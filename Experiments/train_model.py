@@ -20,6 +20,7 @@ from nets.SwinUnet import SwinUnet
 from nets.UNet_base import UNet_base
 from nets.SMESwinUnet import SMESwinUnet
 from nets.UCTransNet import UCTransNet
+from nets.UNext import UNext
 
 from torch.utils.data import DataLoader
 import logging
@@ -66,6 +67,7 @@ def save_checkpoint(state, save_path):
 
 def worker_init_fn(worker_id):
     random.seed(config.seed + worker_id)
+
 
 ##################################################################################
 #=================================================================================
@@ -115,6 +117,15 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         config_vit = config.get_CTranS_config()        
         model = UNet_base(n_channels=config.n_channels,n_classes=config.n_labels)
 
+    elif model_type == 'UNext':
+        # config_vit = config.get_CTranS_config()   
+        config = vars(parse_args())     
+        model = UNext.__dict__[config['arch']](
+            config['num_classes'],
+            config['input_channels'],
+            config['deep_supervision']
+        )
+
     elif model_type == 'SMESwinUnet':
         config_vit = config.get_CTranS_config()        
         model = SMESwinUnet(n_channels=config.n_channels,n_classes=config.n_labels)
@@ -149,6 +160,9 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
     # if torch.cuda.device_count() > 1:
     #     print ("Let's use {0} GPUs!".format(torch.cuda.device_count()))
     # model = nn.DataParallel(model, device_ids=[0])
+
+
+
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
     
     if config.cosineLR is True:
@@ -175,11 +189,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         # train for one epoch
         model.train(True)
         logger.info('Training with batch size : {}'.format(batch_size))
-        print('Training with batch size : {}'.format(batch_size))
+        # print('Training with batch size : {}'.format(batch_size))
         train_one_epoch(train_loader, model, criterion, optimizer, writer, epoch, None, model_type, logger)
         # evaluate on validation set
         logger.info('Validation')
-        print('Validation')
         with torch.no_grad():
             model.eval()
             val_loss, val_dice = train_one_epoch(val_loader, model, criterion,
@@ -192,7 +205,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         if val_loss < min_val_loss:
                 #if epoch+1 > 5:
                 logger.info('\t Saving best model, mean dice increased from: {:.4f} to {:.4f}'.format(max_dice,val_dice))
-                print('\t Saving best model, mean dice increased from: {:.4f} to {:.4f}'.format(max_dice,val_dice))
+                logger.info('\t Saving best model, Val loss decreased from: {:.4f} to {:.4f}'.format(min_val_loss,val_loss))
+                # print('\t Saving best model, mean dice increased from: {:.4f} to {:.4f}'.format(max_dice,val_dice))
                 max_dice = val_dice
                 best_epoch = epoch + 1
                 save_checkpoint({'epoch': epoch,
@@ -204,11 +218,9 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         else:
             logger.info('\t Mean dice:{:.4f} does not increase, '
                         'the best is still: {:.4f} in epoch {}'.format(val_dice,max_dice, best_epoch))
-            print('\t Mean dice:{:.4f} does not increase, '
-                        'the best is still: {:.4f} in epoch {}'.format(val_dice,max_dice, best_epoch))
         early_stopping_count = epoch - best_epoch + 1
         logger.info('\t early_stopping_count: {}/{}'.format(early_stopping_count,config.early_stopping_patience))
-        print('\t early_stopping_count: {}/{}'.format(early_stopping_count,config.early_stopping_patience))
+        # print('\t early_stopping_count: {}/{}'.format(early_stopping_count,config.early_stopping_patience))
         if early_stopping_count > config.early_stopping_patience:
             logger.info('\t early_stopping!')
             print('\t early_stopping!')

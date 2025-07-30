@@ -48,6 +48,7 @@ batch_size = 64
 #model_name = 'SMESwinUnet'
 #model_name = 'UCTransNet'
 model_name = 'UNet_base'
+# model_name = 'UNext'
 #model_name = 'MultiResUnet1_32_1.67'
 
 
