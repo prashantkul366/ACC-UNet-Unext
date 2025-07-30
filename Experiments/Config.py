@@ -11,7 +11,7 @@ import ml_collections
 
 ## PARAMETERS OF THE MODEL
 save_model = True
-tensorboard = True
+tensorboard = False
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # change this as needed
 
 use_cuda = torch.cuda.is_available()
@@ -27,26 +27,27 @@ img_size = 224
 print_frequency = 1
 save_frequency = 100
 vis_frequency = 100
-early_stopping_patience = 100
+# early_stopping_patience = 100
+early_stopping_patience = 50
 
 pretrain = False
 
 
-task_name = 'GlaS_exp1'
-#task_name = 'ISIC18_exp1'
+# task_name = 'GlaS_exp1'
+# task_name = 'ISIC18_exp1'
 #task_name = 'Clinic_exp1'
 #task_name = 'Covid_exp1'
 #task_name = 'BUSI_exp1'
-
+task_name = 'ISIC18_Test'
 
 learning_rate = 1e-3
-batch_size = 12
+batch_size = 64
 
-model_name = 'ACC_UNet'
+# model_name = 'ACC_UNet'
 #model_name = 'SwinUnet'
 #model_name = 'SMESwinUnet'
 #model_name = 'UCTransNet'
-#model_name = 'UNet_base'
+model_name = 'UNet_base'
 #model_name = 'MultiResUnet1_32_1.67'
 
 
@@ -54,15 +55,27 @@ model_name = 'ACC_UNet'
 test_session = "session"         #
 
 
-train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
-val_dataset = './datasets/'+ task_name+ '/Val_Folder/'
-test_dataset = './datasets/'+ task_name+ '/Test_Folder/'
+# train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
+# val_dataset = './datasets/'+ task_name+ '/Val_Folder/'
+# test_dataset = './datasets/'+ task_name+ '/Test_Folder/'
+# session_name       = 'session'  #time.strftime('%m.%d_%Hh%M')
+# save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
+# model_path         = save_path + 'models/'
+# tensorboard_folder = save_path + 'tensorboard_logs/'
+# logger_path        = save_path + session_name + ".log"
+# visualize_path     = save_path + 'visualize_val/'
+
+dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 session_name       = 'session'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
 logger_path        = save_path + session_name + ".log"
 visualize_path     = save_path + 'visualize_val/'
+
 
 
 
