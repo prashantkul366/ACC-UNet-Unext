@@ -78,7 +78,8 @@ session_name       = 'session'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
-logger_path        = save_path + session_name + ".log"
+# logger_path        = save_path + session_name + ".log"
+logger_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/Experiments/train_logs/'
 visualize_path     = save_path + 'visualize_val/'
 
 
