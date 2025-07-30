@@ -165,17 +165,21 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         writer = None
 
     max_dice = 0.0
+    min_val_loss = 1000.0
     best_epoch = 1
     print("Begin Training!!")
     for epoch in range(config.epochs):  # loop over the dataset multiple times
         logger.info('\n========= Epoch [{}/{}] ========='.format(epoch + 1, config.epochs + 1))
+        print('\n========= Epoch [{}/{}] ========='.format(epoch + 1, config.epochs + 1))
         logger.info(config.session_name)
         # train for one epoch
         model.train(True)
         logger.info('Training with batch size : {}'.format(batch_size))
+        print('Training with batch size : {}'.format(batch_size))
         train_one_epoch(train_loader, model, criterion, optimizer, writer, epoch, None, model_type, logger)
         # evaluate on validation set
         logger.info('Validation')
+        print('Validation')
         with torch.no_grad():
             model.eval()
             val_loss, val_dice = train_one_epoch(val_loader, model, criterion,
@@ -184,9 +188,11 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         # =============================================================
         #       Save best model
         # =============================================================
-        if val_dice > max_dice:
+        # if val_dice > max_dice:
+        if val_loss < min_val_loss:
                 #if epoch+1 > 5:
                 logger.info('\t Saving best model, mean dice increased from: {:.4f} to {:.4f}'.format(max_dice,val_dice))
+                print('\t Saving best model, mean dice increased from: {:.4f} to {:.4f}'.format(max_dice,val_dice))
                 max_dice = val_dice
                 best_epoch = epoch + 1
                 save_checkpoint({'epoch': epoch,
@@ -198,11 +204,14 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         else:
             logger.info('\t Mean dice:{:.4f} does not increase, '
                         'the best is still: {:.4f} in epoch {}'.format(val_dice,max_dice, best_epoch))
+            print('\t Mean dice:{:.4f} does not increase, '
+                        'the best is still: {:.4f} in epoch {}'.format(val_dice,max_dice, best_epoch))
         early_stopping_count = epoch - best_epoch + 1
         logger.info('\t early_stopping_count: {}/{}'.format(early_stopping_count,config.early_stopping_patience))
-
+        print('\t early_stopping_count: {}/{}'.format(early_stopping_count,config.early_stopping_patience))
         if early_stopping_count > config.early_stopping_patience:
             logger.info('\t early_stopping!')
+            print('\t early_stopping!')
             break
 
     return model
