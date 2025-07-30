@@ -85,6 +85,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
                               worker_init_fn=worker_init_fn,
                               num_workers=8,
                               pin_memory=True)
+    
+    print("Training Data Loaded!!")
     val_loader = DataLoader(val_dataset,
                             batch_size=config.batch_size,
                             shuffle=True,
@@ -92,6 +94,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
                             num_workers=8,
                             pin_memory=True)
 
+    print("Val Data Loaded!!")
     lr = config.learning_rate
     
     logger.info(model_type)
@@ -140,7 +143,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
 
 
     model = model.cuda()
-
+    print("Model Loaded!!")
     logger.info('Training on ' +str(os.uname()[1]))
     logger.info('Training using GPU : '+torch.cuda.get_device_name(torch.cuda.current_device()))
     # if torch.cuda.device_count() > 1:
@@ -163,6 +166,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
 
     max_dice = 0.0
     best_epoch = 1
+    print("Begin Training!!")
     for epoch in range(config.epochs):  # loop over the dataset multiple times
         logger.info('\n========= Epoch [{}/{}] ========='.format(epoch + 1, config.epochs + 1))
         logger.info(config.session_name)
@@ -220,10 +224,15 @@ if __name__ == '__main__':
     if not os.path.isdir(config.save_path):
         os.makedirs(config.save_path)
 
+    print("Check 1")
     if os.path.isfile(config.logger_path):
         import sys
         sys.exit()
+
+    print("Sys Exit Bypass")
     logger = logger_config(log_path=config.logger_path)
+
+    print("Logger Configured!!")
     model = main_loop(model_type=config.model_name, tensorboard=True)
     
     fp = open('log.log','a')
