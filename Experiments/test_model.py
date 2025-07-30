@@ -9,7 +9,6 @@ from Load_Dataset import ValGenerator, ImageToImage2D
 from torch.utils.data import DataLoader
 import warnings
 import pickle
-from nets.Unet22_2_3_2_grp import Unet22_2_3_2_grp
 warnings.filterwarnings("ignore")
 import Config as config
 import matplotlib.pyplot as plt
