@@ -65,10 +65,15 @@ test_session = "session"         #
 # logger_path        = save_path + session_name + ".log"
 # visualize_path     = save_path + 'visualize_val/'
 
-dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1'
+train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/train'
+val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/val'
+test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/test'
+
 session_name       = 'session'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
