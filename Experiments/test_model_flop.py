@@ -308,7 +308,8 @@ if __name__ == '__main__':
 
             dice_pred+=dice_pred_t
             iou_pred+=iou_pred_t
-            output_bin = (output > 0.5).float().cpu().numpy()
+            # output_bin = (output > 0.5).float().cpu().numpy()
+            output_bin = (output > 0.5).astype(np.float32)
             target_bin = lab
 
             TP = ((output_bin == 1) & (target_bin == 1)).sum()
