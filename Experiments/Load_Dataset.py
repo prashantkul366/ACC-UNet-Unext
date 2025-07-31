@@ -154,7 +154,7 @@ class ImageToImage2D(Dataset):
         # read mask image
         mask = cv2.imread(os.path.join(self.output_path, image_filename[: -3] + "png"),0)
         if mask is None:
-            raise ValueError(f"❌ Failed to load mask: {os.path.join(self.output_path, image_filename[: -3] + "png")}")
+            raise ValueError(f"❌ Failed to load mask: {os.path.join(self.output_path, image_filename[: -3] + 'png')}")
         # print("mask",image_filename[: -3] + "png")
         # print(np.max(mask), np.min(mask))
         mask = cv2.resize(mask,(self.image_size,self.image_size))
