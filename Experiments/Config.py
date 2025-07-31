@@ -38,7 +38,7 @@ pretrain = False
 #task_name = 'Clinic_exp1'
 #task_name = 'Covid_exp1'
 #task_name = 'BUSI_exp1'
-task_name = 'ISIC18_Test'
+task_name = 'ISIC18_UNET'
 
 learning_rate = 1e-3
 batch_size = 64
@@ -53,7 +53,7 @@ model_name = 'UNet_base'
 
 
 
-test_session = "session"         #
+test_session = "session1"         #
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -75,7 +75,7 @@ train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/t
 val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/val'
 test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/test'
 
-session_name       = 'session'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
