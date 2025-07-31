@@ -137,7 +137,9 @@ class ImageToImage2D(Dataset):
             self.joint_transform = lambda x, y: (to_tensor(x), to_tensor(y))
 
     def __len__(self):
-        return len(os.listdir(self.input_path))
+        # return len(os.listdir(self.input_path))
+        return len(self.images_list)
+
 
     def __getitem__(self, idx):
 
