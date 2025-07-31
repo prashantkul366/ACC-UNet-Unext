@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from datetime import datetime
 import os
-from utils import AverageMeter
+# from utils import AverageMeter
 from thop import profile
 import pandas as pd
 import time
@@ -31,6 +31,25 @@ from nets.SwinUnet import SwinUnet
 import json
 from utils import *
 import cv2
+
+
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
 
 
 def show_image_with_dice(predict_save, labs, save_path):
