@@ -122,7 +122,11 @@ class ImageToImage2D(Dataset):
         # self.output_path = os.path.join(dataset_path, 'labelcol')
         self.input_path = os.path.join(dataset_path, 'images')
         self.output_path = os.path.join(dataset_path, 'masks')
-        self.images_list = os.listdir(self.input_path)
+        # self.images_list = os.listdir(self.input_path)
+        self.images_list = [
+                            f for f in os.listdir(self.input_path)
+                            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tif'))
+                        ]
         self.one_hot_mask = one_hot_mask
         self.n_labels = n_labels
 
@@ -145,7 +149,7 @@ class ImageToImage2D(Dataset):
         # print(os.path.join(self.input_path, image_filename))
         image = cv2.imread(os.path.join(self.input_path, image_filename))
         if image is None:
-            raise ValueError(f"❌ Failed to load image: {os.path.join(self.input_path, image_filename)}")
+            raise ValueError(f" Failed to load image: {os.path.join(self.input_path, image_filename)}")
         # print("img",image_filename)
         # print("1",image.shape)
         image = cv2.resize(image,(self.image_size,self.image_size))
@@ -154,7 +158,7 @@ class ImageToImage2D(Dataset):
         # read mask image
         mask = cv2.imread(os.path.join(self.output_path, image_filename[: -3] + "png"),0)
         if mask is None:
-            raise ValueError(f"❌ Failed to load mask: {os.path.join(self.output_path, image_filename[: -3] + 'png')}")
+            raise ValueError(f" Failed to load mask: {os.path.join(self.output_path, image_filename[: -3] + 'png')}")
         # print("mask",image_filename[: -3] + "png")
         # print(np.max(mask), np.min(mask))
         mask = cv2.resize(mask,(self.image_size,self.image_size))
