@@ -247,15 +247,21 @@ if __name__ == '__main__':
 
     # FLOPS CALCULATION
     dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
-    macs, params = profile(model, inputs=(dummy_input,), verbose=False)
-    model_params = params / 1e6
-    model_gflops = macs / 1e9
+    # macs, params = profile(model, inputs=(dummy_input,), verbose=False)
+    # model_params = params / 1e6
+    # model_gflops = macs / 1e9
 
     if torch.cuda.device_count() > 1:
         print ("Let's use {0} GPUs!".format(torch.cuda.device_count()))
         model = nn.DataParallel(model, device_ids=[0,1,2,3])
+
     model.load_state_dict(checkpoint['state_dict'])
     print('Model loaded !')
+
+    dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
+    macs, params = profile(model, inputs=(dummy_input,), verbose=False)
+    model_params = params / 1e6
+    model_gflops = macs / 1e9
     tf_test = ValGenerator(output_size=[config.img_size, config.img_size])
     test_dataset = ImageToImage2D(config.test_dataset, tf_test,image_size=config.img_size)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
