@@ -132,6 +132,6 @@ class UNet_base(nn.Module):
             logits = self.last_activation(logits)
 
         if return_feat:
-            return logits, x5  # you can change x5 to x3 or x4 for different interpretability depth
+            return logits, x
         return logits
 
