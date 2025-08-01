@@ -201,6 +201,8 @@ if __name__ == '__main__':
     elif config.task_name =="ISIC18_UNET":
         test_num = 1000
         model_type = config.model_name
+        if model_type == 'UNet_base_proto':
+            model_type = 'UNet_base'
         model_path = "./ISIC18_UNET/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
     elif config.task_name =="ISIC18_exp2":
@@ -270,8 +272,7 @@ if __name__ == '__main__':
     if not os.path.exists(vis_path):
         os.makedirs(vis_path)
 
-    if model_type == 'UNet_base_proto':
-        model_type = 'UNet_base'
+    
     checkpoint = torch.load(model_path, map_location='cuda')
 
     fp = open(save_path+'test.result','a')
