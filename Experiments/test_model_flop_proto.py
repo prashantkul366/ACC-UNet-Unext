@@ -15,10 +15,16 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from datetime import datetime
 import os
+# from utils import AverageMeter
+from thop import profile
+import pandas as pd
+import time
+
 
 # from nets.ACC_UNet import ACC_UNet
 from nets.UCTransNet import UCTransNet
-from nets.UNet_base import UNet_base
+# from nets.UNet_base import UNet_base
+from nets.UNet_base_proto import UNet_base
 from nets.SMESwinUnet import SMESwinUnet
 from nets.MResUNet1 import MultiResUnet
 from nets.SwinUnet import SwinUnet
@@ -26,6 +32,70 @@ from nets.SwinUnet import SwinUnet
 import json
 from utils import *
 import cv2
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+class ProtoSeg(nn.Module):
+    def __init__(self, ndims='2d'):
+        super().__init__()
+        self.dims = {'1d': (2,), '2d': (2, 3), '3d': (2, 3, 4)}[ndims]
+        self.softmax = nn.Softmax(dim=1)
+
+    def forward(self, xfeat, pred):
+        pos_proto = torch.sum(xfeat * pred, dim=self.dims, keepdim=True) / (torch.sum(pred, dim=self.dims, keepdim=True) + 1e-7)
+        neg_proto = torch.sum(xfeat * (1 - pred), dim=self.dims, keepdim=True) / (torch.sum(1 - pred, dim=self.dims, keepdim=True) + 1e-7)
+
+        pos_dist = -torch.pow(xfeat - pos_proto, 2).sum(1, keepdim=True)
+        neg_dist = -torch.pow(xfeat - neg_proto, 2).sum(1, keepdim=True)
+
+        disfeat = torch.cat([neg_dist, pos_dist], dim=1)
+        return self.softmax(disfeat)  # shape: [B, 2, H, W]
+
+
+def proto_seg_explain(feature_map, pred_mask, gt_mask=None, save_path=None, resize_to=None):
+    """
+    Compute and optionally save Segmentation Ability Map (SAM) using ProtoSeg.
+    """
+    if resize_to and feature_map.shape[2:] != resize_to:
+        feature_map = F.interpolate(feature_map, size=resize_to, mode='bilinear', align_corners=False)
+
+    proto = ProtoSeg(ndims='2d')
+    sam_prob = proto(feature_map, pred_mask)
+    sam_binary = torch.argmax(sam_prob, dim=1).cpu().numpy()[0]
+
+    dice_sam = None
+    if gt_mask is not None:
+        if isinstance(gt_mask, torch.Tensor):
+            gt_mask = gt_mask.cpu().numpy()
+        dice_sam = 2 * np.sum(sam_binary * gt_mask) / (np.sum(sam_binary) + np.sum(gt_mask) + 1e-7)
+
+    if save_path:
+        plt.imsave(save_path + "_SAM.png", sam_binary, cmap='gray')
+        with open(save_path + '_sam.p', 'wb') as f:
+            pickle.dump({'SAM': sam_binary, 'dice_sam': dice_sam}, f)
+
+    return sam_binary, dice_sam
+
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
 
 
 def show_image_with_dice(predict_save, labs, save_path):
@@ -42,13 +112,30 @@ def show_image_with_dice(predict_save, labs, save_path):
 def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pred, dice_ens):
     model.eval()
 
-    output = model(input_img.cuda())
+    start_time = time.time()
+    # output = model(input_img.cuda())
+    output, features = model(input_img.cuda(), return_feat=True)
+
+    end_time = time.time()
+    gpu_time_meter.update(end_time - start_time, input_img.size(0))
+
     pred_class = torch.where(output>0.5,torch.ones_like(output),torch.zeros_like(output))
     predict_save = pred_class[0].cpu().data.numpy()
     predict_save = np.reshape(predict_save, (config.img_size, config.img_size))
     dice_pred_tmp, iou_tmp = show_image_with_dice(predict_save, labs, save_path=vis_save_path+'_predict'+model_type+'.jpg')
     input_img.to('cpu')
 
+    output_sigmoid = output  # already sigmoid since using Sigmoid in UNet
+    pred_prob = output_sigmoid.detach()  # shape (B,1,H,W)
+
+    sam_binary, dice_sam = proto_seg_explain(
+        feature_map=features.detach(),
+        pred_mask=pred_prob.detach(),
+        gt_mask=labs[0],
+        save_path=vis_save_path + '_protoseg',
+        resize_to=(config.img_size, config.img_size)
+    )
+    print(f"→ SA Dice (ProtoSeg): {dice_sam:.4f}")
 
     input_img = input_img[0].transpose(0,-1).cpu().detach().numpy()
     labs = labs[0]
@@ -79,7 +166,9 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
         plt.close()
 
 
-    return dice_pred_tmp, iou_tmp
+    # return dice_pred_tmp, iou_tmp
+    return dice_pred_tmp, iou_tmp, output
+
 
 
 
@@ -198,11 +287,11 @@ if __name__ == '__main__':
     elif model_type == 'UNet_base':
         config_vit = config.get_CTranS_config()   
         model = UNet_base(n_channels=config.n_channels,n_classes=config.n_labels)
-        
+
     elif model_type == 'UNet_base_proto':
         config_vit = config.get_CTranS_config()   
         model = UNet_base(n_channels=config.n_channels,n_classes=config.n_labels)
-
+        
     elif model_type == 'SwinUnet':            
         model = SwinUnet()
         model.load_from()
@@ -218,11 +307,24 @@ if __name__ == '__main__':
     else: raise TypeError('Please enter a valid name for the model type')
 
     model = model.cuda()
+
+    # FLOPS CALCULATION
+    dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
+    # macs, params = profile(model, inputs=(dummy_input,), verbose=False)
+    # model_params = params / 1e6
+    # model_gflops = macs / 1e9
+
     if torch.cuda.device_count() > 1:
         print ("Let's use {0} GPUs!".format(torch.cuda.device_count()))
         model = nn.DataParallel(model, device_ids=[0,1,2,3])
+
     model.load_state_dict(checkpoint['state_dict'])
     print('Model loaded !')
+
+    dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
+    macs, params = profile(model, inputs=(dummy_input,), verbose=False)
+    model_params = params / 1e6
+    model_gflops = macs / 1e9
     tf_test = ValGenerator(output_size=[config.img_size, config.img_size])
     test_dataset = ImageToImage2D(config.test_dataset, tf_test,image_size=config.img_size)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
@@ -230,6 +332,13 @@ if __name__ == '__main__':
     dice_pred = 0.0
     iou_pred = 0.0
     dice_ens = 0.0
+
+    accuracy_meter = AverageMeter()
+    sensitivity_meter = AverageMeter()
+    specificity_meter = AverageMeter()
+    precision_meter = AverageMeter()
+    recall_meter = AverageMeter()
+    gpu_time_meter = AverageMeter()
 
     with tqdm(total=test_num, desc='Test visualize', unit='img', ncols=70, leave=True) as pbar:
         for i, (sampled_batch, names) in enumerate(test_loader, 1):
@@ -250,19 +359,86 @@ if __name__ == '__main__':
             ###########plt.savefig(vis_path+str(i)+"_lab.jpg", dpi=300)
             ###########plt.close()
             input_img = torch.from_numpy(arr)
-            dice_pred_t,iou_pred_t = vis_and_save_heatmap(model, input_img, None, lab,
-                                                          vis_path+str(i)+'.png',
-                                               dice_pred=dice_pred, dice_ens=dice_ens)
+            # dice_pred_t,iou_pred_t = vis_and_save_heatmap(model, input_img, None, lab,
+            #                                               vis_path+str(i)+'.png',
+            #                                    dice_pred=dice_pred, dice_ens=dice_ens)
+            dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
+                                                    model, input_img, None, lab,
+                                                    vis_path + str(i) + '.png',
+                                                    dice_pred=dice_pred,
+                                                    dice_ens=dice_ens
+                                                )
+
             dice_pred+=dice_pred_t
             iou_pred+=iou_pred_t
+            # output_bin = (output > 0.5).float().cpu().numpy()
+            output_bin = (output > 0.5).astype(np.float32)
+            target_bin = lab
+
+            TP = ((output_bin == 1) & (target_bin == 1)).sum()
+            TN = ((output_bin == 0) & (target_bin == 0)).sum()
+            FP = ((output_bin == 1) & (target_bin == 0)).sum()
+            FN = ((output_bin == 0) & (target_bin == 1)).sum()
+
+            eps = 1e-7
+            sensitivity = TP / (TP + FN + eps)
+            specificity = TN / (TN + FP + eps)
+            accuracy = (TP + TN) / (TP + TN + FP + FN + eps)
+            precision = TP / (TP + FP + eps)
+            recall = TP / (TP + FN + eps)
+
+            sensitivity_meter.update(sensitivity)
+            specificity_meter.update(specificity)
+            accuracy_meter.update(accuracy)
+            precision_meter.update(precision)
+            recall_meter.update(recall)
+
             torch.cuda.empty_cache()
             pbar.update()
     print ("dice_pred",dice_pred/test_num)
     print ("iou_pred",iou_pred/test_num)
+    print(f"Precision: {precision_meter.avg:.4f}")
+    print(f"Recall: {recall_meter.avg:.4f}")
+    print(f"Sensitivity: {sensitivity_meter.avg * 100:.2f}%")
+    print(f"Specificity: {specificity_meter.avg * 100:.2f}%")
+    print(f"Accuracy: {accuracy_meter.avg * 100:.2f}%")
+    print(f"Params: {model_params:.2f} M")
+    print(f"GFLOPs: {model_gflops:.2f} G")
+    print(f"Avg GPU Time/Image: {gpu_time_meter.avg:.4f} sec")
+
+    fp.write(f"Precision: {precision_meter.avg:.4f}\n")
+    fp.write(f"Recall: {recall_meter.avg:.4f}\n")
+    fp.write(f"Sensitivity: {sensitivity_meter.avg * 100:.2f}%\n")
+    fp.write(f"Specificity: {specificity_meter.avg * 100:.2f}%\n")
+    fp.write(f"Accuracy: {accuracy_meter.avg * 100:.2f}%\n")
+    fp.write(f"Params (M): {model_params:.2f}\n")
+    fp.write(f"GFLOPs: {model_gflops:.2f}\n")
+    fp.write(f"Avg GPU Time (s): {gpu_time_meter.avg:.4f}\n")
+
     
     fp.write(f"dice_pred : {dice_pred/test_num}\n")
     fp.write(f"iou_pred : {iou_pred/test_num}\n")
     fp.close()
+
+    # SAVE RESULTS TO CSV
+    metrics_dict = {
+    'IoU': [float(iou_pred/test_num)],
+    'Dice': [float(dice_pred/test_num)],
+    'Precision': [float(precision_meter.avg)],
+    'Recall': [float(recall_meter.avg)],
+    'Sensitivity (%)': [float(sensitivity_meter.avg * 100)],
+    'Specificity (%)': [float(specificity_meter.avg * 100)],
+    'Accuracy (%)': [float(accuracy_meter.avg * 100)],
+    'Params (M)': [float(model_params)],
+    'GFLOPs': [float(model_gflops)],
+    'Avg GPU Time (s)': [float(gpu_time_meter.avg)],
+    }
+
+    df = pd.DataFrame(metrics_dict)
+    csv_path = os.path.join(save_path, 'metrics_results.csv')
+    df.to_csv(csv_path, index=False)
+    print(f"✅ Saved metrics to {csv_path}")
+
 
 
 
