@@ -44,9 +44,9 @@ learning_rate = 1e-3
 batch_size = 48
 
 # model_name = 'ACC_UNet'
-#model_name = 'SwinUnet'
+model_name = 'SwinUnet'
 #model_name = 'SMESwinUnet'
-model_name = 'UCTransNet'
+# model_name = 'UCTransNet'
 # model_name = 'UNet_base'
 # model_name = 'UNext'
 #model_name = 'MultiResUnet1_32_1.67'
