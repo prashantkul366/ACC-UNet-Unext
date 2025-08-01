@@ -289,6 +289,7 @@ if __name__ == '__main__':
         model = UNet_base(n_channels=config.n_channels,n_classes=config.n_labels)
 
     elif model_type == 'UNet_base_proto':
+        model_type = 'UNet_base'
         config_vit = config.get_CTranS_config()   
         model = UNet_base(n_channels=config.n_channels,n_classes=config.n_labels)
         
