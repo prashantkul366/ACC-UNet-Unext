@@ -20,6 +20,7 @@ from nets.SwinUnet import SwinUnet
 from nets.UNet_base import UNet_base
 from nets.SMESwinUnet import SMESwinUnet
 from nets.UCTransNet import UCTransNet
+from nets.UNeXt import UNext
 
 from torch.utils.data import DataLoader
 import logging
@@ -129,7 +130,9 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
 
     elif model_type.split('_')[0] == 'MultiResUnet1':          
         model = MultiResUnet(n_channels=config.n_channels,n_classes=config.n_labels,nfilt=int(model_type.split('_')[1]), alpha=float(model_type.split('_')[2]))        
-               
+
+    elif model_type == 'UNeXt':
+        model = UNext(n_channels=config.n_channels, n_classes=config.n_labels)  
 
     else: 
         raise TypeError('Please enter a valid name for the model type')

@@ -11,7 +11,7 @@ import torch.nn.functional as F
 import os
 import matplotlib.pyplot as plt
 from utils import *
-__all__ = ['UNext']
+# __all__ = ['UNext']
 
 import timm
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
@@ -206,14 +206,17 @@ class UNext(nn.Module):
 
     ## Conv 3 + MLP 2 + shifted MLP
     
-    def __init__(self,  num_classes, input_channels=3, deep_supervision=False,img_size=224, patch_size=16, in_chans=3,  embed_dims=[ 128, 160, 256],
-                 num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
-                 attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm,
-                 depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1], **kwargs):
+    # def __init__(self,  num_classes, input_channels=3, deep_supervision=False,img_size=224, patch_size=16, in_chans=3,  embed_dims=[ 128, 160, 256],
+    #              num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
+    #              attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm,
+    #              depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1], **kwargs):
+    def __init__(self, n_channels=3, n_classes=1, **kwargs):
+
         super().__init__()
         
         print("UNext Initiated")
-        self.encoder1 = nn.Conv2d(3, 16, 3, stride=1, padding=1)  
+        # self.encoder1 = nn.Conv2d(3, 16, 3, stride=1, padding=1)  
+        self.encoder1 = nn.Conv2d(n_channels, 16, 3, stride=1, padding=1)
         self.encoder2 = nn.Conv2d(16, 32, 3, stride=1, padding=1)  
         self.encoder3 = nn.Conv2d(32, 128, 3, stride=1, padding=1)
 
@@ -267,8 +270,9 @@ class UNext(nn.Module):
         self.dbn3 = nn.BatchNorm2d(32)
         self.dbn4 = nn.BatchNorm2d(16)
         
-        self.final = nn.Conv2d(16, num_classes, kernel_size=1)
-
+        # self.final = nn.Conv2d(16, num_classes, kernel_size=1)
+        self.final = nn.Conv2d(16, n_classes, kernel_size=1)
+        
         self.soft = nn.Softmax(dim =1)
 
     def forward(self, x):
