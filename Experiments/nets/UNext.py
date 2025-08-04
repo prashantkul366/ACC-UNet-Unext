@@ -370,4 +370,8 @@ class UNext(nn.Module):
 
         return self.final(out)
 
+    def load_from(self):
+        print("UNeXt: no pretrained weights loaded (stub).")
+
+
 #EOF
