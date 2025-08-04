@@ -286,7 +286,7 @@ class UNext(nn.Module):
         # self.final = nn.Conv2d(16, num_classes, kernel_size=1)
         self.final = nn.Conv2d(16, n_classes, kernel_size=1)
 
-        self.soft = nn.Softmax(dim =1)
+        # self.soft = nn.Softmax(dim =1)
 
     def forward(self, x):
         
