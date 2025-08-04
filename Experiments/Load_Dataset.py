@@ -180,6 +180,9 @@ class ImageToImage2D(Dataset):
 
         if self.joint_transform:
             sample = self.joint_transform(sample)
+
+        sample['label'] = sample['label'].unsqueeze(0).float()
+        sample['image'] = sample['image'].float()
         # sample = {'image': image, 'label': mask}
         # print("2222",np.max(mask), np.min(mask))
 
