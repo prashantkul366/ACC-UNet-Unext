@@ -20,7 +20,7 @@ from nets.SwinUnet import SwinUnet
 from nets.UNet_base import UNet_base
 from nets.SMESwinUnet import SMESwinUnet
 from nets.UCTransNet import UCTransNet
-from nets.UNeXt import UNext
+from nets.UNext import UNext
 
 from torch.utils.data import DataLoader
 import logging
