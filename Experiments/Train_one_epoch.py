@@ -72,13 +72,13 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # ====================================================
 
         preds = model(images)
-        print("preds:", preds.shape, preds.min().item(), preds.max().item(), preds.dtype)
-        print("masks:", masks.shape, masks.min().item(), masks.max().item(), masks.dtype)
+        # print("preds:", preds.shape, preds.min().item(), preds.max().item(), preds.dtype)
+        # print("masks:", masks.shape, masks.min().item(), masks.max().item(), masks.dtype)
 
         out_loss = criterion(preds, masks.float())  # Loss
 
-        print("preds:", preds.shape, preds.min().item(), preds.max().item())
-        print("masks:", masks.shape, masks.min().item(), masks.max().item())
+        # print("preds:", preds.shape, preds.min().item(), preds.max().item())
+        # print("masks:", masks.shape, masks.min().item(), masks.max().item())
 
         if model.training:
             optimizer.zero_grad()
