@@ -351,7 +351,12 @@ class UNext(nn.Module):
 
         out = F.relu(F.interpolate(self.decoder5(out),scale_factor=(2,2),mode ='bilinear'))
 
-        return self.final(out)
+        # return self.final(out)
+        out = self.final(out)
+        if out.shape[1] == 1:
+            out = torch.sigmoid(out)  # For binary segmentation
+        return out
+
 
 # class UNext_S(nn.Module):
 

@@ -47,14 +47,14 @@ batch_size = 64
 # model_name = 'SwinUnet'
 #model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
-model_name = 'UNet_base'
+# model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 #model_name = 'MultiResUnet1_32_1.67'
-# model_name = 'UNeXt'
+model_name = 'UNeXt'
 
 
 
-test_session = "session2"         #
+test_session = "session1"         #
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -76,7 +76,7 @@ train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/t
 val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/val'
 test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/test'
 
-session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
