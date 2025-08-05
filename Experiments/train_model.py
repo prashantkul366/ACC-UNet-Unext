@@ -132,7 +132,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         model = MultiResUnet(n_channels=config.n_channels,n_classes=config.n_labels,nfilt=int(model_type.split('_')[1]), alpha=float(model_type.split('_')[2]))        
 
     elif model_type == 'UNeXt':
-        model = UNext(n_channels=config.n_channels, n_classes=config.n_labels)  
+        model = UNext(n_channels=config.n_channels, n_classes=config.n_labels)
+        # lr = 1e-4  
 
     else: 
         raise TypeError('Please enter a valid name for the model type')
