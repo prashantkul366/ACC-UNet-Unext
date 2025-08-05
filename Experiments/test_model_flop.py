@@ -283,7 +283,8 @@ if __name__ == '__main__':
             arr=test_data.numpy()
             arr = arr.astype(np.float32())
             lab=test_label.data.numpy()
-            img_lab = np.reshape(lab, (lab.shape[1], lab.shape[2])) * 255
+            # img_lab = np.reshape(lab, (lab.shape[1], lab.shape[2])) * 255
+            img_lab = lab.reshape(config.img_size, config.img_size) * 255
             ###########fig, ax = plt.subplots()
             ###########plt.imshow(img_lab, cmap='gray')
             ###########plt.axis("off")
