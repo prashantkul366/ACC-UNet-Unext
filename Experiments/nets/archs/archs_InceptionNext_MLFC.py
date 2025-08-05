@@ -411,6 +411,12 @@ class UNext_InceptionNext_MLFC(nn.Module):
         # return self.final(out)
         out = self.final(out)
         out = F.interpolate(out, size=(x.size(2), x.size(3)), mode='bilinear', align_corners=False)
+
+
+        # return out
+        out = self.final(out)
+        if out.shape[1] == 1:
+            out = torch.sigmoid(out)  # For binary segmentation
         return out
 
 
