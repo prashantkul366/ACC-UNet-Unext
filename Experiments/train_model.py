@@ -142,7 +142,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         # lr = 1e-4  
 
     elif model_type == 'UNext_InceptionNext_MLFC':
-        model = UNext_Ineption_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_InceptionNext_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)
         # lr = 1e-4  
 
     else: 
