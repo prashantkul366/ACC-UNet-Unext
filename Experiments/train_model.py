@@ -24,7 +24,7 @@ from nets.UCTransNet import UCTransNet
 
 ##################### NEW ARCHS ######################
 from nets.UNext import UNext
-from nets.archs.archs_InceptionNext_MLFC import UNext_Ineption_MLFC
+from nets.archs.archs_InceptionNext_MLFC import UNext_InceptionNext_MLFC
 
 from torch.utils.data import DataLoader
 import logging
@@ -141,7 +141,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         model = UNext(n_channels=config.n_channels, n_classes=config.n_labels)
         # lr = 1e-4  
 
-    elif model_type == 'UNext_Inception_MLFC':
+    elif model_type == 'UNext_InceptionNext_MLFC':
         model = UNext_Ineption_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)
         # lr = 1e-4  
 
