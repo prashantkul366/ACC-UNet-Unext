@@ -33,6 +33,8 @@ from utils import *
 import cv2
 
 
+from nets.UNext import UNext
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
 
@@ -236,6 +238,10 @@ if __name__ == '__main__':
     elif model_type == 'SMESwinUnet':            
         model = SMESwinUnet(n_channels=config.n_channels,n_classes=config.n_labels)
         model.load_from()
+
+    elif model_type == 'UNeXt':
+        model = UNext(n_channels=config.n_channels, n_classes=config.n_labels)
+        # lr = 1e-4  
 
     elif model_type.split('_')[0] == 'MultiResUnet1':          
         model = MultiResUnet(n_channels=config.n_channels,n_classes=config.n_labels,nfilt=int(model_type.split('_')[1]), alpha=float(model_type.split('_')[2]))
