@@ -20,7 +20,11 @@ from nets.SwinUnet import SwinUnet
 from nets.UNet_base import UNet_base
 from nets.SMESwinUnet import SMESwinUnet
 from nets.UCTransNet import UCTransNet
+
+
+##################### NEW ARCHS ######################
 from nets.UNext import UNext
+from nets.archs.archs_InceptionNext_MLFC import UNext_Ineption_MLFC
 
 from torch.utils.data import DataLoader
 import logging
@@ -135,6 +139,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
 
     elif model_type == 'UNeXt':
         model = UNext(n_channels=config.n_channels, n_classes=config.n_labels)
+        # lr = 1e-4  
+
+    elif model_type == 'UNext_Ineption_MLFC':
+        model = UNext_Ineption_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)
         # lr = 1e-4  
 
     else: 
