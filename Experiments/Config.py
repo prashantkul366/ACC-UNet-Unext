@@ -51,7 +51,7 @@ batch_size = 256
 # model_name = 'UNet_base_proto'
 #model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'UNeXt'
-model_name = 'UNext_Ineption_MLFC'
+model_name = 'UNext_Inception_MLFC'
 
 
 

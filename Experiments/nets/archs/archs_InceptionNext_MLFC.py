@@ -34,6 +34,10 @@ def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
     """1x1 convolution"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=1, bias=False)
 
+def resize_to_match(self, x, target_size):
+    if x.shape[2:] != target_size:
+        return F.interpolate(x, size=target_size, mode='bilinear', align_corners=False)
+    return x
 
 def shift(dim):
             x_shift = [ torch.roll(x_c, shift, dim) for x_c, shift in zip(xs, range(-self.pad, self.pad+1))]
@@ -209,7 +213,7 @@ class OverlapPatchEmbed(nn.Module):
 
         return x, H, W
 
-class UNext_Ineption_MLFC(nn.Module):
+class UNext_Inception_MLFC(nn.Module):
 
     ## Conv 3 + MLP 2 + shifted MLP
     
@@ -250,9 +254,9 @@ class UNext_Ineption_MLFC(nn.Module):
         # self.skip_fusion = MLFC(16, 32, 128, 160, lenn=1)
         self.skip_fusion = MLFC(*[80, 128, 160, 160], lenn=1)
 
-        self.skip_t3_proj = nn.Conv2d(160, 128, 1)
-        self.skip_t2_proj = nn.Conv2d(128, 32, 1)
-        self.skip_t1_proj = nn.Conv2d(80, 16, 1)
+        # self.skip_t3_proj = nn.Conv2d(160, 128, 1)
+        # self.skip_t2_proj = nn.Conv2d(128, 32, 1)
+        # self.skip_t1_proj = nn.Conv2d(80, 16, 1)
 
 
         self.ebn1 = nn.BatchNorm2d(16)
@@ -353,9 +357,9 @@ class UNext_Ineption_MLFC(nn.Module):
         t4 = out
 
         t1, t2, t3, t4 = self.skip_fusion(t1, t2, t3, t4)       # MLFC FUSION   
-        t3 = self.skip_t3_proj(t3)  # 160 → 128 for decoder2
-        t2 = self.skip_t2_proj(t2)  # 128 → 32  for decoder3
-        t1 = self.skip_t1_proj(t1)  # 80 → 16   for decoder4
+        # t3 = self.skip_t3_proj(t3)  # 160 → 128 for decoder2
+        # t2 = self.skip_t2_proj(t2)  # 128 → 32  for decoder3
+        # t1 = self.skip_t1_proj(t1)  # 80 → 16   for decoder4
 
         ### Bottleneck
 
@@ -423,14 +427,13 @@ if __name__ == '__main__':
     model.eval()
 
     # Dummy input: B x C x H x W
-    dummy_input = torch.randn(1, 3, 256, 256)
+    dummy_input = torch.randn(1, 3, 224, 224)
 
     # Forward pass
     with torch.no_grad():
         output = model(dummy_input)
 
     print(f"✅ Forward pass successful! Output shape: {output.shape}")
-
 
 
 #EOF

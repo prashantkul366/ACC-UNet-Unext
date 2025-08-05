@@ -3,8 +3,14 @@ ACC-UNet architecture using PyTorch
 """
 
 import torch
+import torch.nn.functional as F
 
 
+
+def resize_to_match(self, x, target_size):
+    if x.shape[2:] != target_size:
+        return F.interpolate(x, size=target_size, mode='bilinear', align_corners=False)
+    return x
 
 class ChannelSELayer(torch.nn.Module):
     """
