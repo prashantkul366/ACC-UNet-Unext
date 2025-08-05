@@ -23,7 +23,8 @@ cosineLR = True         # whether use cosineLR or not
 n_channels = 3
 n_labels = 1
 epochs = 1000
-img_size = 224
+# img_size = 224
+img_size = 256
 print_frequency = 1
 save_frequency = 100
 vis_frequency = 100
@@ -50,8 +51,8 @@ batch_size = 256
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 #model_name = 'MultiResUnet1_32_1.67'
-model_name = 'UNeXt'
-# model_name = 'UNext_Inception_MLFC'
+# model_name = 'UNeXt'
+model_name = 'UNext_Inception_MLFC'
 
 
 

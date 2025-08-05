@@ -11,16 +11,14 @@ import torch.nn.functional as F
 import os
 import matplotlib.pyplot as plt
 # from utils import *
-__all__ = ['UNext_Ineption_MLFC']
+__all__ = ['UNext_InceptionNext_MLFC']
 
-# from nets.archs.inceptionnext import MetaNeXtStage, InceptionDWConv2d
-# from nets.archs.ACC_UNet import MLFC
-
-from inceptionnext import MetaNeXtStage, InceptionDWConv2d
-from ACC_UNet import MLFC 
+# from inceptionnext import MetaNeXtStage, InceptionDWConv2d
+from nets.archs.inceptionnext import MetaNeXtStage, InceptionDWConv2d
+# from ACC_UNet import MLFC  
+from nets.archs.ACC_UNet import MLFC
 
 from functools import partial 
-
 import timm
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 import types
@@ -35,10 +33,6 @@ def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
     """1x1 convolution"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=1, bias=False)
 
-def resize_to_match(self, x, target_size):
-    if x.shape[2:] != target_size:
-        return F.interpolate(x, size=target_size, mode='bilinear', align_corners=False)
-    return x
 
 def shift(dim):
             x_shift = [ torch.roll(x_c, shift, dim) for x_c, shift in zip(xs, range(-self.pad, self.pad+1))]
@@ -214,11 +208,11 @@ class OverlapPatchEmbed(nn.Module):
 
         return x, H, W
 
-class UNext_Inception_MLFC(nn.Module):
+class UNext_InceptionNext_MLFC(nn.Module):
 
     ## Conv 3 + MLP 2 + shifted MLP
     
-    def __init__(self, n_channels=3, n_classes=1, deep_supervision=False,img_size=224, patch_size=16, in_chans=3,  embed_dims=[ 128, 160, 256],
+    def __init__(self,n_channels=3, n_classes=1, deep_supervision=False,img_size=224, patch_size=16, in_chans=3,  embed_dims=[ 128, 160, 256],
                  num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
                  attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm,
                  depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1], **kwargs):
@@ -255,9 +249,9 @@ class UNext_Inception_MLFC(nn.Module):
         # self.skip_fusion = MLFC(16, 32, 128, 160, lenn=1)
         self.skip_fusion = MLFC(*[80, 128, 160, 160], lenn=1)
 
-        # self.skip_t3_proj = nn.Conv2d(160, 128, 1)
-        # self.skip_t2_proj = nn.Conv2d(128, 32, 1)
-        # self.skip_t1_proj = nn.Conv2d(80, 16, 1)
+        self.skip_t3_proj = nn.Conv2d(160, 128, 1)
+        self.skip_t2_proj = nn.Conv2d(128, 32, 1)
+        self.skip_t1_proj = nn.Conv2d(80, 16, 1)
 
 
         self.ebn1 = nn.BatchNorm2d(16)
@@ -357,19 +351,10 @@ class UNext_Inception_MLFC(nn.Module):
         out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
         t4 = out
 
-        # Determine the largest spatial size among t1–t4
-        def unify_spatial_size(tensors, mode='bilinear', align_corners=True):
-            h = max(t.shape[2] for t in tensors)
-            w = max(t.shape[3] for t in tensors)
-            return [F.interpolate(t, size=(h, w), mode=mode, align_corners=align_corners) for t in tensors]
-
-        t1, t2, t3, t4 = unify_spatial_size([t1, t2, t3, t4])
-        t1, t2, t3, t4 = self.skip_fusion(t1, t2, t3, t4)
-
-        # t1, t2, t3, t4 = self.skip_fusion(t1, t2, t3, t4)       # MLFC FUSION   
-        # t3 = self.skip_t3_proj(t3)  # 160 → 128 for decoder2
-        # t2 = self.skip_t2_proj(t2)  # 128 → 32  for decoder3
-        # t1 = self.skip_t1_proj(t1)  # 80 → 16   for decoder4
+        t1, t2, t3, t4 = self.skip_fusion(t1, t2, t3, t4)       # MLFC FUSION   
+        t3 = self.skip_t3_proj(t3)  # 160 → 128 for decoder2
+        t2 = self.skip_t2_proj(t2)  # 128 → 32  for decoder3
+        t1 = self.skip_t1_proj(t1)  # 80 → 16   for decoder4
 
         ### Bottleneck
 
@@ -433,17 +418,18 @@ class UNext_Inception_MLFC(nn.Module):
 if __name__ == '__main__':
     # Sanity check
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = UNext_Inception_MLFC(num_classes=1, input_channels=3)
+    model = UNext_InceptionNext_MLFC(num_classes=1, input_channels=3)
     model.eval()
 
     # Dummy input: B x C x H x W
-    dummy_input = torch.randn(1, 3, 224, 224)
+    dummy_input = torch.randn(1, 3, 256, 256)
 
     # Forward pass
     with torch.no_grad():
         output = model(dummy_input)
 
     print(f"✅ Forward pass successful! Output shape: {output.shape}")
+
 
 
 #EOF

@@ -430,6 +430,12 @@ class MLFC(torch.nn.Module):
         _, _, h3, w3 = x3.shape
         _, _, h4, w4 = x4.shape
 
+        # print("Inside MLFC.forward:")
+        # print("t1:", x1.shape)
+        # print("t2:", x2.shape)
+        # print("t3:", x3.shape)
+        # print("t4:", x4.shape)
+
         for i in range(len(self.cnv_blks1)):
             x_c1 = self.act(
                 self.bns1[i](
@@ -529,6 +535,12 @@ class MLFC(torch.nn.Module):
         x2 = self.sqe2(x_c2)
         x3 = self.sqe3(x_c3)
         x4 = self.sqe4(x_c4)
+
+        # print("After MLFC.forward:")
+        # print("t1:", x1.shape)
+        # print("t2:", x2.shape)
+        # print("t3:", x3.shape)
+        # print("t4:", x4.shape)
 
         return x1, x2, x3, x4
 
