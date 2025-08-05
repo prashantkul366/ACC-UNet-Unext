@@ -48,10 +48,10 @@ class RandomGenerator(object):
             image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
         image = F.to_tensor(image)
-        # label = to_long_tensor(label)
+        label = to_long_tensor(label)
         ###########################################################
-        label = torch.from_numpy(np.array(label, dtype=np.float32))
-        label = (label > 0).float()  # Binarize & ensure float
+        # label = torch.from_numpy(np.array(label, dtype=np.float32))
+        # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################
         sample = {'image': image, 'label': label}
         return sample
@@ -68,10 +68,10 @@ class ValGenerator(object):
             image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
         image = F.to_tensor(image)
-        # label = to_long_tensor(label)
+        label = to_long_tensor(label)
         ###########################################################
-        label = torch.from_numpy(np.array(label, dtype=np.float32))
-        label = (label > 0).float()  # Binarize & ensure float
+        # label = torch.from_numpy(np.array(label, dtype=np.float32))
+        # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################
         sample = {'image': image, 'label': label}
         return sample
@@ -173,13 +173,13 @@ class ImageToImage2D(Dataset):
         # print(np.max(mask), np.min(mask))
         mask = cv2.resize(mask,(self.image_size,self.image_size))
         # print(np.max(mask), np.min(mask))
-        # if self.n_labels == 1:
-        #     mask[mask<=0] = 0
-        #     # (mask == 35).astype(int)
-        #     mask[mask>0] = 1
-        #     mask = mask.astype(np.float32)  # 🔧 Ensure float type
         if self.n_labels == 1:
-            mask = (mask > 0).astype(np.float32)  # binarize + cast to float
+            mask[mask<=0] = 0
+            # (mask == 35).astype(int)
+            mask[mask>0] = 1
+        #     mask = mask.astype(np.float32)  # 🔧 Ensure float type
+        # if self.n_labels == 1:
+        #     mask = (mask > 0).astype(np.float32)  # binarize + cast to float
 
             # print("11111",np.max(mask), np.min(mask))
 
@@ -194,8 +194,8 @@ class ImageToImage2D(Dataset):
         if self.joint_transform:
             sample = self.joint_transform(sample)
 
-        sample['label'] = torch.clamp(sample['label'].unsqueeze(0).float(), 0.0, 1.0)
-        sample['image'] = sample['image'].float()
+        # sample['label'] = torch.clamp(sample['label'].unsqueeze(0).float(), 0.0, 1.0)
+        # sample['image'] = sample['image'].float()
         # sample = {'image': image, 'label': mask}
         # print("2222",np.max(mask), np.min(mask))
 

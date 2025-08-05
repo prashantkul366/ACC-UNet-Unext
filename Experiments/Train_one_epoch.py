@@ -63,7 +63,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         images, masks = sampled_batch['image'], sampled_batch['label']
         images, masks = images.cuda(), masks.cuda()
 
-        masks = masks.float()  # Ensure it's not accidentally long
+        # masks = masks.float()  # Ensure it's not accidentally long
         # masks = torch.clamp(masks, 0.0, 1.0)  # Clamp to [0, 1]
         # print("Unique mask values:", torch.unique(masks))
 
