@@ -10,15 +10,16 @@ from torchvision.utils import save_image
 import torch.nn.functional as F
 import os
 import matplotlib.pyplot as plt
-from utils import *
+# from utils import *
 __all__ = ['UNext_Ineption_MLFC']
 
-from nets.archs.inceptionnext import MetaNeXtStage, InceptionDWConv2d
-from nets.archs.ACC_UNet import MLFC
+# from nets.archs.inceptionnext import MetaNeXtStage, InceptionDWConv2d
+# from nets.archs.ACC_UNet import MLFC
 
-# from inceptionnext import MetaNeXtStage, InceptionDWConv2d
-from functools import partial  
-# from ACC_UNet import MLFC 
+from inceptionnext import MetaNeXtStage, InceptionDWConv2d
+from ACC_UNet import MLFC 
+
+from functools import partial 
 
 import timm
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
@@ -356,7 +357,16 @@ class UNext_Inception_MLFC(nn.Module):
         out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
         t4 = out
 
-        t1, t2, t3, t4 = self.skip_fusion(t1, t2, t3, t4)       # MLFC FUSION   
+        # Determine the largest spatial size among t1–t4
+        def unify_spatial_size(tensors, mode='bilinear', align_corners=True):
+            h = max(t.shape[2] for t in tensors)
+            w = max(t.shape[3] for t in tensors)
+            return [F.interpolate(t, size=(h, w), mode=mode, align_corners=align_corners) for t in tensors]
+
+        t1, t2, t3, t4 = unify_spatial_size([t1, t2, t3, t4])
+        t1, t2, t3, t4 = self.skip_fusion(t1, t2, t3, t4)
+
+        # t1, t2, t3, t4 = self.skip_fusion(t1, t2, t3, t4)       # MLFC FUSION   
         # t3 = self.skip_t3_proj(t3)  # 160 → 128 for decoder2
         # t2 = self.skip_t2_proj(t2)  # 128 → 32  for decoder3
         # t1 = self.skip_t1_proj(t1)  # 80 → 16   for decoder4
@@ -423,7 +433,7 @@ class UNext_Inception_MLFC(nn.Module):
 if __name__ == '__main__':
     # Sanity check
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = UNext(num_classes=1, input_channels=3)
+    model = UNext_Inception_MLFC(num_classes=1, input_channels=3)
     model.eval()
 
     # Dummy input: B x C x H x W
