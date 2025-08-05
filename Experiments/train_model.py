@@ -30,6 +30,8 @@ import Config as config
 from torchvision import transforms
 from utils import CosineAnnealingWarmRestarts, WeightedDiceBCE
 
+os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+
 def logger_config(log_path):
     loggerr = logging.getLogger()
     loggerr.setLevel(level=logging.INFO)

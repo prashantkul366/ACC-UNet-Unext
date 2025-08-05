@@ -48,7 +48,11 @@ class RandomGenerator(object):
             image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
         image = F.to_tensor(image)
-        label = to_long_tensor(label)
+        # label = to_long_tensor(label)
+        ###########################################################
+        label = torch.from_numpy(np.array(label, dtype=np.float32))
+        label = (label > 0).float()  # Binarize & ensure float
+        ###########################################################
         sample = {'image': image, 'label': label}
         return sample
 
@@ -64,7 +68,11 @@ class ValGenerator(object):
             image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
         image = F.to_tensor(image)
-        label = to_long_tensor(label)
+        # label = to_long_tensor(label)
+        ###########################################################
+        label = torch.from_numpy(np.array(label, dtype=np.float32))
+        label = (label > 0).float()  # Binarize & ensure float
+        ###########################################################
         sample = {'image': image, 'label': label}
         return sample
 
