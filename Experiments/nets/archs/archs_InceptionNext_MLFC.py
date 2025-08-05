@@ -13,9 +13,12 @@ import matplotlib.pyplot as plt
 from utils import *
 __all__ = ['UNext_Ineption_MLFC']
 
-from inceptionnext import MetaNeXtStage, InceptionDWConv2d
-from functools import partial  # already imported
-from ACC_UNet import MLFC  # adjust path if needed
+from nets.archs.inceptionnext import MetaNeXtStage, InceptionDWConv2d
+from nets.archs.ACC_UNet import MLFC
+
+# from inceptionnext import MetaNeXtStage, InceptionDWConv2d
+from functools import partial  
+# from ACC_UNet import MLFC 
 
 import timm
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
