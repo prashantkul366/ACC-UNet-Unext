@@ -165,10 +165,14 @@ class ImageToImage2D(Dataset):
         # print(np.max(mask), np.min(mask))
         mask = cv2.resize(mask,(self.image_size,self.image_size))
         # print(np.max(mask), np.min(mask))
+        # if self.n_labels == 1:
+        #     mask[mask<=0] = 0
+        #     # (mask == 35).astype(int)
+        #     mask[mask>0] = 1
+        #     mask = mask.astype(np.float32)  # 🔧 Ensure float type
         if self.n_labels == 1:
-            mask[mask<=0] = 0
-            # (mask == 35).astype(int)
-            mask[mask>0] = 1
+            mask = (mask > 0).astype(np.float32)  # binarize + cast to float
+
             # print("11111",np.max(mask), np.min(mask))
 
         # correct dimensions if needed
@@ -176,12 +180,13 @@ class ImageToImage2D(Dataset):
         # image, mask = F.to_pil_image(image), F.to_pil_image(mask)
         # print("11",image.shape)
         # print("22",mask.shape)
+        assert mask.max() <= 1.0 and mask.min() >= 0.0, f"Mask out of range: {mask.min()} - {mask.max()}"
         sample = {'image': image, 'label': mask}
 
         if self.joint_transform:
             sample = self.joint_transform(sample)
 
-        sample['label'] = sample['label'].unsqueeze(0).float()
+        sample['label'] = torch.clamp(sample['label'].unsqueeze(0).float(), 0.0, 1.0)
         sample['image'] = sample['image'].float()
         # sample = {'image': image, 'label': mask}
         # print("2222",np.max(mask), np.min(mask))
