@@ -23,8 +23,8 @@ cosineLR = True         # whether use cosineLR or not
 n_channels = 3
 n_labels = 1
 epochs = 1000
-# img_size = 224
-img_size = 256
+img_size = 224
+# img_size = 256
 print_frequency = 1
 save_frequency = 100
 vis_frequency = 100
@@ -42,7 +42,7 @@ pretrain = False
 task_name = 'ISIC18_UNET'
 
 learning_rate = 1e-3
-batch_size = 8
+batch_size = 512
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
@@ -52,8 +52,8 @@ batch_size = 8
 # model_name = 'UNet_base_proto'
 #model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'UNeXt'
-model_name = 'UNext_InceptionNext_MLFC'
-
+# model_name = 'UNext_InceptionNext_MLFC'
+model_name = 'UNext_CMRF'  
 
 
 test_session = "session1"         #

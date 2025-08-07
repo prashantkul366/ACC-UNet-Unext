@@ -11,14 +11,11 @@ import torch.nn.functional as F
 import os
 import matplotlib.pyplot as plt
 # from utils import *
-__all__ = ['UNext_InceptionNext_MLFC']
+__all__ = ['UNext']
 
-# from inceptionnext import MetaNeXtStage, InceptionDWConv2d
-from nets.archs.inceptionnext import MetaNeXtStage, InceptionDWConv2d
-# from ACC_UNet import MLFC  
-from nets.archs.ACC_UNet import MLFC
+from inceptionnext import MetaNeXtStage, InceptionDWConv2d
+from functools import partial  # already imported
 
-from functools import partial 
 import timm
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 import types
@@ -208,23 +205,23 @@ class OverlapPatchEmbed(nn.Module):
 
         return x, H, W
 
-class UNext_InceptionNext_MLFC(nn.Module):
+class UNext(nn.Module):
 
     ## Conv 3 + MLP 2 + shifted MLP
     
-    def __init__(self,n_channels=3, n_classes=1, deep_supervision=False,img_size=224, patch_size=16, in_chans=3,  embed_dims=[ 128, 160, 256],
+    def __init__(self,  num_classes, input_channels=3, deep_supervision=False,img_size=224, patch_size=16, in_chans=3,  embed_dims=[ 128, 160, 256],
                  num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
                  attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm,
                  depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1], **kwargs):
         super().__init__()
         
-        print("UNext InceptionNext MLFC Initiated")
+        print("UNext InceptionNext Initiated")
         # self.encoder1 = nn.Conv2d(3, 16, 3, stride=1, padding=1)  
         # self.encoder2 = nn.Conv2d(16, 32, 3, stride=1, padding=1)  
         # self.encoder3 = nn.Conv2d(32, 128, 3, stride=1, padding=1)
 
         self.stem = nn.Sequential(
-            nn.Conv2d(n_channels, 40, kernel_size=4, stride=4),  # 256→64
+            nn.Conv2d(input_channels, 40, kernel_size=4, stride=4),  # 256→64
             nn.BatchNorm2d(40)
         )
 
@@ -245,11 +242,6 @@ class UNext_InceptionNext_MLFC(nn.Module):
             token_mixer=partial(InceptionDWConv2d, band_kernel_size=11, branch_ratio=0.25),
             norm_layer=nn.BatchNorm2d
         )
-
-        
-
-        # self.skip_fusion = MLFC(16, 32, 128, 160, lenn=1)
-        self.skip_fusion = MLFC(*[80, 128, 160, 160], lenn=1)
 
         self.ebn1 = nn.BatchNorm2d(16)
         self.ebn2 = nn.BatchNorm2d(32)
@@ -290,6 +282,11 @@ class UNext_InceptionNext_MLFC(nn.Module):
         self.patch_embed4 = OverlapPatchEmbed(img_size=img_size // 8, patch_size=3, stride=2, in_chans=embed_dims[1],
                                               embed_dim=embed_dims[2])
 
+
+        self.skip_t3_proj = nn.Conv2d(160, 128, kernel_size=1)
+        self.skip_t2_proj = nn.Conv2d(128, 32, kernel_size=1)
+        self.skip_t1_proj = nn.Conv2d(80, 16, kernel_size=1)
+
         self.decoder1 = nn.Conv2d(256, 160, 3, stride=1,padding=1)  
         self.decoder2 =   nn.Conv2d(160, 128, 3, stride=1, padding=1)  
         self.decoder3 =   nn.Conv2d(128, 32, 3, stride=1, padding=1) 
@@ -301,7 +298,7 @@ class UNext_InceptionNext_MLFC(nn.Module):
         self.dbn3 = nn.BatchNorm2d(32)
         self.dbn4 = nn.BatchNorm2d(16)
         
-        self.final = nn.Conv2d(16, n_classes, kernel_size=1)
+        self.final = nn.Conv2d(16, num_classes, kernel_size=1)
 
         self.soft = nn.Softmax(dim =1)
 
@@ -343,19 +340,6 @@ class UNext_InceptionNext_MLFC(nn.Module):
         out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
         t4 = out
 
-        print(f"BEFORE MLFC FUSION")
-        print(f"t1 shape: {t1.shape}")
-        print(f"t2 shape: {t2.shape}")
-        print(f"t3 shape: {t3.shape}")
-        print(f"t4 shape: {t4.shape}")
-
-        t1, t2, t3, t4 = self.skip_fusion(t1, t2, t3, t4)       # MLFC FUSION   
-
-        print(f"AFTER MLFC FUSION")
-        print(f"t1 shape: {t1.shape}")
-        print(f"t2 shape: {t2.shape}")
-        print(f"t3 shape: {t3.shape}")
-        print(f"t4 shape: {t4.shape}")
         ### Bottleneck
 
         out ,H,W= self.patch_embed4(out)
@@ -386,9 +370,7 @@ class UNext_InceptionNext_MLFC(nn.Module):
            t3 = F.interpolate(t3, size=out.shape[2:], mode='bilinear', align_corners=True)
 
         
-        if t3.shape[1] != out.shape[1]:
-            t3 = nn.Conv2d(t3.shape[1], out.shape[1], kernel_size=1).to(t3.device)(t3)
-
+        t3 = self.skip_t3_proj(t3)
         out = torch.add(out,t3)
         _,_,H,W = out.shape
         out = out.flatten(2).transpose(1,2)
@@ -403,29 +385,19 @@ class UNext_InceptionNext_MLFC(nn.Module):
         if t2.shape[2:] != out.shape[2:]:
            t2 = F.interpolate(t2, size=out.shape[2:], mode='bilinear', align_corners=True)
 
-        if t2.shape[1] != out.shape[1]:
-            t2 = nn.Conv2d(t2.shape[1], out.shape[1], kernel_size=1).to(t2.device)(t2)
-
+        t2 = self.skip_t2_proj(t2)
         out = torch.add(out,t2)
         out = F.relu(F.interpolate(self.dbn4(self.decoder4(out)),scale_factor=(2,2),mode ='bilinear'))
         if t1.shape[2:] != out.shape[2:]:
           t1 = F.interpolate(t1, size=out.shape[2:], mode='bilinear', align_corners=True)
 
-        if t1.shape[1] != out.shape[1]:
-            t1 = nn.Conv2d(t1.shape[1], out.shape[1], kernel_size=1).to(t1.device)(t1)
-
+        t1 = self.skip_t1_proj(t1)
         out = torch.add(out,t1)
         out = F.relu(F.interpolate(self.decoder5(out),scale_factor=(2,2),mode ='bilinear'))
 
         # return self.final(out)
-        # out = self.final(out)
-        out = F.interpolate(out, size=(x.size(2), x.size(3)), mode='bilinear', align_corners=False)
-
-
-        # return out
         out = self.final(out)
-        if out.shape[1] == 1:
-            out = torch.sigmoid(out)  # For binary segmentation
+        out = F.interpolate(out, size=(x.size(2), x.size(3)), mode='bilinear', align_corners=False)
         return out
 
 
@@ -433,7 +405,7 @@ class UNext_InceptionNext_MLFC(nn.Module):
 if __name__ == '__main__':
     # Sanity check
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = UNext_InceptionNext_MLFC(num_classes=1, input_channels=3)
+    model = UNext(num_classes=1, input_channels=3)
     model.eval()
 
     # Dummy input: B x C x H x W

@@ -437,99 +437,200 @@ class MLFC(torch.nn.Module):
         # print("t4:", x4.shape)
 
         for i in range(len(self.cnv_blks1)):
+            # x_c1 = self.act(
+            #     self.bns1[i](
+            #         self.cnv_blks1[i](
+            #             torch.cat(
+            #                 [
+            #                     x1,
+            #                     self.no_param_up(x2),
+            #                     self.no_param_up(self.no_param_up(x3)),
+            #                     self.no_param_up(self.no_param_up(self.no_param_up(x4))),
+            #                 ],
+            #                 dim=1,
+            #             )
+            #         )
+            #     )
+            # )
+            target_size = x1.shape[2:]
             x_c1 = self.act(
                 self.bns1[i](
                     self.cnv_blks1[i](
-                        torch.cat(
-                            [
-                                x1,
-                                self.no_param_up(x2),
-                                self.no_param_up(self.no_param_up(x3)),
-                                self.no_param_up(self.no_param_up(self.no_param_up(x4))),
-                            ],
-                            dim=1,
-                        )
-                    )
-                )
-            )
-            x_c2 = self.act(
-                self.bns2[i](
-                    self.cnv_blks2[i](
-                        torch.cat(
-                            [
-                                self.no_param_down(x1),
-                                (x2),
-                                (self.no_param_up(x3)),
-                                (self.no_param_up(self.no_param_up(x4))),
-                            ],
-                            dim=1,
-                        )
-                    )
-                )
-            )
-            x_c3 = self.act(
-                self.bns3[i](
-                    self.cnv_blks3[i](
-                        torch.cat(
-                            [
-                                self.no_param_down(self.no_param_down(x1)),
-                                self.no_param_down(x2),
-                                (x3),
-                                (self.no_param_up(x4)),
-                            ],
-                            dim=1,
-                        )
-                    )
-                )
-            )
-            x_c4 = self.act(
-                self.bns4[i](
-                    self.cnv_blks4[i](
-                        torch.cat(
-                            [
-                                self.no_param_down(self.no_param_down(self.no_param_down(x1))),
-                                self.no_param_down(self.no_param_down(x2)),
-                                self.no_param_down(x3),
-                                x4,
-                            ],
-                            dim=1,
-                        )
+                        torch.cat([
+                            self.resize_to(x1, target_size),
+                            self.resize_to(x2, target_size),
+                            self.resize_to(x3, target_size),
+                            self.resize_to(x4, target_size),
+                        ], dim=1)
                     )
                 )
             )
 
+            # x_c2 = self.act(
+            #     self.bns2[i](
+            #         self.cnv_blks2[i](
+            #             torch.cat(
+            #                 [
+            #                     self.no_param_down(x1),
+            #                     (x2),
+            #                     (self.no_param_up(x3)),
+            #                     (self.no_param_up(self.no_param_up(x4))),
+            #                 ],
+            #                 dim=1,
+            #             )
+            #         )
+            #     )
+            # )
+
+            target_size = x2.shape[2:]
+            x_c2 = self.act(
+                self.bns2[i](
+                    self.cnv_blks2[i](
+                        torch.cat([
+                            self.resize_to(x1, target_size),
+                            self.resize_to(x2, target_size),
+                            self.resize_to(x3, target_size),
+                            self.resize_to(x4, target_size),
+                        ], dim=1)
+                    )
+                )
+            )
+
+            # x_c3 = self.act(
+            #     self.bns3[i](
+            #         self.cnv_blks3[i](
+            #             torch.cat(
+            #                 [
+            #                     self.no_param_down(self.no_param_down(x1)),
+            #                     self.no_param_down(x2),
+            #                     (x3),
+            #                     (self.no_param_up(x4)),
+            #                 ],
+            #                 dim=1,
+            #             )
+            #         )
+            #     )
+            # )
+
+            target_size = x3.shape[2:]
+            x_c3 = self.act(
+                self.bns3[i](
+                    self.cnv_blks3[i](
+                        torch.cat([
+                            self.resize_to(x1, target_size),
+                            self.resize_to(x2, target_size),
+                            self.resize_to(x3, target_size),
+                            self.resize_to(x4, target_size),
+                        ], dim=1)
+                    )
+                )
+            )
+
+            # x_c4 = self.act(
+            #     self.bns4[i](
+            #         self.cnv_blks4[i](
+            #             torch.cat(
+            #                 [
+            #                     self.no_param_down(self.no_param_down(self.no_param_down(x1))),
+            #                     self.no_param_down(self.no_param_down(x2)),
+            #                     self.no_param_down(x3),
+            #                     x4,
+            #                 ],
+            #                 dim=1,
+            #             )
+            #         )
+            #     )
+            # )
+            target_size = x4.shape[2:]
+            x_c4 = self.act(
+                self.bns4[i](
+                    self.cnv_blks4[i](
+                        torch.cat([
+                            self.resize_to(x1, target_size),
+                            self.resize_to(x2, target_size),
+                            self.resize_to(x3, target_size),
+                            self.resize_to(x4, target_size),
+                        ], dim=1)
+                    )
+                )
+            )
+
+            # x_c1 = self.act(
+            #     self.bns_mrg1[i](
+            #         self.cnv_mrg1[i](
+            #             torch.cat([x_c1, x1], dim=2).view(batch_size, 2 * self.in_filters1, h1, w1)
+            #         )
+            #         + x1
+            #     )
+            # )
+
+            target_size = x1.shape[2:]
+            x_c1 = self.resize_to(x_c1, target_size)
             x_c1 = self.act(
                 self.bns_mrg1[i](
                     self.cnv_mrg1[i](
-                        torch.cat([x_c1, x1], dim=2).view(batch_size, 2 * self.in_filters1, h1, w1)
+                        torch.cat([x_c1, x1], dim=1)
                     )
-                    + x1
-                )
+                ) + x1
             )
+
+            # x_c2 = self.act(
+            #     self.bns_mrg2[i](
+            #         self.cnv_mrg2[i](
+            #             torch.cat([x_c2, x2], dim=2).view(batch_size, 2 * self.in_filters2, h2, w2)
+            #         )
+            #         + x2
+            #     )
+            # )
+
+            target_size = x2.shape[2:]
+            x_c2 = self.resize_to(x_c2, target_size)
             x_c2 = self.act(
                 self.bns_mrg2[i](
                     self.cnv_mrg2[i](
-                        torch.cat([x_c2, x2], dim=2).view(batch_size, 2 * self.in_filters2, h2, w2)
+                        torch.cat([x_c2, x2], dim=1)
                     )
-                    + x2
-                )
+                ) + x2
             )
+
+            # x_c3 = self.act(
+            #     self.bns_mrg3[i](
+            #         self.cnv_mrg3[i](
+            #             torch.cat([x_c3, x3], dim=2).view(batch_size, 2 * self.in_filters3, h3, w3)
+            #         )
+            #         + x3
+            #     )
+            # )
+
+            target_size = x3.shape[2:]
+            x_c3 = self.resize_to(x_c3, target_size)
             x_c3 = self.act(
                 self.bns_mrg3[i](
                     self.cnv_mrg3[i](
-                        torch.cat([x_c3, x3], dim=2).view(batch_size, 2 * self.in_filters3, h3, w3)
+                        torch.cat([x_c3, x3], dim=1)
                     )
-                    + x3
-                )
+                ) + x3
             )
+
+            # x_c4 = self.act(
+            #     self.bns_mrg4[i](
+            #         self.cnv_mrg4[i](
+            #             torch.cat([x_c4, x4], dim=2).view(batch_size, 2 * self.in_filters4, h4, w4)
+            #         )
+            #         + x4
+            #     )
+            # )
+
+            target_size = x4.shape[2:]
+            x_c4 = self.resize_to(x_c4, target_size)
             x_c4 = self.act(
                 self.bns_mrg4[i](
                     self.cnv_mrg4[i](
-                        torch.cat([x_c4, x4], dim=2).view(batch_size, 2 * self.in_filters4, h4, w4)
+                        torch.cat([x_c4, x4], dim=1)
                     )
-                    + x4
-                )
+                ) + x4
             )
+
 
         x1 = self.sqe1(x_c1)
         x2 = self.sqe2(x_c2)
@@ -543,6 +644,12 @@ class MLFC(torch.nn.Module):
         # print("t4:", x4.shape)
 
         return x1, x2, x3, x4
+    
+    def resize_to(self, x, target_size):
+        if x.shape[2:] != target_size:
+            return F.interpolate(x, size=target_size, mode='bilinear', align_corners=False)
+        return x
+
 
 
 class ACC_UNet(torch.nn.Module):
