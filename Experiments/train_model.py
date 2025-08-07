@@ -23,9 +23,13 @@ from nets.UCTransNet import UCTransNet
 
 
 ##################### NEW ARCHS ######################
+
 from nets.UNext import UNext
 from nets.archs.archs_InceptionNext_MLFC import UNext_InceptionNext_MLFC
 from nets.archs.UNext_CMRF import UNext_CMRF
+from nets.archs.UNext_CMRF_enc_dec import UNext_CMRF_enc_dec
+
+######################################################
 
 
 from torch.utils.data import DataLoader
@@ -151,6 +155,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
     elif model_type == 'UNext_CMRF':
         model = UNext_CMRF(n_channels=config.n_channels, n_classes=config.n_labels)
+        # lr = 1e-4
+
+    elif model_type == 'UNext_CMRF_enc_dec':
+        model = UNext_CMRF_enc_dec(n_channels=config.n_channels, n_classes=config.n_labels)
         # lr = 1e-4
 
     else: 

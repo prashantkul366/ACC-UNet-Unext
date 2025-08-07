@@ -21,8 +21,8 @@ from abc import ABCMeta, abstractmethod
 # from mmcv.cnn import ConvModule
 import pdb
 
-from TinyU_Net import CMRF
-# from nets.archs.TinyU_Net import CMRF
+# from TinyU_Net import CMRF
+from nets.archs.TinyU_Net import CMRF
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
@@ -204,7 +204,7 @@ class OverlapPatchEmbed(nn.Module):
 
         return x, H, W
 
-class UNext_CMRF(nn.Module):
+class UNext_CMRF_enc_dec(nn.Module):
 
     ## Conv 3 + MLP 2 + shifted MLP
     
@@ -214,7 +214,7 @@ class UNext_CMRF(nn.Module):
                  depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1], **kwargs):
         super().__init__()
         
-        print("UNext CMRF Encoders Initiated")
+        print("UNext CMRF Encoders + Decoder Initiated")
         # self.encoder1 = nn.Conv2d(n_channels, 16, 3, stride=1, padding=1)  
         # self.encoder2 = nn.Conv2d(16, 32, 3, stride=1, padding=1)  
         # self.encoder3 = nn.Conv2d(32, 128, 3, stride=1, padding=1)
@@ -516,7 +516,7 @@ class UNext_CMRF(nn.Module):
 if __name__ == '__main__':
     # Sanity check
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = UNext_CMRF(num_classes=1, input_channels=3)
+    model = UNext_CMRF_enc_dec(num_classes=1, input_channels=3)
     model.eval()
 
     # Dummy input: B x C x H x W
