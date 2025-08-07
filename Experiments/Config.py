@@ -56,7 +56,9 @@ batch_size = 128
 # model_name = 'UNext_InceptionNext_MLFC'
 # model_name = 'UNext_CMRF'   # CMRF encoder
 # model_name = 'UNext_CMRF_enc_dec'  # CMRF encoder + decoder
-model_name = 'UNext_CMRF_enc_MLFC'  # CMRF encoder + MLFC fusion
+# model_name = 'UNext_CMRF_enc_MLFC'  # CMRF encoder + MLFC fusion
+model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
+
 
 test_session = "session1"         #
 
