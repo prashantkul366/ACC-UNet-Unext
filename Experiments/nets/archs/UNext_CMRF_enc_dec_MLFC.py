@@ -21,12 +21,12 @@ from abc import ABCMeta, abstractmethod
 # from mmcv.cnn import ConvModule
 import pdb
 
-from TinyU_Net import CMRF
-# from nets.archs.TinyU_Net import CMRF
+# from TinyU_Net import CMRF
+from nets.archs.TinyU_Net import CMRF
 
-from ACC_UNet import MLFC
-# from nets.archs.ACC_UNet import MLFC
-
+# from ACC_UNet import MLFC
+from nets.archs.ACC_UNet import MLFC
+# 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
     """1x1 convolution"""
