@@ -216,7 +216,7 @@ class UNext_CMRF_enc_MLFC(nn.Module):
                  depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1], **kwargs):
         super().__init__()
         
-        print("UNext CMRF Encoders Initiated")
+        print("UNext CMRF Encoders + MLFC Initiated")
         # self.encoder1 = nn.Conv2d(n_channels, 16, 3, stride=1, padding=1)  
         # self.encoder2 = nn.Conv2d(16, 32, 3, stride=1, padding=1)  
         # self.encoder3 = nn.Conv2d(32, 128, 3, stride=1, padding=1)
