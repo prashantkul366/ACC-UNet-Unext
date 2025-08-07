@@ -281,7 +281,7 @@ if __name__ == '__main__':
 
     print("Logger Configured!!")
     # model = main_loop(model_type=config.model_name, tensorboard=True)
-    model = main_loop(model_type=config.model_name, tensorboard=True, resume=True)
+    model = main_loop(model_type=config.model_name, tensorboard=True, resume=False)
 
     
     fp = open('log.log','a')
