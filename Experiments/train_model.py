@@ -81,7 +81,9 @@ def worker_init_fn(worker_id):
 #          Main Loop: load model,
 #=================================================================================
 ##################################################################################
-def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
+# def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
+def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, resume=False):
+
     # Load train and val data
     
     train_tf= transforms.Compose([RandomGenerator(output_size=[config.img_size, config.img_size])])
@@ -164,6 +166,30 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
 
     model = model.cuda()
     print("Model Loaded!!")
+
+    checkpoint_path = os.path.join(config.model_path, f'best_model-{model_type}.pth.tar')
+    start_epoch = 0
+    max_dice = 0.0
+    best_epoch = 1
+
+    if resume and os.path.isfile(checkpoint_path):
+        logger.info(f" Resuming training from checkpoint: {checkpoint_path}")
+        checkpoint = torch.load(checkpoint_path)
+        model.load_state_dict(checkpoint['state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        start_epoch = checkpoint['epoch'] + 1
+        max_dice = checkpoint.get('val_loss', 0.0)
+        best_epoch = start_epoch
+
+        logger.info(f" Model type: {model_type}")
+        logger.info(f" Resuming from epoch: {checkpoint['epoch']}")
+        logger.info(f" Last best dice score: {max_dice:.4f}")
+        logger.info(f" Optimizer state and model weights loaded successfully")
+        logger.info(f" Continuing training on GPU: {torch.cuda.get_device_name(torch.cuda.current_device())}")
+
+
+
+
     logger.info('Training on ' +str(os.uname()[1]))
     logger.info('Training using GPU : '+torch.cuda.get_device_name(torch.cuda.current_device()))
     # if torch.cuda.device_count() > 1:
@@ -184,10 +210,11 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
     else:
         writer = None
 
-    max_dice = 0.0
-    best_epoch = 1
+    # max_dice = 0.0
+    # best_epoch = 1
     print("Begin Training!!")
-    for epoch in range(config.epochs):  # loop over the dataset multiple times
+    # for epoch in range(config.epochs):  # loop over the dataset multiple times
+    for epoch in range(start_epoch, config.epochs):  # resume if needed
         logger.info('\n========= Epoch [{}/{}] ========='.format(epoch + 1, config.epochs + 1))
         logger.info(config.session_name)
         # train for one epoch
@@ -253,7 +280,9 @@ if __name__ == '__main__':
     logger = logger_config(log_path=config.logger_path)
 
     print("Logger Configured!!")
-    model = main_loop(model_type=config.model_name, tensorboard=True)
+    # model = main_loop(model_type=config.model_name, tensorboard=True)
+    model = main_loop(model_type=config.model_name, tensorboard=True, resume=True)
+
     
     fp = open('log.log','a')
     fp.write(f'{config.model_name} on {config.task_name} completed\n')

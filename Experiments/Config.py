@@ -32,6 +32,7 @@ vis_frequency = 100
 early_stopping_patience = 30
 
 pretrain = False
+resume_checkpoint = True  # or False
 
 
 # task_name = 'GlaS_exp1'
