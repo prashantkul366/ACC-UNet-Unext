@@ -34,14 +34,14 @@ import cv2
 
 
 ##################### NEW ARCHS ######################
+
 from nets.UNext import UNext
-from nets.archs.archs_InceptionNext_MLFC import UNext_InceptionNext_MLFC
+# from nets.archs.archs_InceptionNext_MLFC import UNext_InceptionNext_MLFC
 from nets.archs.UNext_CMRF import UNext_CMRF
 from nets.archs.UNext_CMRF_enc_dec import UNext_CMRF_enc_dec
 from nets.archs.UNext_CMRF_enc_MLFC import UNext_CMRF_enc_MLFC
 from nets.archs.UNext_CMRF_enc_dec_MLFC import UNext_CMRF_enc_dec_MLFC
-
-#######################################################
+######################################################
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
