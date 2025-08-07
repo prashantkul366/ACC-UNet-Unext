@@ -25,7 +25,7 @@ from nets.UCTransNet import UCTransNet
 ##################### NEW ARCHS ######################
 
 from nets.UNext import UNext
-from nets.archs.archs_InceptionNext_MLFC import UNext_InceptionNext_MLFC
+# from nets.archs.archs_InceptionNext_MLFC import UNext_InceptionNext_MLFC
 from nets.archs.UNext_CMRF import UNext_CMRF
 from nets.archs.UNext_CMRF_enc_dec import UNext_CMRF_enc_dec
 from nets.archs.UNext_CMRF_enc_MLFC import UNext_CMRF_enc_MLFC
@@ -164,7 +164,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     elif model_type == 'UNext_CMRF_enc_MLFC':
         model = UNext_CMRF_enc_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)
 
-        
+
     else: 
         raise TypeError('Please enter a valid name for the model type')
 
