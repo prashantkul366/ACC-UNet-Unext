@@ -21,11 +21,11 @@ from abc import ABCMeta, abstractmethod
 # from mmcv.cnn import ConvModule
 import pdb
 
-from TinyU_Net import CMRF
-# from nets.archs.TinyU_Net import CMRF
+# from TinyU_Net import CMRF
+from nets.archs.TinyU_Net import CMRF
 
-from squeeze_and_excitation import ChannelSpatialSELayer
-# from nets.archs.squeeze_and_excitation import ChannelSpatialSELayer
+# from squeeze_and_excitation import ChannelSpatialSELayer
+from nets.archs.squeeze_and_excitation import ChannelSpatialSELayer
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
     """1x1 convolution"""
@@ -216,7 +216,7 @@ class UNext_CMRF_enc_CSSE(nn.Module):
                  depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1], **kwargs):
         super().__init__()
         
-        print("UNext CMRF Encoders Initiated")
+        print("UNext CMRF Encoders Channel Spatial SE Initiated")
         # self.encoder1 = nn.Conv2d(n_channels, 16, 3, stride=1, padding=1)  
         # self.encoder2 = nn.Conv2d(16, 32, 3, stride=1, padding=1)  
         # self.encoder3 = nn.Conv2d(32, 128, 3, stride=1, padding=1)
