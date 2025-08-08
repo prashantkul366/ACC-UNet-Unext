@@ -43,7 +43,7 @@ resume_checkpoint = False  # or False
 task_name = 'ISIC18_UNET'
 
 learning_rate = 1e-3
-batch_size = 64
+batch_size = 256
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
@@ -57,8 +57,8 @@ batch_size = 64
 # model_name = 'UNext_CMRF'   # CMRF encoder
 # model_name = 'UNext_CMRF_enc_dec'  # CMRF encoder + decoder
 # model_name = 'UNext_CMRF_enc_MLFC'  # CMRF encoder + MLFC fusion
-model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
-
+# model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
+model_name = 'UNext_CMRF_enc_CSSE'
 
 test_session = "session1"         #
 

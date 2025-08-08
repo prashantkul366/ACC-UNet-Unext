@@ -41,6 +41,7 @@ from nets.archs.UNext_CMRF import UNext_CMRF
 from nets.archs.UNext_CMRF_enc_dec import UNext_CMRF_enc_dec
 from nets.archs.UNext_CMRF_enc_MLFC import UNext_CMRF_enc_MLFC
 from nets.archs.UNext_CMRF_enc_dec_MLFC import UNext_CMRF_enc_dec_MLFC
+from nets.archs.UNext_CMRF_enc_CSSE import UNext_CMRF_enc_CSSE
 ######################################################
 
 class AverageMeter(object):
@@ -267,6 +268,10 @@ if __name__ == '__main__':
 
     elif model_type == 'UNext_CMRF_enc_dec_MLFC':
         model = UNext_CMRF_enc_dec_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)
+
+    elif model_type == 'UNext_CMRF_enc_CSSE':
+        model = UNext_CMRF_enc_CSSE(n_channels=config.n_channels, n_classes=config.n_labels)
+
 
     elif model_type.split('_')[0] == 'MultiResUnet1':          
         model = MultiResUnet(n_channels=config.n_channels,n_classes=config.n_labels,nfilt=int(model_type.split('_')[1]), alpha=float(model_type.split('_')[2]))
