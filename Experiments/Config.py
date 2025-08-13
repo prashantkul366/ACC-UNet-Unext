@@ -48,14 +48,14 @@ task_name = 'BUSI_UNET'
 learning_rate = 1e-3
 batch_size = 8
 
-model_name = 'ACC_UNet'
+# model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
 #model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 #model_name = 'MultiResUnet1_32_1.67'
-# model_name = 'UNeXt'
+model_name = 'UNeXt'
 # model_name = 'UNext_InceptionNext_MLFC'
 # model_name = 'UNext_CMRF'   # CMRF encoder
 # model_name = 'UNext_CMRF_enc_dec'  # CMRF encoder + decoder
