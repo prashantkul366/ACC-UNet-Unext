@@ -125,6 +125,7 @@ class ImageToImage2D(Dataset):
 
     def __init__(self, dataset_path: str, joint_transform: Callable = None, one_hot_mask: int = False, image_size: int =224, n_labels: int=1) -> None:
         self.dataset_path = dataset_path
+        print(f"Dataset path: {dataset_path}")
         self.image_size = image_size        
         # self.input_path = os.path.join(dataset_path, 'img')
         # self.output_path = os.path.join(dataset_path, 'labelcol')
