@@ -94,10 +94,10 @@ test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/te
 # test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/test'
 
 # BUSI
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_prepared/'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_prepared/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_prepared/val'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_prepared/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/val'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/test'
 
 
 session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
