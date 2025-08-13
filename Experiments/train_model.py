@@ -115,6 +115,9 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     print("Val Data Loaded!!")
     lr = config.learning_rate
     
+    print("length of train dataset: ", len(train_dataset))
+    print("length of val dataset: ", len(val_dataset))
+    
     logger.info(model_type)
     logger.info('n_filts : ' + str(config.n_filts))
 
