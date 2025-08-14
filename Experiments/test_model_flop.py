@@ -317,6 +317,7 @@ if __name__ == '__main__':
     precision_meter = AverageMeter()
     recall_meter = AverageMeter()
     gpu_time_meter = AverageMeter()
+    f1_meter = AverageMeter()
 
     with tqdm(total=test_num, desc='Test visualize', unit='img', ncols=70, leave=True) as pbar:
         for i, (sampled_batch, names) in enumerate(test_loader, 1):
@@ -366,11 +367,14 @@ if __name__ == '__main__':
             precision = TP / (TP + FP + eps)
             recall = TP / (TP + FN + eps)
 
+            f1 = (2 * precision * recall) / (precision + recall + eps)
+
             sensitivity_meter.update(sensitivity)
             specificity_meter.update(specificity)
             accuracy_meter.update(accuracy)
             precision_meter.update(precision)
             recall_meter.update(recall)
+            f1_meter.update(f1) 
 
             torch.cuda.empty_cache()
             pbar.update()
@@ -378,6 +382,7 @@ if __name__ == '__main__':
     print ("iou_pred",iou_pred/test_num)
     print(f"Precision: {precision_meter.avg:.4f}")
     print(f"Recall: {recall_meter.avg:.4f}")
+    print(f"F1: {f1_meter.avg:.4f}")
     print(f"Sensitivity: {sensitivity_meter.avg * 100:.2f}%")
     print(f"Specificity: {specificity_meter.avg * 100:.2f}%")
     print(f"Accuracy: {accuracy_meter.avg * 100:.2f}%")
@@ -385,8 +390,10 @@ if __name__ == '__main__':
     print(f"GFLOPs: {model_gflops:.2f} G")
     print(f"Avg GPU Time/Image: {gpu_time_meter.avg:.4f} sec")
 
+
     fp.write(f"Precision: {precision_meter.avg:.4f}\n")
     fp.write(f"Recall: {recall_meter.avg:.4f}\n")
+    fp.write(f"F1: {f1_meter.avg:.4f}\n")
     fp.write(f"Sensitivity: {sensitivity_meter.avg * 100:.2f}%\n")
     fp.write(f"Specificity: {specificity_meter.avg * 100:.2f}%\n")
     fp.write(f"Accuracy: {accuracy_meter.avg * 100:.2f}%\n")
@@ -405,6 +412,7 @@ if __name__ == '__main__':
     'Dice': [float(dice_pred/test_num)],
     'Precision': [float(precision_meter.avg)],
     'Recall': [float(recall_meter.avg)],
+    'F1': [float(f1_meter.avg)], 
     'Sensitivity (%)': [float(sensitivity_meter.avg * 100)],
     'Specificity (%)': [float(specificity_meter.avg * 100)],
     'Accuracy (%)': [float(accuracy_meter.avg * 100)],
