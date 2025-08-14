@@ -10,7 +10,7 @@ import os
 import numpy as np
 import random
 from torch.backends import cudnn
-from torch.optim import lr_scheduler
+from torch.optim import lr_scheduler as torch_lr_scheduler
 from Load_Dataset import RandomGenerator,ValGenerator,ImageToImage2D
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -229,7 +229,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     if config.cosineLR is True:
         # lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
         # lr_scheduler = CosineAnnealingLR(optimizer, T_max=config['epochs'], eta_min=config['min_lr'])
-        lr_scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=0.00001)
+        # lr_scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=0.00001)
+        lr_scheduler = torch_lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=1e-5)
 
 
     else:
