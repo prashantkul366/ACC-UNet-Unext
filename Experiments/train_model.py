@@ -10,6 +10,7 @@ import os
 import numpy as np
 import random
 from torch.backends import cudnn
+from torch.optim import lr_scheduler
 from Load_Dataset import RandomGenerator,ValGenerator,ImageToImage2D
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -220,8 +221,17 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     # model = nn.DataParallel(model, device_ids=[0])
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
     
+    # if config.cosineLR is True:
+    #     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=1e-4)
+    #     if model_type == 'UNeXt':
+    #         lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
+
     if config.cosineLR is True:
-        lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=1e-4)
+        # lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
+        # lr_scheduler = CosineAnnealingLR(optimizer, T_max=config['epochs'], eta_min=config['min_lr'])
+        lr_scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=0.00001)
+
+
     else:
         lr_scheduler =  None
     if tensorboard:
