@@ -66,7 +66,7 @@ model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
 # model_name = 'UNext_CMRF_enc_CSSE'
 
-test_session = "session1"         #
+test_session = "session2"         #
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
