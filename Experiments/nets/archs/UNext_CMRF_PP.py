@@ -394,10 +394,11 @@ class UNext_CMRF_PP_UNetPP(nn.Module):
     UNet++-style nested decoder on top of your UNeXt+CMRF backbone.
     J = 2 (x_{i,1} and x_{i,2} for rows 0..2; x_{3,1} for row 3).
     """
-    def __init__(self, n_channels=3, n_classes=1, img_size=224):
+    def __init__(self, n_channels=3, n_classes=1, img_size=224, return_all=False):
         super().__init__()
         self.n_classes = n_classes
-
+        self.return_all = return_all
+    
         # ====== ENCODER (reuse your exact CMRF encoders) ======
         self.encoder1 = CMRF(n_channels, 16)   # row0 base
         self.encoder2 = CMRF(16, 32)           # row1 base
@@ -513,9 +514,15 @@ class UNext_CMRF_PP_UNetPP(nn.Module):
             logit_02 = torch.sigmoid(logit_02)
 
         # Return both (train) or their mean (simple inference). Choose what you prefer:
-        return {"out_mean": (logit_01 + logit_02) / 2, "out_01": logit_01, "out_02": logit_02}
+        # return {"out_mean": (logit_01 + logit_02) / 2, "out_01": logit_01, "out_02": logit_02}
 
+        out_mean = (logit_01 + logit_02) / 2  # [B, C, H, W]
 
+        # If you kept the flag, you can still get all heads when you want:
+        if getattr(self, "return_all", False):
+            return {"out_mean": out_mean, "out_01": logit_01, "out_02": logit_02}
+
+        return out_mean
 
 
 # class UNext_S(nn.Module):
@@ -668,7 +675,7 @@ class UNext_CMRF_PP_UNetPP(nn.Module):
 
 if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = UNext_CMRF_PP_UNetPP(n_channels=3, n_classes=1).to(device)
+    model = UNext_CMRF_PP_UNetPP(n_channels=3, n_classes=1, return_all=False).to(device)
     model.eval()
 
     dummy_input = torch.randn(1, 3, 224, 224, device=device)
@@ -676,8 +683,9 @@ if __name__ == '__main__':
         out = model(dummy_input)
 
     print("✅ UNet++ nested decoder ok")
-    for k, v in out.items():
-        print(k, v.shape)
+    print("out_mean", out.shape)
+    # for k, v in out.items():
+    #     print(k, v.shape)
 
 
 #EOF
