@@ -42,6 +42,8 @@ from nets.archs.UNext_CMRF_enc_dec import UNext_CMRF_enc_dec
 from nets.archs.UNext_CMRF_enc_MLFC import UNext_CMRF_enc_MLFC
 from nets.archs.UNext_CMRF_enc_dec_MLFC import UNext_CMRF_enc_dec_MLFC
 from nets.archs.UNext_CMRF_enc_CSSE import UNext_CMRF_enc_CSSE
+from nets.archs.UNext_CMRF_PP import UNext_CMRF_PP
+
 ######################################################
 
 class AverageMeter(object):
@@ -171,7 +173,6 @@ if __name__ == '__main__':
         model_path = "./ISIC18_exp3/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"
 
     
-    
     elif config.task_name =="Clinic_exp1":
         test_num = 122
         model_type = config.model_name
@@ -276,6 +277,9 @@ if __name__ == '__main__':
 
     elif model_type == 'UNext_CMRF_enc_CSSE':
         model = UNext_CMRF_enc_CSSE(n_channels=config.n_channels, n_classes=config.n_labels)
+
+    elif model_type == 'UNext_CMRF_PP':
+        model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
 
 
     elif model_type.split('_')[0] == 'MultiResUnet1':          

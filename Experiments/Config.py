@@ -22,16 +22,16 @@ n_filts = 32            # change this to train larger ACC-UNet model
 cosineLR = True         # whether use cosineLR or not
 n_channels = 3
 n_labels = 1
-# epochs = 1000
-epochs = 400
+epochs = 1000
+# epochs = 400
 img_size = 224
 # img_size = 256
 print_frequency = 1
 save_frequency = 100
 vis_frequency = 100
 # early_stopping_patience = 100
-# early_stopping_patience = 30
-early_stopping_patience = 400
+early_stopping_patience = 30
+# early_stopping_patience = 400
 
 pretrain = False
 resume_checkpoint = False  # or False
@@ -44,11 +44,11 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-# task_name = 'ISIC18_UNET'
-task_name = 'BUSI_UNET'
+task_name = 'ISIC18_UNET'
+# task_name = 'BUSI_UNET'
 
-# learning_rate = 1e-3
-learning_rate = 0.0001
+learning_rate = 1e-3
+# learning_rate = 0.0001
 batch_size = 8
 
 # model_name = 'ACC_UNet'
@@ -58,15 +58,16 @@ batch_size = 8
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 #model_name = 'MultiResUnet1_32_1.67'
-model_name = 'UNeXt'
+# model_name = 'UNeXt'
 # model_name = 'UNext_InceptionNext_MLFC'
 # model_name = 'UNext_CMRF'   # CMRF encoder
 # model_name = 'UNext_CMRF_enc_dec'  # CMRF encoder + decoder
 # model_name = 'UNext_CMRF_enc_MLFC'  # CMRF encoder + MLFC fusion
 # model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
 # model_name = 'UNext_CMRF_enc_CSSE'
+model_name = 'UNext_CMRF_PP'
 
-test_session = "session2"         #
+test_session = "session1"         #
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -79,10 +80,10 @@ test_session = "session2"         #
 # logger_path        = save_path + session_name + ".log"
 # visualize_path     = save_path + 'visualize_val/'
 
-# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 # ISIC 18
 # dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1'
@@ -97,10 +98,10 @@ test_session = "session2"         #
 # test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/test'
 
 # BUSI
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/val'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/val'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/test'
 
 
 session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
