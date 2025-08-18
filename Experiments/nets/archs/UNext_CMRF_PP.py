@@ -21,8 +21,8 @@ from abc import ABCMeta, abstractmethod
 # from mmcv.cnn import ConvModule
 import pdb
 
-from TinyU_Net import CMRF
-# from nets.archs.TinyU_Net import CMRF
+# from TinyU_Net import CMRF
+from nets.archs.TinyU_Net import CMRF
 
 
 
