@@ -49,7 +49,7 @@ task_name = 'ISIC18_UNET'
 
 learning_rate = 1e-3
 # learning_rate = 0.0001
-batch_size = 8
+batch_size = 256
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
