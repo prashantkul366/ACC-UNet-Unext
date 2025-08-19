@@ -383,6 +383,7 @@ if __name__ == '__main__':
 
             torch.cuda.empty_cache()
             pbar.update()
+    print("Test completed!")
     print ("dice_pred",dice_pred/test_num)
     print ("iou_pred",iou_pred/test_num)
     print(f"Precision: {precision_meter.avg:.4f}")
