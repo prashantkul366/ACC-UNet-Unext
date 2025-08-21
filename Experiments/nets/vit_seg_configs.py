@@ -21,10 +21,6 @@ def get_b16_config():
     config.decoder_channels = (256, 128, 64, 16)
     config.n_classes = 2
     config.activation = 'softmax'
-
-    config.n_skip = 0
-    config.skip_channels = [0, 0, 0, 0]
-
     return config
 
 
@@ -67,9 +63,6 @@ def get_b32_config():
     config = get_b16_config()
     config.patches.size = (32, 32)
     config.pretrained_path = 'pretrained_ckpt/vit_checkpoint/imagenet21k/ViT-B_32.npz'
-    config.n_skip = 0
-    config.skip_channels = [0, 0, 0, 0]
-
     return config
 
 
@@ -93,9 +86,6 @@ def get_l16_config():
     config.decoder_channels = (256, 128, 64, 16)
     config.n_classes = 2
     config.activation = 'softmax'
-    config.n_skip = 0
-    config.skip_channels = [0, 0, 0, 0]
-
     return config
 
 
@@ -120,9 +110,6 @@ def get_l32_config():
     """Returns the ViT-L/32 configuration."""
     config = get_l16_config()
     config.patches.size = (32, 32)
-    config.n_skip = 0
-    config.skip_channels = [0, 0, 0, 0]
-
     return config
 
 
