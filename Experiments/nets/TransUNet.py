@@ -22,7 +22,7 @@ class TransUNet(nn.Module):
     - For binary tasks (n_classes==1) returns sigmoid probabilities to match WeightedDiceBCE.
     - Auto-loads ViT weights from vit_seg_configs.py if available.
     """
-    def __init__(self, n_channels=3, n_classes=1, backbone='ViT-B_16', img_size=None, vis=False):
+    def __init__(self, n_channels=3, n_classes=1, backbone='R50-ViT-B_16', img_size=None, vis=False):
         super().__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
