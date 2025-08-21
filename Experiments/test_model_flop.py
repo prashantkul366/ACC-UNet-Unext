@@ -313,6 +313,7 @@ if __name__ == '__main__':
         model = nn.DataParallel(model, device_ids=[0,1,2,3])
 
     model.load_state_dict(checkpoint['state_dict'])
+    print(model_type)
     print('Model loaded !')
 
     dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
