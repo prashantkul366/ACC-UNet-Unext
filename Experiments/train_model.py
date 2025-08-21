@@ -34,6 +34,8 @@ from nets.archs.UNext_CMRF_enc_dec_MLFC import UNext_CMRF_enc_dec_MLFC
 from nets.archs.UNext_CMRF_enc_CSSE import UNext_CMRF_enc_CSSE
 from nets.archs.UNext_CMRF_PP import UNext_CMRF_PP_UNetPP
 
+
+from nets.TransUNet import TransUNet
 ######################################################
 
 
@@ -181,6 +183,13 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     elif model_type == 'UNext_CMRF_PP':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_PP_UNetPP(n_channels=config.n_channels, n_classes=config.n_labels)
+
+    elif model_type == 'TransUNet':
+        model = TransUNet(n_channels=config.n_channels, n_classes=config.n_labels)
+        # good defaults for ViT-based models:
+        # lr = 1e-4
+        # optimizer = torch.optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()),
+                                    # lr=lr, weight_decay=0.01)
 
 
     else: 

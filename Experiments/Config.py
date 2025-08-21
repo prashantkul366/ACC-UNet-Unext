@@ -65,7 +65,8 @@ batch_size = 128
 # model_name = 'UNext_CMRF_enc_MLFC'  # CMRF encoder + MLFC fusion
 # model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
 # model_name = 'UNext_CMRF_enc_CSSE'
-model_name = 'UNext_CMRF_PP'
+# model_name = 'UNext_CMRF_PP'
+model_name = 'TransUNet'  # TransUNet model
 
 test_session = "session1"         #
 
