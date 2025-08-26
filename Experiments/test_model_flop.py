@@ -443,7 +443,3 @@ if __name__ == '__main__':
     csv_path = os.path.join(save_path, 'metrics_results.csv')
     df.to_csv(csv_path, index=False)
     print(f"✅ Saved metrics to {csv_path}")
-
-
-
-
