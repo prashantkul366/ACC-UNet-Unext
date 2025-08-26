@@ -72,6 +72,8 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # ====================================================
 
         preds = model(images)
+        final_preds = preds[1] if isinstance(preds, (tuple, list)) else preds
+
         # print("preds:", preds.shape, preds.min().item(), preds.max().item(), preds.dtype)
         # print("masks:", masks.shape, masks.min().item(), masks.max().item(), masks.dtype)
 
@@ -90,8 +92,11 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
 
 
         # train_iou = 0
-        train_iou = iou_on_batch(masks,preds)
-        train_dice = criterion._show_dice(preds, masks.float())
+        # train_iou = iou_on_batch(masks,preds)
+        train_iou = iou_on_batch(masks,final_preds)
+
+        # train_dice = criterion._show_dice(preds, masks.float())
+        train_dice = criterion._show_dice(final_preds, masks.float())
 
         batch_time = time.time() - end
         # train_acc = acc_on_batch(masks,preds)
@@ -99,7 +104,8 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
             vis_path = config.visualize_path+str(epoch)+'/'
             if not os.path.isdir(vis_path):
                 os.makedirs(vis_path)
-            save_on_batch(images,masks,preds,names,vis_path)
+            # save_on_batch(images,masks,preds,names,vis_path)
+            save_on_batch(images,masks,final_preds,names,vis_path)
         dices.append(train_dice)
 
         time_sum += len(images) * batch_time
