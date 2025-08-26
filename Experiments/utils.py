@@ -107,6 +107,47 @@ class WeightedDiceBCE(nn.Module):
 
         return dice_BCE_loss
 
+class DSAdapterLoss(nn.Module):
+    """
+    Wraps an existing 2-arg loss (pred, target) to support deep supervision tuples:
+      ( (gt4, gt3, gt2, gt1), pred )
+    Weighted sum: 0.5*gt1 + 0.4*gt2 + 0.3*gt3 + 0.2*gt4 + 1.0*pred  (example)
+    """
+    def __init__(self, base_loss, ds_weights=(0.2, 0.3, 0.4, 0.5), main_weight=1.0):
+        super().__init__()
+        self.base = base_loss
+        self.ds_w = ds_weights
+        self.main_w = main_weight
+
+    def forward(self, preds, target):
+        # If the model returned only the final pred, behave normally.
+        if not isinstance(preds, (tuple, list)):
+            return self.base(preds, target)
+
+        ds_tuple, final_pred = preds  # ((gt4,gt3,gt2,gt1), pred)
+        gt4, gt3, gt2, gt1 = ds_tuple
+        loss = 0.0
+        # upsample target once to full res; downsample for other scales as needed if shapes differ
+        # (Assuming your model already upsampled gt*_up to HxW; if not, adapt here.)
+        H, W = target.shape[-2:]
+        # ensure DS preds are HxW; if not, upsample here:
+        ds_list = [gt4, gt3, gt2, gt1]
+        for i in range(4):
+            if ds_list[i].shape[-2:] != (H, W):
+                ds_list[i] = F.interpolate(ds_list[i], size=(H, W), mode='bilinear', align_corners=True)
+
+        for w, p in zip(self.ds_w, ds_list):
+            loss = loss + w * self.base(p, target)
+        loss = loss + self.main_w * self.base(final_pred, target)
+        return loss
+
+    # optional: keep your dice monitor working
+    def _show_dice(self, inputs, targets):
+        if isinstance(inputs, (tuple, list)):
+            _, final_pred = inputs
+            return self.base._show_dice(final_pred, targets)
+        return self.base._show_dice(inputs, targets)
+
 def auc_on_batch(masks, pred):
     '''Computes the mean Area Under ROC Curve over a batch during training'''
     aucs = []

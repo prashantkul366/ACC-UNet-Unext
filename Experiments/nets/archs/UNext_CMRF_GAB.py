@@ -21,11 +21,11 @@ from abc import ABCMeta, abstractmethod
 # from mmcv.cnn import ConvModule
 import pdb
 
-# from TinyU_Net import CMRF
-from nets.archs.TinyU_Net import CMRF
+from TinyU_Net import CMRF
+# from nets.archs.TinyU_Net import CMRF
 
-# from ege_unet import group_aggregation_bridge
-from nets.archs.ege_unet import group_aggregation_bridge
+from ege_unet import group_aggregation_bridge
+# from nets.archs.ege_unet import group_aggregation_bridge
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
@@ -712,7 +712,8 @@ if __name__ == '__main__':
     with torch.no_grad():
         output = model(dummy_input)
 
-    print(f"✅ Forward pass successful! Output shape: {output.shape}")
+    # print(f"✅ Forward pass successful! Output shape: {output.shape}")
+    print(f"✅ Forward pass successful! Output shape: ")
 
 
 
