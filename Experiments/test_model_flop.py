@@ -44,6 +44,7 @@ from nets.archs.UNext_CMRF_enc_dec_MLFC import UNext_CMRF_enc_dec_MLFC
 from nets.archs.UNext_CMRF_enc_CSSE import UNext_CMRF_enc_CSSE
 from nets.archs.UNext_CMRF_PP import UNext_CMRF_PP_UNetPP
 
+from nets.archs.UNext_CMRF_GAB import UNext_CMRF_GAB
 
 from nets.TransUNet import TransUNet
 ######################################################
@@ -291,7 +292,10 @@ if __name__ == '__main__':
         # optimizer = torch.optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()),
                                     # lr=lr, weight_decay=0.01)
 
-    
+    elif model_type == 'UNext_CMRF_GAB':
+        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_CMRF_GAB(n_channels=config.n_channels, n_classes=config.n_labels)
+
 
 
     elif model_type.split('_')[0] == 'MultiResUnet1':          
