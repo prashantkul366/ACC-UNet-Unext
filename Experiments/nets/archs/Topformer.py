@@ -486,7 +486,7 @@ SIM_BLOCK = {
 }
 
 
-@BACKBONES.register_module()
+# @BACKBONES.register_module()
 class Topformer(BaseModule):
     def __init__(self, cfgs,
                  channels,
