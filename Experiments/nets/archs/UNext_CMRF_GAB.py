@@ -210,7 +210,6 @@ class OverlapPatchEmbed(nn.Module):
 class UNext_CMRF_GAB(nn.Module):
 
     ## Conv 3 + MLP 2 + shifted MLP
-    
     def __init__(self, n_channels=3, n_classes=1,  deep_supervision=False,img_size=224, patch_size=16, in_chans=3,  embed_dims=[ 128, 160, 256],
                  num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
                  attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm,

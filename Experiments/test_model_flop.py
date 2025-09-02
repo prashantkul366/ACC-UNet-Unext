@@ -93,19 +93,73 @@ def show_image_with_dice(predict_save, labs, save_path):
 
 
     return dice_pred, iou_pred
-    
+
+
+def get_final_prob(model_out, n_classes=1):
+    """
+    Return ONLY the final prediction as probabilities [B,C,H,W].
+    Works whether the model returns a tensor or any nested tuple/list.
+    """
+    # unwrap nested structures and take the LAST tensor as the final head
+    def _collect(x):
+        if torch.is_tensor(x):
+            return [x]
+        if isinstance(x, (list, tuple)):
+            out = []
+            for it in x:
+                out += _collect(it)
+            return out
+        return []
+
+    tensors = _collect(model_out)
+    if not tensors:
+        raise TypeError(f"No tensors in model_out (type={type(model_out)})")
+    final = tensors[-1]                    # <- final head logits/probs
+
+    # ensure [B,C,H,W]
+    if final.ndim == 3:                    # [B,H,W] -> [B,1,H,W]
+        final = final.unsqueeze(1)
+
+    # probabilities
+    if n_classes == 1:
+        final = torch.sigmoid(final)       # safe even if already sigmoided
+    else:
+        final = F.softmax(final, dim=1)
+    return final
+
 
 def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pred, dice_ens):
     model.eval()
 
     start_time = time.time()
     output = model(input_img.cuda())
+
+        # --- handle deep supervision: keep FINAL head only ---
+    if isinstance(output, (tuple, list)):
+        # ((aux... ), out)  -> take out
+        # (aux1, aux2, ..., out) -> take last
+        output = output[1] if (len(output) == 2 and isinstance(output[0], (tuple, list))) else output[-1]
+
+    # ensure [B,C,H,W]
+    if output.ndim == 3:
+        output = output.unsqueeze(1)
+
+    # convert to probabilities
+    output = torch.sigmoid(output) if output.shape[1] == 1 else F.softmax(output, dim=1)
+
     end_time = time.time()
     gpu_time_meter.update(end_time - start_time, input_img.size(0))
 
-    pred_class = torch.where(output>0.5,torch.ones_like(output),torch.zeros_like(output))
-    predict_save = pred_class[0].cpu().data.numpy()
-    predict_save = np.reshape(predict_save, (config.img_size, config.img_size))
+    pred_class = (output > 0.5).float()
+    predict_save = pred_class[0, 0].cpu().numpy()   # squeeze channel; already HxW
+    # (Delete the reshape line below; no longer needed)
+
+
+    # pred_class = torch.where(output>0.5,torch.ones_like(output),torch.zeros_like(output))
+    # predict_save = pred_class[0].cpu().data.numpy()
+
+    # predict_save = np.reshape(predict_save, (config.img_size, config.img_size))
+    
     dice_pred_tmp, iou_tmp = show_image_with_dice(predict_save, labs, save_path=vis_save_path+'_predict'+model_type+'.jpg')
     input_img.to('cpu')
 
@@ -363,7 +417,8 @@ if __name__ == '__main__':
         for i, (sampled_batch, names) in enumerate(test_loader, 1):
             test_data, test_label = sampled_batch['image'], sampled_batch['label']
             arr=test_data.numpy()
-            arr = arr.astype(np.float32())
+            # arr = arr.astype(np.float32())
+            arr = arr.astype(np.float32)
             lab=test_label.data.numpy()
             # img_lab = np.reshape(lab, (lab.shape[1], lab.shape[2])) * 255
             img_lab = lab.reshape(config.img_size, config.img_size) * 255
