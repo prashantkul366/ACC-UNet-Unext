@@ -3,11 +3,60 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from mmcv.cnn import ConvModule
-from mmcv.cnn import build_norm_layer
-from mmcv.runner import BaseModule
-from mmcv.runner import _load_checkpoint
-from mmseg.utils import get_root_logger
+# from mmcv.cnn import ConvModule
+# from mmcv.cnn import build_norm_layer
+# from mmcv.runner import BaseModule
+# from mmcv.runner import _load_checkpoint
+# from mmseg.utils import get_root_logger
+
+# --- keep your existing torch imports here ---
+import math
+import torch
+from torch import nn
+import torch.nn.functional as F
+
+# ====== ADD THIS shim block; it replaces mmcv/mmseg when missing ======
+try:
+    from mmcv.cnn import ConvModule, build_norm_layer
+except Exception:
+    # Minimal build_norm_layer that returns (name, module) like mmcv
+    def build_norm_layer(norm_cfg, num_features):
+        # norm_cfg is ignored; we only need BN
+        return 'bn', nn.BatchNorm2d(num_features)
+
+    class ConvModule(nn.Sequential):
+        """
+        Minimal subset compatible with your SIM blocks:
+        - Conv2d
+        - optional BN (when norm_cfg is not None)
+        - optional ReLU (when act_cfg is not None)
+        """
+        def __init__(self, in_channels, out_channels, kernel_size=1, stride=1, padding=0,
+                     dilation=1, groups=1, bias=False, norm_cfg=None, act_cfg=None):
+            super().__init__()
+            self.add_module('conv', nn.Conv2d(in_channels, out_channels, kernel_size, stride,
+                                              padding, dilation, groups, bias=bias))
+            if norm_cfg is not None:
+                self.add_module('bn', nn.BatchNorm2d(out_channels))
+            if act_cfg is not None:
+                # mmcv defaults to ReLU for act_cfg provided; good enough here
+                self.add_module('act', nn.ReLU(inplace=True))
+
+try:
+    from mmcv.runner import BaseModule, _load_checkpoint
+except Exception:
+    # Fallback so class definitions parse; you’re not using checkpointing here.
+    class BaseModule(nn.Module):
+        pass
+    def _load_checkpoint(*args, **kwargs):
+        raise NotImplementedError("Checkpoint load needs mmcv.")
+
+try:
+    from mmseg.utils import get_root_logger
+except Exception:
+    def get_root_logger(*args, **kwargs):
+        return None
+# ====== END shim block ======
 
 # from ..builder import BACKBONES
 
