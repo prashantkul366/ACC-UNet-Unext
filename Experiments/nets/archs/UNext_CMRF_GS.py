@@ -21,14 +21,12 @@ from abc import ABCMeta, abstractmethod
 # from mmcv.cnn import ConvModule
 import pdb
 
-from TinyU_Net import CMRF
-# from nets.archs.TinyU_Net import CMRF
+# from TinyU_Net import CMRF
+from nets.archs.TinyU_Net import CMRF
 
 
-from Topformer import PyramidPoolAgg, BasicLayer, InjectionMultiSum
-# from nets.archs.Topformer import PyramidPoolAgg, BasicLayer, InjectionMultiSum
-
-
+from Topformer import InjectionMultiSumCBR  # SIM module
+from nets.archs.Topformer import InjectionMultiSumCBR
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
@@ -251,29 +249,23 @@ class UNext_CMRF_GS(nn.Module):
             drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[1], norm_layer=norm_layer,
             sr_ratio=sr_ratios[0])])
         
-        # ---------- Global semantics (pool+concat) + transformer over tokens ----------
-        self.ppa = PyramidPoolAgg(stride=2)  # small tokens (~2x2) from each map, then concatenate along channels
+        # ---- Global semantics (pool all encoders -> concat -> project) ----
+        self.gs_size = img_size // 32                   # 224 -> 7
+        self.gs_pool = nn.AdaptiveAvgPool2d((self.gs_size, self.gs_size))
 
-        # 2) Lightweight transformer on concatenated tokens
-        #    embedding_dim = 32 + 128 + 160 = 320
-        self.trans = BasicLayer(
-            block_num=2,                  # small depth; tweak if you like
-            embedding_dim=320,
-            key_dim=16,
-            num_heads=8,
-            mlp_ratio=2,
-            attn_ratio=2, 
-            drop=0.0, attn_drop=0.0,
-            drop_path=[0.0, 0.0],         # keep simple
-            norm_cfg=dict(type='BN2d', requires_grad=True),
-            act_layer=nn.ReLU,
-        )
+        # t1:16, t2:32, t3:128  => concat 176ch -> project to 256 (bottleneck dim)
+        # self.g_in_proj = nn.Conv2d(16 + 32 + 128, 256, kernel_size=1, bias=False)
+        self.g_in_proj = nn.Conv2d(16 + 32 + 128 + 160, 256, kernel_size=1, bias=False)
+        self.g_in_bn   = nn.BatchNorm2d(256)
 
-        # ---------- Semantic Injection Modules (SIM) at skips ----------
-        # SIM keeps channels; it enriches local maps with the global semantics.
-        self.sim_t4 = InjectionMultiSum(inp=160, oup=160, norm_cfg=dict(type='BN', requires_grad=True))
-        self.sim_t3 = InjectionMultiSum(inp=128, oup=128, norm_cfg=dict(type='BN', requires_grad=True))
-        self.sim_t2 = InjectionMultiSum(inp=32,  oup=32,  norm_cfg=dict(type='BN', requires_grad=True))
+        # After bottleneck, split into per-scale chunks (160,128,32,16) for SIMs
+        self.g_split_proj = nn.Conv2d(256, 160 + 128 + 32 + 16, kernel_size=1, bias=True)
+
+        # ---- Semantic Injection Modules (TopFormer SIMs) ----
+        self.sim4 = InjectionMultiSumCBR(inp=160, oup=160)  # inject at the t4 skip
+        self.sim3 = InjectionMultiSumCBR(inp=128, oup=128)  # inject at the t3 skip
+        self.sim2 = InjectionMultiSumCBR(inp=32,  oup=32)   # inject at the t2 skip
+        self.sim1 = InjectionMultiSumCBR(inp=16,  oup=16)   # inject at the t1 skip
 
 
         self.dblock1 = nn.ModuleList([shiftedBlock(
@@ -309,52 +301,54 @@ class UNext_CMRF_GS(nn.Module):
     def forward(self, x):
         
         B = x.shape[0]
-        ### Encoder
-        ### Conv Stage
+        # --- encoders ---
+        out = F.relu(F.max_pool2d(self.encoder1(x), 2, 2));  t1 = out          # (B,16,112,112)
+        out = F.relu(F.max_pool2d(self.encoder2(out), 2, 2)); t2 = out          # (B,32,56,56)
+        out = F.relu(F.max_pool2d(self.encoder3(out), 2, 2)); t3 = out          # (B,128,28,28)
 
-        ### Stage 1
-        # out = F.relu(F.max_pool2d(self.ebn1(self.encoder1(x)),2,2))
-        # t1 = out
-        # ### Stage 2
-        # out = F.relu(F.max_pool2d(self.ebn2(self.encoder2(out)),2,2))
-        # t2 = out
-        # ### Stage 3
-        # out = F.relu(F.max_pool2d(self.ebn3(self.encoder3(out)),2,2))
-        # t3 = out
-
-        out = F.relu(F.max_pool2d(self.encoder1(x), 2, 2))
-        t1 = out
-        out = F.relu(F.max_pool2d(self.encoder2(out), 2, 2))
-        t2 = out
-        out = F.relu(F.max_pool2d(self.encoder3(out), 2, 2))
-        t3 = out
-
-        ### Tokenized MLP Stage
-        ### Stage 4
-
-        out,H,W = self.patch_embed3(out)
-        for i, blk in enumerate(self.block1):
+        # --- stage 4 (tokenized MLP) to get t4 ---
+        out, H, W = self.patch_embed3(out)
+        for blk in self.block1:
             out = blk(out, H, W)
         out = self.norm3(out)
-        out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
-        t4 = out
+        t4 = out.reshape(out.shape[0], H, W, -1).permute(0,3,1,2).contiguous()  # (B,160,14,14)
 
-        ### Bottleneck
+        # ===== MAIN BOTTLENECK (do NOT use block2 here) =====
+        out_main_tokens, H4, W4 = self.patch_embed4(t4)          # tokens for main path
+        out_main = self.norm4(out_main_tokens)                   # (B,49,256)
+        out_main = out_main.reshape(B, H4, W4, -1).permute(0,3,1,2).contiguous()  # (B,256,7,7)
 
-        out ,H,W= self.patch_embed4(out)
-        for i, blk in enumerate(self.block2):
-            out = blk(out, H, W)
-        out = self.norm4(out)
-        out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
+        # ===== GLOBAL SEMANTICS: pool+concat t1,t2,t3,t4 =====
+        g_cat = torch.cat([
+            self.gs_pool(t1),    # (B,16,7,7)
+            self.gs_pool(t2),    # (B,32,7,7)
+            self.gs_pool(t3),    # (B,128,7,7)
+            self.gs_pool(t4),    # (B,160,7,7)
+        ], dim=1)                # (B,336,7,7)
+
+        g = self.g_in_bn(self.g_in_proj(g_cat))                   # (B,256,7,7)
+
+        # ---- pass concatenated global semantic through block2 ONLY ----
+        g_tokens = g.flatten(2).transpose(1, 2)                   # (B,49,256)
+        for blk in self.block2:
+            g_tokens = blk(g_tokens, self.gs_size, self.gs_size)
+        g_tokens = self.norm4(g_tokens)
+        g = g_tokens.reshape(B, self.gs_size, self.gs_size, 256).permute(0,3,1,2).contiguous()  # (B,256,7,7)
+
+        # split per scale to drive SIMs for t4,t3,t2,t1
+        g = self.g_split_proj(g)                                  # (B,336,7,7)
+        g160, g128, g32, g16 = torch.split(g, [160, 128, 32, 16], dim=1)
 
         ### Stage 4
 
         out = F.relu(F.interpolate(self.dbn1(self.decoder1(out)),scale_factor=(2,2),mode ='bilinear'))
         if t4.shape[2:] != out.shape[2:]:
            t4 = F.interpolate(t4, size=out.shape[2:], mode='bilinear', align_corners=True)
-           
-        
-        out = torch.add(out,t4)
+
+        t4_aug = self.sim4(t4, F.interpolate(g160, size=out.shape[2:], mode='bilinear', align_corners=False))
+        out = out + t4_aug
+
+        # out = torch.add(out,t4)
         _,_,H,W = out.shape
         out = out.flatten(2).transpose(1,2)
         for i, blk in enumerate(self.dblock1):
@@ -368,8 +362,10 @@ class UNext_CMRF_GS(nn.Module):
         if t3.shape[2:] != out.shape[2:]:
            t3 = F.interpolate(t3, size=out.shape[2:], mode='bilinear', align_corners=True)
 
+        t3_aug = self.sim3(t3, F.interpolate(g128, size=out.shape[2:], mode='bilinear', align_corners=False))
+        out = out + t3_aug
           
-        out = torch.add(out,t3)
+        # out = torch.add(out,t3)
         _,_,H,W = out.shape
         out = out.flatten(2).transpose(1,2)
         
@@ -382,13 +378,19 @@ class UNext_CMRF_GS(nn.Module):
         out = F.relu(F.interpolate(self.dbn3(self.decoder3(out)),scale_factor=(2,2),mode ='bilinear'))
         if t2.shape[2:] != out.shape[2:]:
            t2 = F.interpolate(t2, size=out.shape[2:], mode='bilinear', align_corners=True)
-        out = torch.add(out,t2)
+        
+        t2_aug = self.sim2(t2, F.interpolate(g32, size=out.shape[2:], mode='bilinear', align_corners=False))
+        out = out + t2_aug      
+        # out = torch.add(out,t2)
 
 
         out = F.relu(F.interpolate(self.dbn4(self.decoder4(out)),scale_factor=(2,2),mode ='bilinear'))
         if t1.shape[2:] != out.shape[2:]:
           t1 = F.interpolate(t1, size=out.shape[2:], mode='bilinear', align_corners=True)
-        out = torch.add(out,t1)
+        
+        t1_aug = self.sim1(t1, F.interpolate(g16, size=out.shape[2:], mode='bilinear', align_corners=False))
+        out = out + t1_aug
+        # out = torch.add(out,t1)
 
 
         out = F.relu(F.interpolate(self.decoder5(out),scale_factor=(2,2),mode ='bilinear'))
@@ -538,7 +540,6 @@ if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = UNext_CMRF_GS(num_classes=1, input_channels=3)
     model.eval()
-
 
     # Dummy input: B x C x H x W
     dummy_input = torch.randn(1, 3, 224, 224)
