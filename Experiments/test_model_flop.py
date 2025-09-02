@@ -16,9 +16,24 @@ from tqdm import tqdm
 from datetime import datetime
 import os
 # from utils import AverageMeter
-from thop import profile
+# from thop import profile
 import pandas as pd
 import time
+
+# ---- Python 3.12 distutils shim for old THOP ----
+try:
+    import distutils.version  # if this works, do nothing
+except Exception:
+    import sys, types
+    import packaging.version as pv
+    dv = types.ModuleType("distutils.version")
+    class LooseVersion(pv.Version):  # THOP only compares versions
+        pass
+    sys.modules['distutils'] = types.ModuleType("distutils")
+    sys.modules['distutils.version'] = dv
+    dv.LooseVersion = LooseVersion
+# -----------------------------------------------
+from thop import profile
 
 
 # from nets.ACC_UNet import ACC_UNet
