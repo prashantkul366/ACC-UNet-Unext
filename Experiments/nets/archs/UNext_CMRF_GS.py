@@ -21,11 +21,14 @@ from abc import ABCMeta, abstractmethod
 # from mmcv.cnn import ConvModule
 import pdb
 
-# from TinyU_Net import CMRF
-from nets.archs.TinyU_Net import CMRF
+from TinyU_Net import CMRF
+# from nets.archs.TinyU_Net import CMRF
 
-# from ege_unet import group_aggregation_bridge
-from nets.archs.ege_unet import group_aggregation_bridge
+
+from Topformer import PyramidPoolAgg, BasicLayer, InjectionMultiSum
+# from nets.archs.Topformer import PyramidPoolAgg, BasicLayer, InjectionMultiSum
+
+
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
@@ -207,20 +210,17 @@ class OverlapPatchEmbed(nn.Module):
 
         return x, H, W
 
-class UNext_CMRF_GAB(nn.Module):
+class UNext_CMRF_GS(nn.Module):
 
     ## Conv 3 + MLP 2 + shifted MLP
     
     def __init__(self, n_channels=3, n_classes=1,  deep_supervision=False,img_size=224, patch_size=16, in_chans=3,  embed_dims=[ 128, 160, 256],
                  num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
                  attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm,
-                 depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1],use_gab=True, gt_ds=True, **kwargs):
+                 depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1], **kwargs):
         super().__init__()
         
-        self.use_gab = use_gab
-        self.gt_ds   = gt_ds
-        print("UNext CMRF Encoders + GAB Initiated")
-        print("GT_DS:", self.gt_ds)
+        print("UNext CMRF Encoders Initiated")
         # self.encoder1 = nn.Conv2d(n_channels, 16, 3, stride=1, padding=1)  
         # self.encoder2 = nn.Conv2d(16, 32, 3, stride=1, padding=1)  
         # self.encoder3 = nn.Conv2d(32, 128, 3, stride=1, padding=1)
@@ -251,19 +251,30 @@ class UNext_CMRF_GAB(nn.Module):
             drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[1], norm_layer=norm_layer,
             sr_ratio=sr_ratios[0])])
         
-        # === GAB bridges (dims must be divisible by 4 on xl side) ===
-        if self.use_gab:
-            self.GAB4 = group_aggregation_bridge(dim_xh=256, dim_xl=160)  # bottleneck -> t4
-            self.GAB3 = group_aggregation_bridge(dim_xh=160, dim_xl=128)  # fused l4 -> t3
-            self.GAB2 = group_aggregation_bridge(dim_xh=128, dim_xl=32)   # fused l3 -> t2
-            self.GAB1 = group_aggregation_bridge(dim_xh=32,  dim_xl=16)   # fused l2 -> t1
+        # ---------- Global semantics (pool+concat) + transformer over tokens ----------
+        self.ppa = PyramidPoolAgg(stride=2)  # small tokens (~2x2) from each map, then concatenate along channels
 
-        # === Deep supervision mask heads (1 channel each) ===
-        if self.use_gab and self.gt_ds:
-            self.gt_conv4 = nn.Conv2d(160, 1, 1)  # mask for level-4 GAB (before adding t4)
-            self.gt_conv3 = nn.Conv2d(128, 1, 1)  # for level-3
-            self.gt_conv2 = nn.Conv2d(32,  1, 1)  # for level-2
-            self.gt_conv1 = nn.Conv2d(16,  1, 1)  # for level-1
+        # 2) Lightweight transformer on concatenated tokens
+        #    embedding_dim = 32 + 128 + 160 = 320
+        self.trans = BasicLayer(
+            block_num=2,                  # small depth; tweak if you like
+            embedding_dim=320,
+            key_dim=16,
+            num_heads=8,
+            mlp_ratio=2,
+            attn_ratio=2, 
+            drop=0.0, attn_drop=0.0,
+            drop_path=[0.0, 0.0],         # keep simple
+            norm_cfg=dict(type='BN2d', requires_grad=True),
+            act_layer=nn.ReLU,
+        )
+
+        # ---------- Semantic Injection Modules (SIM) at skips ----------
+        # SIM keeps channels; it enriches local maps with the global semantics.
+        self.sim_t4 = InjectionMultiSum(inp=160, oup=160, norm_cfg=dict(type='BN', requires_grad=True))
+        self.sim_t3 = InjectionMultiSum(inp=128, oup=128, norm_cfg=dict(type='BN', requires_grad=True))
+        self.sim_t2 = InjectionMultiSum(inp=32,  oup=32,  norm_cfg=dict(type='BN', requires_grad=True))
+
 
         self.dblock1 = nn.ModuleList([shiftedBlock(
             dim=embed_dims[1], num_heads=num_heads[0], mlp_ratio=1, qkv_bias=qkv_bias, qk_scale=qk_scale,
@@ -295,277 +306,99 @@ class UNext_CMRF_GAB(nn.Module):
 
         self.soft = nn.Softmax(dim =1)
 
-    # def forward(self, x):
+    def forward(self, x):
         
-    #     B = x.shape[0]
-    #     ### Encoder
-    #     ### Conv Stage
+        B = x.shape[0]
+        ### Encoder
+        ### Conv Stage
 
-    #     ### Stage 1
-    #     # out = F.relu(F.max_pool2d(self.ebn1(self.encoder1(x)),2,2))
-    #     # t1 = out
-    #     # ### Stage 2
-    #     # out = F.relu(F.max_pool2d(self.ebn2(self.encoder2(out)),2,2))
-    #     # t2 = out
-    #     # ### Stage 3
-    #     # out = F.relu(F.max_pool2d(self.ebn3(self.encoder3(out)),2,2))
-    #     # t3 = out
+        ### Stage 1
+        # out = F.relu(F.max_pool2d(self.ebn1(self.encoder1(x)),2,2))
+        # t1 = out
+        # ### Stage 2
+        # out = F.relu(F.max_pool2d(self.ebn2(self.encoder2(out)),2,2))
+        # t2 = out
+        # ### Stage 3
+        # out = F.relu(F.max_pool2d(self.ebn3(self.encoder3(out)),2,2))
+        # t3 = out
 
-    #     out = F.relu(F.max_pool2d(self.encoder1(x), 2, 2))
-    #     t1 = out
-    #     out = F.relu(F.max_pool2d(self.encoder2(out), 2, 2))
-    #     t2 = out
-    #     out = F.relu(F.max_pool2d(self.encoder3(out), 2, 2))
-    #     t3 = out
+        out = F.relu(F.max_pool2d(self.encoder1(x), 2, 2))
+        t1 = out
+        out = F.relu(F.max_pool2d(self.encoder2(out), 2, 2))
+        t2 = out
+        out = F.relu(F.max_pool2d(self.encoder3(out), 2, 2))
+        t3 = out
 
-    #     ### Tokenized MLP Stage
-    #     ### Stage 4
+        ### Tokenized MLP Stage
+        ### Stage 4
 
-    #     out,H,W = self.patch_embed3(out)
-    #     for i, blk in enumerate(self.block1):
-    #         out = blk(out, H, W)
-    #     out = self.norm3(out)
-    #     out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
-    #     t4 = out
+        out,H,W = self.patch_embed3(out)
+        for i, blk in enumerate(self.block1):
+            out = blk(out, H, W)
+        out = self.norm3(out)
+        out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
+        t4 = out
 
-    #     ### Bottleneck
+        ### Bottleneck
 
-    #     out ,H,W= self.patch_embed4(out)
-    #     for i, blk in enumerate(self.block2):
-    #         out = blk(out, H, W)
-    #     out = self.norm4(out)
-    #     out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
+        out ,H,W= self.patch_embed4(out)
+        for i, blk in enumerate(self.block2):
+            out = blk(out, H, W)
+        out = self.norm4(out)
+        out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
 
-    #     ### Stage 4
+        ### Stage 4
 
-    #     out = F.relu(F.interpolate(self.dbn1(self.decoder1(out)),scale_factor=(2,2),mode ='bilinear'))
-    #     if t4.shape[2:] != out.shape[2:]:
-    #        t4 = F.interpolate(t4, size=out.shape[2:], mode='bilinear', align_corners=True)
-
+        out = F.relu(F.interpolate(self.dbn1(self.decoder1(out)),scale_factor=(2,2),mode ='bilinear'))
+        if t4.shape[2:] != out.shape[2:]:
+           t4 = F.interpolate(t4, size=out.shape[2:], mode='bilinear', align_corners=True)
+           
         
-    #     out = torch.add(out,t4)
-    #     _,_,H,W = out.shape
-    #     out = out.flatten(2).transpose(1,2)
-    #     for i, blk in enumerate(self.dblock1):
-    #         out = blk(out, H, W)
+        out = torch.add(out,t4)
+        _,_,H,W = out.shape
+        out = out.flatten(2).transpose(1,2)
+        for i, blk in enumerate(self.dblock1):
+            out = blk(out, H, W)
 
-    #     ### Stage 3
+        ### Stage 3
         
-    #     out = self.dnorm3(out)
-    #     out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
-    #     out = F.relu(F.interpolate(self.dbn2(self.decoder2(out)),scale_factor=(2,2),mode ='bilinear'))
-    #     if t3.shape[2:] != out.shape[2:]:
-    #        t3 = F.interpolate(t3, size=out.shape[2:], mode='bilinear', align_corners=True)
+        out = self.dnorm3(out)
+        out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
+        out = F.relu(F.interpolate(self.dbn2(self.decoder2(out)),scale_factor=(2,2),mode ='bilinear'))
+        if t3.shape[2:] != out.shape[2:]:
+           t3 = F.interpolate(t3, size=out.shape[2:], mode='bilinear', align_corners=True)
 
           
-    #     out = torch.add(out,t3)
-    #     _,_,H,W = out.shape
-    #     out = out.flatten(2).transpose(1,2)
+        out = torch.add(out,t3)
+        _,_,H,W = out.shape
+        out = out.flatten(2).transpose(1,2)
         
-    #     for i, blk in enumerate(self.dblock2):
-    #         out = blk(out, H, W)
+        for i, blk in enumerate(self.dblock2):
+            out = blk(out, H, W)
 
-    #     out = self.dnorm4(out)
-    #     out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
+        out = self.dnorm4(out)
+        out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
 
-    #     out = F.relu(F.interpolate(self.dbn3(self.decoder3(out)),scale_factor=(2,2),mode ='bilinear'))
-    #     if t2.shape[2:] != out.shape[2:]:
-    #        t2 = F.interpolate(t2, size=out.shape[2:], mode='bilinear', align_corners=True)
-    #     out = torch.add(out,t2)
-
-
-    #     out = F.relu(F.interpolate(self.dbn4(self.decoder4(out)),scale_factor=(2,2),mode ='bilinear'))
-    #     if t1.shape[2:] != out.shape[2:]:
-    #       t1 = F.interpolate(t1, size=out.shape[2:], mode='bilinear', align_corners=True)
-    #     out = torch.add(out,t1)
+        out = F.relu(F.interpolate(self.dbn3(self.decoder3(out)),scale_factor=(2,2),mode ='bilinear'))
+        if t2.shape[2:] != out.shape[2:]:
+           t2 = F.interpolate(t2, size=out.shape[2:], mode='bilinear', align_corners=True)
+        out = torch.add(out,t2)
 
 
-    #     out = F.relu(F.interpolate(self.decoder5(out),scale_factor=(2,2),mode ='bilinear'))
-
-    #     # return self.final(out)
-    #     out = self.final(out)
-    #     if out.shape[1] == 1:
-    #         out = torch.sigmoid(out)  # For binary segmentation
-    #     return out
-
-    # def forward(self, x):
-        
-    #     out = F.gelu(F.max_pool2d(self.ebn1(self.encoder1(x)),2,2))
-    #     t1 = out # b, c0, H/2, W/2
-
-    #     out = F.gelu(F.max_pool2d(self.ebn2(self.encoder2(out)),2,2))
-    #     t2 = out # b, c1, H/4, W/4 
-
-    #     out = F.gelu(F.max_pool2d(self.ebn3(self.encoder3(out)),2,2))
-    #     t3 = out # b, c2, H/8, W/8
-        
-    #     # out = F.gelu(F.max_pool2d(self.ebn4(self.encoder4(out)),2,2))
-        
-    #     out,H,W = self.patch_embed3(out)
-    #     for i, blk in enumerate(self.block1):
-    #         out = blk(out, H, W)
-    #     out = self.norm3(out)
-    #     out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
-    #     t4 = out # b, c3, H/16, W/16
-        
-    #     out ,H,W= self.patch_embed4(out)
-    #     for i, blk in enumerate(self.block2):
-    #         out = blk(out, H, W)
-    #     out = self.norm4(out)
-    #     out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
+        out = F.relu(F.interpolate(self.dbn4(self.decoder4(out)),scale_factor=(2,2),mode ='bilinear'))
+        if t1.shape[2:] != out.shape[2:]:
+          t1 = F.interpolate(t1, size=out.shape[2:], mode='bilinear', align_corners=True)
+        out = torch.add(out,t1)
 
 
-    #     out = F.relu(F.interpolate(self.dbn1(self.decoder1(out)),scale_factor=(2,2),mode ='bilinear'))
-    #     if t4.shape[2:] != out.shape[2:]:
-    #        t4 = F.interpolate(t4, size=out.shape[2:], mode='bilinear', align_corners=True)
+        out = F.relu(F.interpolate(self.decoder5(out),scale_factor=(2,2),mode ='bilinear'))
 
-    #     if self.gt_ds: 
-    #         gt_pre4 = self.gt_conv2(out4)
-    #         t4 = self.GAB4(t5, t4, gt_pre4)
-    #         gt_pre4 = F.interpolate(gt_pre4, scale_factor=16, mode ='bilinear', align_corners=True)
-    #     else:t4 = self.GAB4(t5, t4)
-    #     out4 = torch.add(out4, t4) # b, c3, H/16, W/16
-        
-    #     out3 = F.gelu(F.interpolate(self.dbn3(self.decoder3(out4)),scale_factor=(2,2),mode ='bilinear',align_corners=True)) # b, c2, H/8, W/8
-    #     if self.gt_ds: 
-    #         gt_pre3 = self.gt_conv3(out3)
-    #         t3 = self.GAB3(t4, t3, gt_pre3)
-    #         gt_pre3 = F.interpolate(gt_pre3, scale_factor=8, mode ='bilinear', align_corners=True)
-    #     else: t3 = self.GAB3(t4, t3)
-    #     out3 = torch.add(out3, t3) # b, c2, H/8, W/8
-        
-    #     out2 = F.gelu(F.interpolate(self.dbn4(self.decoder4(out3)),scale_factor=(2,2),mode ='bilinear',align_corners=True)) # b, c1, H/4, W/4
-    #     if self.gt_ds: 
-    #         gt_pre2 = self.gt_conv4(out2)
-    #         t2 = self.GAB2(t3, t2, gt_pre2)
-    #         gt_pre2 = F.interpolate(gt_pre2, scale_factor=4, mode ='bilinear', align_corners=True)
-    #     else: t2 = self.GAB2(t3, t2)
-    #     out2 = torch.add(out2, t2) # b, c1, H/4, W/4 
-        
-    #     out1 = F.gelu(F.interpolate(self.dbn5(self.decoder5(out2)),scale_factor=(2,2),mode ='bilinear',align_corners=True)) # b, c0, H/2, W/2
-    #     if self.gt_ds: 
-    #         gt_pre1 = self.gt_conv5(out1)
-    #         t1 = self.GAB1(t2, t1, gt_pre1)
-    #         gt_pre1 = F.interpolate(gt_pre1, scale_factor=2, mode ='bilinear', align_corners=True)
-    #     else: t1 = self.GAB1(t2, t1)
-    #     out1 = torch.add(out1, t1) # b, c0, H/2, W/2
-        
-    #     out0 = F.interpolate(self.final(out1),scale_factor=(2,2),mode ='bilinear',align_corners=True) # b, num_class, H, W
-        
-    #     if self.gt_ds:
-    #         return (torch.sigmoid(gt_pre5), torch.sigmoid(gt_pre4), torch.sigmoid(gt_pre3), torch.sigmoid(gt_pre2), torch.sigmoid(gt_pre1)), torch.sigmoid(out0)
-    #     else:
-    #         return torch.sigmoid(out0)
-
-    def forward(self, x):
-        B = x.shape[0]
-
-        # -------- Encoder: 3× CMRF stages --------
-        out = F.relu(F.max_pool2d(self.encoder1(x), 2, 2)); t1 = out          # (B,16, H/2,  W/2)
-        out = F.relu(F.max_pool2d(self.encoder2(out), 2, 2)); t2 = out        # (B,32, H/4,  W/4)
-        out = F.relu(F.max_pool2d(self.encoder3(out), 2, 2)); t3 = out        # (B,128,H/8,  W/8)
-
-        # -------- Tok-MLP Stage 1 (H/8 -> H/16, 128->160) --------
-        tok, H, W = self.patch_embed3(out)                    # (B, H/16*W/16, 160)
-        for blk in self.block1:
-            tok = blk(tok, H, W)
-        tok = self.norm3(tok)
-        t4 = tok.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()        # (B,160,H/16,W/16)
-
-        # -------- Bottleneck Tok-MLP (H/16 -> H/32, 160->256) --------
-        tok, H, W = self.patch_embed4(t4)                     # (B, H/32*W/32, 256)
-        for blk in self.block2:
-            tok = blk(tok, H, W)
-        tok = self.norm4(tok)
-        bot = tok.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()       # (B,256,H/32,W/32)
-
-        # ================== Decoder with GAB ==================
-
-        # ---- Level 4 decode (to 160, up to H/16), GAB4 with t4 ----
-        out4 = F.relu(F.interpolate(self.dbn1(self.decoder1(bot)), scale_factor=(2, 2),
-                                    mode='bilinear', align_corners=True))     # (B,160,H/16,W/16)
-        if t4.shape[2:] != out4.shape[2:]:
-            t4 = F.interpolate(t4, size=out4.shape[2:], mode='bilinear', align_corners=True)
-
-        if self.use_gab:
-            if self.gt_ds:
-                gt4 = self.gt_conv4(out4)                                     # (B,1,H/16,W/16)
-                t4 = self.GAB4(bot, t4, gt4)
-                gt4_up = F.interpolate(gt4, scale_factor=16, mode='bilinear', align_corners=True)
-            else:
-                t4 = self.GAB4(bot, t4, None)
-        out4 = out4 + t4                                                      # (B,160,H/16,W/16)
-        xh3 = out4
-
-        # ---- Level 3 token block + decode (to 128, up to H/8), GAB3 with t3 ----
-        _, _, H, W = out4.shape
-        tok = out4.flatten(2).transpose(1, 2)                                 # (B, H*W, 160)
-        for blk in self.dblock1:
-            tok = blk(tok, H, W)
-        mid = self.dnorm3(tok).reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()  # (B,160,H/16,W/16)
-
-        out3 = F.relu(F.interpolate(self.dbn2(self.decoder2(mid)), scale_factor=(2, 2),
-                                    mode='bilinear', align_corners=True))     # (B,128,H/8,W/8)
-        if t3.shape[2:] != out3.shape[2:]:
-            t3 = F.interpolate(t3, size=out3.shape[2:], mode='bilinear', align_corners=True)
-
-        if self.use_gab:
-            if self.gt_ds:
-                gt3 = self.gt_conv3(out3)                                     # (B,1,H/8,W/8)
-                t3  = self.GAB3(xh3, t3, gt3)
-                gt3_up = F.interpolate(gt3, scale_factor=8, mode='bilinear', align_corners=True)
-            else:
-                t3  = self.GAB3(xh3, t3, None)
-        out3 = out3 + t3                                                      # (B,128,H/8,W/8)
-        xh2 = out3
-
-        # ---- Level 2 token block + decode (to 32, up to H/4), GAB2 with t2 ----
-        _, _, H, W = out3.shape
-        tok = out3.flatten(2).transpose(1, 2)                                 # (B, H*W, 128)
-        for blk in self.dblock2:
-            tok = blk(tok, H, W)
-        mid = self.dnorm4(tok).reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()  # (B,128,H/8,W/8)
-
-        out2 = F.relu(F.interpolate(self.dbn3(self.decoder3(mid)), scale_factor=(2, 2),
-                                    mode='bilinear', align_corners=True))     # (B,32,H/4,W/4)
-        if t2.shape[2:] != out2.shape[2:]:
-            t2 = F.interpolate(t2, size=out2.shape[2:], mode='bilinear', align_corners=True)
-
-        if self.use_gab:
-            if self.gt_ds:
-                gt2 = self.gt_conv2(out2)                                     # (B,1,H/4,W/4)
-                t2  = self.GAB2(xh2, t2, gt2)
-                gt2_up = F.interpolate(gt2, scale_factor=4, mode='bilinear', align_corners=True)
-            else:
-                t2  = self.GAB2(xh2, t2, None)
-        out2 = out2 + t2                                                      # (B,32,H/4,W/4)
-        xh1 = out2
-
-        # ---- Level 1 decode (to 16, up to H/2), GAB1 with t1 ----
-        out1 = F.relu(F.interpolate(self.dbn4(self.decoder4(out2)), scale_factor=(2, 2),
-                                    mode='bilinear', align_corners=True))     # (B,16,H/2,W/2)
-        if t1.shape[2:] != out1.shape[2:]:
-            t1 = F.interpolate(t1, size=out1.shape[2:], mode='bilinear', align_corners=True)
-
-        if self.use_gab:
-            if self.gt_ds:
-                gt1 = self.gt_conv1(out1)                                     # (B,1,H/2,W/2)
-                t1  = self.GAB1(xh1, t1, gt1)
-                gt1_up = F.interpolate(gt1, scale_factor=2, mode='bilinear', align_corners=True)
-            else:
-                t1  = self.GAB1(xh1, t1, None)
-        out1 = out1 + t1                                                      # (B,16,H/2,W/2)
-
-        # ---- Final up + head ----
-        out0 = F.relu(F.interpolate(self.decoder5(out1), scale_factor=(2, 2),
-                                    mode='bilinear', align_corners=True))     # (B,16,H,W)
-        logits = self.final(out0)
-        out = torch.sigmoid(logits) if logits.shape[1] == 1 else logits
-
-        if self.use_gab and self.gt_ds:
-            return (torch.sigmoid(gt4_up), torch.sigmoid(gt3_up),
-                    torch.sigmoid(gt2_up), torch.sigmoid(gt1_up)), out
+        # return self.final(out)
+        out = self.final(out)
+        if out.shape[1] == 1:
+            out = torch.sigmoid(out)  # For binary segmentation
         return out
+
 
 # class UNext_S(nn.Module):
 
@@ -703,8 +536,9 @@ class UNext_CMRF_GAB(nn.Module):
 if __name__ == '__main__':
     # Sanity check
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = UNext_CMRF_GAB(num_classes=1, input_channels=3)
+    model = UNext_CMRF_GS(num_classes=1, input_channels=3)
     model.eval()
+
 
     # Dummy input: B x C x H x W
     dummy_input = torch.randn(1, 3, 224, 224)
@@ -713,8 +547,7 @@ if __name__ == '__main__':
     with torch.no_grad():
         output = model(dummy_input)
 
-    # print(f"✅ Forward pass successful! Output shape: {output.shape}")
-    print(f"✅ Forward pass successful! Output shape: ")
+    print(f"✅ Forward pass successful! Output shape: {output.shape}")
 
 
 

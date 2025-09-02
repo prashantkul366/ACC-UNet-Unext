@@ -29,8 +29,8 @@ img_size = 256
 print_frequency = 1
 save_frequency = 100
 vis_frequency = 100
-# early_stopping_patience = 100
-early_stopping_patience = 30
+early_stopping_patience = 100
+# early_stopping_patience = 30
 # early_stopping_patience = 400
 
 pretrain = False
