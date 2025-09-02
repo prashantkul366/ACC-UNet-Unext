@@ -232,7 +232,10 @@ class UNext_CMRF_GS(nn.Module):
         self.ebn3 = nn.BatchNorm2d(128)
         
         self.norm3 = norm_layer(embed_dims[1])
-        self.norm4 = norm_layer(embed_dims[2])
+        # self.norm4 = norm_layer(embed_dims[2])
+        self.norm4_main = norm_layer(embed_dims[2])  # for out_main_tokens
+        self.norm4_gs   = norm_layer(embed_dims[2])  # for g_tokens
+
 
         self.dnorm3 = norm_layer(160)
         self.dnorm4 = norm_layer(128)
@@ -315,7 +318,8 @@ class UNext_CMRF_GS(nn.Module):
 
         # ===== MAIN BOTTLENECK (do NOT use block2 here) =====
         out_main_tokens, H4, W4 = self.patch_embed4(t4)          # tokens for main path
-        out_main = self.norm4(out_main_tokens)                   # (B,49,256)
+        # out_main = self.norm4(out_main_tokens)                   # (B,49,256)
+        out_main = self.norm4_main(out_main_tokens)
         out_main = out_main.reshape(B, H4, W4, -1).permute(0,3,1,2).contiguous()  # (B,256,7,7)
 
         # ===== GLOBAL SEMANTICS: pool+concat t1,t2,t3,t4 =====
@@ -332,7 +336,8 @@ class UNext_CMRF_GS(nn.Module):
         g_tokens = g.flatten(2).transpose(1, 2)                   # (B,49,256)
         for blk in self.block2:
             g_tokens = blk(g_tokens, self.gs_size, self.gs_size)
-        g_tokens = self.norm4(g_tokens)
+        # g_tokens = self.norm4(g_tokens)
+        g_tokens = self.norm4_gs(g_tokens)
         g = g_tokens.reshape(B, self.gs_size, self.gs_size, 256).permute(0,3,1,2).contiguous()  # (B,256,7,7)
 
         # split per scale to drive SIMs for t4,t3,t2,t1
@@ -341,7 +346,8 @@ class UNext_CMRF_GS(nn.Module):
 
         ### Stage 4
 
-        out = F.relu(F.interpolate(self.dbn1(self.decoder1(out)),scale_factor=(2,2),mode ='bilinear'))
+        # out = F.relu(F.interpolate(self.dbn1(self.decoder1(out)),scale_factor=(2,2),mode ='bilinear'))
+        out = F.relu(F.interpolate(self.dbn1(self.decoder1(out_main)), scale_factor=(2, 2), mode='bilinear'))
         if t4.shape[2:] != out.shape[2:]:
            t4 = F.interpolate(t4, size=out.shape[2:], mode='bilinear', align_corners=True)
 
