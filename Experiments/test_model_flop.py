@@ -45,6 +45,7 @@ from nets.archs.UNext_CMRF_enc_CSSE import UNext_CMRF_enc_CSSE
 from nets.archs.UNext_CMRF_PP import UNext_CMRF_PP_UNetPP
 
 from nets.archs.UNext_CMRF_GAB import UNext_CMRF_GAB
+from nets.archs.UNext_CMRF_GS import UNext_CMRF_GS
 
 from nets.TransUNet import TransUNet
 ######################################################
@@ -296,6 +297,9 @@ if __name__ == '__main__':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GAB(n_channels=config.n_channels, n_classes=config.n_labels)
 
+    elif model_type == 'UNext_CMRF_GS':
+        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_CMRF_GS(n_channels=config.n_channels, n_classes=config.n_labels)
 
 
     elif model_type.split('_')[0] == 'MultiResUnet1':          

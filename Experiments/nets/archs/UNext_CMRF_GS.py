@@ -21,12 +21,12 @@ from abc import ABCMeta, abstractmethod
 # from mmcv.cnn import ConvModule
 import pdb
 
-# from TinyU_Net import CMRF
-from nets.archs.TinyU_Net import CMRF
+from TinyU_Net import CMRF
+# from nets.archs.TinyU_Net import CMRF
 
 
 from Topformer import InjectionMultiSumCBR  # SIM module
-from nets.archs.Topformer import InjectionMultiSumCBR
+# from nets.archs.Topformer import InjectionMultiSumCBR
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:

@@ -67,7 +67,8 @@ batch_size = 256
 # model_name = 'UNext_CMRF_enc_CSSE'
 # model_name = 'UNext_CMRF_PP'
 # model_name = 'TransUNet'  # TransUNet model
-model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
+# model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
+model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
 
 test_session = "session1"         #
 
