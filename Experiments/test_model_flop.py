@@ -57,7 +57,8 @@ from nets.archs.UNext_CMRF_enc_dec import UNext_CMRF_enc_dec
 from nets.archs.UNext_CMRF_enc_MLFC import UNext_CMRF_enc_MLFC
 from nets.archs.UNext_CMRF_enc_dec_MLFC import UNext_CMRF_enc_dec_MLFC
 from nets.archs.UNext_CMRF_enc_CSSE import UNext_CMRF_enc_CSSE
-from nets.archs.UNext_CMRF_PP import UNext_CMRF_PP_UNetPP
+# from nets.archs.UNext_CMRF_PP import UNext_CMRF_PP_UNetPP
+from nets.archs.UNext_CMRF_dense_skip import UNext_CMRF_Dense_Skip
 
 from nets.archs.UNext_CMRF_GAB import UNext_CMRF_GAB
 from nets.archs.UNext_CMRF_GS import UNext_CMRF_GS
@@ -351,9 +352,10 @@ if __name__ == '__main__':
     elif model_type == 'UNext_CMRF_enc_CSSE':
         model = UNext_CMRF_enc_CSSE(n_channels=config.n_channels, n_classes=config.n_labels)
 
-    elif model_type == 'UNext_CMRF_PP':
+    elif model_type == 'UNext_CMRF_dense_skip':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
-        model = UNext_CMRF_PP_UNetPP(n_channels=config.n_channels, n_classes=config.n_labels)
+        # model = UNext_CMRF_PP_UNetPP(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_CMRF_Dense_Skip(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'TransUNet':
         model = TransUNet(n_channels=config.n_channels, n_classes=config.n_labels)
