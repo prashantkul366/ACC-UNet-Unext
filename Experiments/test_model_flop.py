@@ -134,7 +134,7 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
     start_time = time.time()
     output = model(input_img.cuda())
 
-        # --- handle deep supervision: keep FINAL head only ---
+    # --- handle deep supervision: keep FINAL head only ---
     if isinstance(output, (tuple, list)):
         # ((aux... ), out)  -> take out
         # (aux1, aux2, ..., out) -> take last
