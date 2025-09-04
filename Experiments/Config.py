@@ -29,7 +29,7 @@ img_size = 256
 print_frequency = 1
 save_frequency = 100
 vis_frequency = 100
-early_stopping_patience = 100
+early_stopping_patience = 30
 # early_stopping_patience = 30
 # early_stopping_patience = 400
 
@@ -49,7 +49,7 @@ task_name = 'ISIC18_UNET'
 
 learning_rate = 1e-3
 # learning_rate = 0.0001
-batch_size = 256
+batch_size = 128
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
@@ -57,7 +57,7 @@ batch_size = 256
 # model_name = 'UCTransNet'
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
-# model_name = 'MultiResUnet1_32_1.67'
+model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'UNeXt'
 # model_name = 'UNext_InceptionNext_MLFC'
 # model_name = 'UNext_CMRF'   # CMRF encoder
@@ -69,7 +69,7 @@ batch_size = 256
 # model_name = 'TransUNet'  # TransUNet model
 # model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
-model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
+# model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
 
 test_session = "session1"         #
 

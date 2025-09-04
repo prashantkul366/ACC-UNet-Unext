@@ -16,7 +16,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # from nets.ACC_UNet import ACC_UNet
-# from nets.MResUNet1 import MultiResUnet
+from nets.MResUNet1 import MultiResUnet
 # from nets.SwinUnet import SwinUnet
 # from nets.UNet_base import UNet_base
 # from nets.SMESwinUnet import SMESwinUnet
@@ -248,12 +248,12 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     # model = nn.DataParallel(model, device_ids=[0])
 
 
-    # criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
-    criterion = DSAdapterLoss(
-        base_loss=WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5, n_labels=config.n_labels),
-        ds_weights=(0.2, 0.3, 0.4, 0.5),   # match your preferred scheme
-        main_weight=1.0
-    )
+    criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
+    # criterion = DSAdapterLoss(
+    #     base_loss=WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5, n_labels=config.n_labels),
+    #     ds_weights=(0.2, 0.3, 0.4, 0.5),   # match your preferred scheme
+    #     main_weight=1.0
+    # )
 
     # if config.cosineLR is True:
     #     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=1e-4)
@@ -261,10 +261,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     #         lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
 
     if config.cosineLR is True:
-        # lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
+        lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
         # lr_scheduler = CosineAnnealingLR(optimizer, T_max=config['epochs'], eta_min=config['min_lr'])
         # lr_scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=0.00001)
-        lr_scheduler = torch_lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=1e-5)
+        # lr_scheduler = torch_lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=1e-5)
 
 
     else:
@@ -310,6 +310,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
                                  'state_dict': model.state_dict(),
                                  'val_loss': val_loss,
                                  'optimizer': optimizer.state_dict()}, config.model_path)#+f'_{epoch}')
+                
+                model.save(config.model_path+f'/best_model-{model_type}.pth')
         else:
             logger.info('\t Mean dice:{:.4f} does not increase, '
                         'the best is still: {:.4f} in epoch {}'.format(val_dice,max_dice, best_epoch))
