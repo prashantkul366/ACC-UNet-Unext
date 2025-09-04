@@ -20,19 +20,18 @@ import os
 import pandas as pd
 import time
 
-# ---- Python 3.12 distutils shim for old THOP ----
 try:
-    import distutils.version  # if this works, do nothing
+    import distutils.version 
 except Exception:
     import sys, types
     import packaging.version as pv
     dv = types.ModuleType("distutils.version")
-    class LooseVersion(pv.Version):  # THOP only compares versions
+    class LooseVersion(pv.Version): 
         pass
     sys.modules['distutils'] = types.ModuleType("distutils")
     sys.modules['distutils.version'] = dv
     dv.LooseVersion = LooseVersion
-# -----------------------------------------------
+
 from thop import profile
 
 
@@ -136,30 +135,30 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
     output = model(input_img.cuda())
 
     # --- handle deep supervision: keep FINAL head only ---
-    if isinstance(output, (tuple, list)):
-        # ((aux... ), out)  -> take out
-        # (aux1, aux2, ..., out) -> take last
-        output = output[1] if (len(output) == 2 and isinstance(output[0], (tuple, list))) else output[-1]
+    # if isinstance(output, (tuple, list)):
+    #     # ((aux... ), out)  -> take out
+    #     # (aux1, aux2, ..., out) -> take last
+    #     output = output[1] if (len(output) == 2 and isinstance(output[0], (tuple, list))) else output[-1]
 
-    # ensure [B,C,H,W]
-    if output.ndim == 3:
-        output = output.unsqueeze(1)
+    # # ensure [B,C,H,W]
+    # if output.ndim == 3:
+    #     output = output.unsqueeze(1)
 
     # convert to probabilities
-    output = torch.sigmoid(output) if output.shape[1] == 1 else F.softmax(output, dim=1)
+    # output = torch.sigmoid(output) if output.shape[1] == 1 else F.softmax(output, dim=1)
 
     end_time = time.time()
     gpu_time_meter.update(end_time - start_time, input_img.size(0))
 
-    pred_class = (output > 0.5).float()
-    predict_save = pred_class[0, 0].cpu().numpy()   # squeeze channel; already HxW
+    # pred_class = (output > 0.5).float()
+    # predict_save = pred_class[0, 0].cpu().numpy()   # squeeze channel; already HxW
     # (Delete the reshape line below; no longer needed)
 
 
-    # pred_class = torch.where(output>0.5,torch.ones_like(output),torch.zeros_like(output))
-    # predict_save = pred_class[0].cpu().data.numpy()
+    pred_class = torch.where(output>0.5,torch.ones_like(output),torch.zeros_like(output))
+    predict_save = pred_class[0].cpu().data.numpy()
 
-    # predict_save = np.reshape(predict_save, (config.img_size, config.img_size))
+    predict_save = np.reshape(predict_save, (config.img_size, config.img_size))
     
     dice_pred_tmp, iou_tmp = show_image_with_dice(predict_save, labs, save_path=vis_save_path+'_predict'+model_type+'.jpg')
     input_img.to('cpu')

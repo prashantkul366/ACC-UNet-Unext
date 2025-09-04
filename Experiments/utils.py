@@ -127,8 +127,7 @@ class DSAdapterLoss(nn.Module):
         ds_tuple, final_pred = preds  # ((gt4,gt3,gt2,gt1), pred)
         gt4, gt3, gt2, gt1 = ds_tuple
         loss = 0.0
-        # upsample target once to full res; downsample for other scales as needed if shapes differ
-        # (Assuming your model already upsampled gt*_up to HxW; if not, adapt here.)
+        
         H, W = target.shape[-2:]
         # ensure DS preds are HxW; if not, upsample here:
         ds_list = [gt4, gt3, gt2, gt1]
@@ -141,7 +140,6 @@ class DSAdapterLoss(nn.Module):
         loss = loss + self.main_w * self.base(final_pred, target)
         return loss
 
-    # optional: keep your dice monitor working
     def _show_dice(self, inputs, targets):
         if isinstance(inputs, (tuple, list)):
             _, final_pred = inputs
