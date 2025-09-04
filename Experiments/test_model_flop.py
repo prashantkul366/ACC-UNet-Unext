@@ -178,7 +178,7 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
         },
         open(vis_save_path+'.p','wb'))
 
-    plt.savefig(vis_save_path+'_predict'+model_type+'.png',dpi=300)
+    # plt.savefig(vis_save_path+'_predict'+model_type+'.png',dpi=300)
 
     if(False):
         
