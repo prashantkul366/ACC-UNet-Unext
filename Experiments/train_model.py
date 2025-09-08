@@ -248,12 +248,12 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     # model = nn.DataParallel(model, device_ids=[0])
 
 
-    criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
-    # criterion = DSAdapterLoss(
-    #     base_loss=WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5, n_labels=config.n_labels),
-    #     ds_weights=(0.2, 0.3, 0.4, 0.5),   # match your preferred scheme
-    #     main_weight=1.0
-    # )
+    # criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
+    criterion = DSAdapterLoss(
+        base_loss=WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5, n_labels=config.n_labels),
+        ds_weights=(0.2, 0.3, 0.4, 0.5),   # match your preferred scheme
+        main_weight=1.0
+    )
 
     # if config.cosineLR is True:
     #     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=1e-4)
