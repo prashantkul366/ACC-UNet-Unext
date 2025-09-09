@@ -80,6 +80,7 @@ class UNetEncoder(nn.Module):
         super(UNetEncoder, self).__init__()
         self.cmrf       = CMRF(in_channels, out_channels)
         self.downsample = nn.MaxPool2d(kernel_size=2, stride=2)
+        # Try Wavelet Here
         
     def forward(self, x):
         x = self.cmrf(x)
