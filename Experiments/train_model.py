@@ -313,7 +313,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
                                  'val_loss': val_loss,
                                  'optimizer': optimizer.state_dict()}, config.model_path)#+f'_{epoch}')
                 
-                model.save(config.model_path+f'/best_model-{model_type}.pth')
+                # model.save(config.model_path+f'/best_model-{model_type}.pth')
         else:
             logger.info('\t Mean dice:{:.4f} does not increase, '
                         'the best is still: {:.4f} in epoch {}'.format(val_dice,max_dice, best_epoch))
