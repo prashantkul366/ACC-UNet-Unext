@@ -63,6 +63,7 @@ from nets.archs.UNext_CMRF_GAB import UNext_CMRF_GAB
 from nets.archs.UNext_CMRF_GS import UNext_CMRF_GS
 
 from nets.TransUNet import TransUNet
+from nets.archs.u_kan import UKAN
 ######################################################
 
 class AverageMeter(object):
@@ -332,6 +333,9 @@ if __name__ == '__main__':
     elif model_type == 'UNeXt':
         model = UNext(n_channels=config.n_channels, n_classes=config.n_labels)
         # lr = 1e-4  
+
+    elif model_type == 'U-KAN':
+        model = UKAN(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_InceptionNext_MLFC':
         model = UNext_InceptionNext_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)

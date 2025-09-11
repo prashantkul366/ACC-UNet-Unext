@@ -57,7 +57,7 @@ batch_size = 32
 # model_name = 'UCTransNet'
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
-model_name = 'MultiResUnet1_32_1.67'
+# model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'UNeXt'
 # model_name = 'UNext_InceptionNext_MLFC'
 # model_name = 'UNext_CMRF'   # CMRF encoder
@@ -70,6 +70,7 @@ model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
+model_name = 'U-KAN'
 
 test_session = "session1"         #
 

@@ -39,6 +39,8 @@ from nets.archs.UNext_CMRF_GAB import UNext_CMRF_GAB
 from nets.archs.UNext_CMRF_GS import UNext_CMRF_GS
 
 from nets.TransUNet import TransUNet
+
+from nets.archs.u_kan import UKAN
 ######################################################
 
 
@@ -169,6 +171,9 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     elif model_type == 'UNext_CMRF':
         model = UNext_CMRF(n_channels=config.n_channels, n_classes=config.n_labels)
         # lr = 1e-4
+
+    elif model_type == 'U-KAN':
+        model = UKAN(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_enc_dec':
         model = UNext_CMRF_enc_dec(n_channels=config.n_channels, n_classes=config.n_labels)
