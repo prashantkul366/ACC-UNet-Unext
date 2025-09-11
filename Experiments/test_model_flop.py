@@ -503,7 +503,7 @@ if __name__ == '__main__':
     fp.write(f"Params (M): {model_params:.2f}\n")
     fp.write(f"GFLOPs: {model_gflops:.2f}\n")
     fp.write(f"Avg GPU Time (s): {gpu_time_meter.avg:.4f}\n")
-
+    
     
     fp.write(f"dice_pred : {dice_pred/test_num}\n")
     fp.write(f"iou_pred : {iou_pred/test_num}\n")
