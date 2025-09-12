@@ -293,7 +293,7 @@ class UKAN(nn.Module):
         super().__init__()
 
         kan_input_dim = embed_dims[0]
-
+        print("U-KAN model Initialization")
         self.encoder1 = ConvLayer(3, kan_input_dim//8)  
         self.encoder2 = ConvLayer(kan_input_dim//8, kan_input_dim//4)  
         self.encoder3 = ConvLayer(kan_input_dim//4, kan_input_dim)
