@@ -311,10 +311,13 @@ class UNext_CMRF_GS_Wavelet(nn.Module):
         
         B = x.shape[0]
         # --- encoders ---
-        out = F.relu(self.pool1(self.encoder1(x), 2, 2));  t1 = out          # (B,16,112,112)
-        out = F.relu(self.pool2(self.encoder2(out), 2, 2)); t2 = out          # (B,32,56,56)
-        out = F.relu(self.pool3(self.encoder3(out), 2, 2)); t3 = out          # (B,128,28,28)
+        # out = F.relu(self.pool1(self.encoder1(x), 2, 2));  t1 = out          # (B,16,112,112)
+        # out = F.relu(self.pool2(self.encoder2(out), 2, 2)); t2 = out          # (B,32,56,56)
+        # out = F.relu(self.pool3(self.encoder3(out), 2, 2)); t3 = out          # (B,128,28,28)
 
+        out = F.relu(self.pool1(self.encoder1(x)));        t1 = out   # (B,16,112,112)
+        out = F.relu(self.pool2(self.encoder2(out)));      t2 = out   # (B,32,56,56)
+        out = F.relu(self.pool3(self.encoder3(out)));      t3 = out   # (B,128,28,28)
 
 
         # --- stage 4 (tokenized MLP) to get t4 ---
