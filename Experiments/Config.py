@@ -67,12 +67,12 @@ batch_size = 32
 # model_name = 'UNext_CMRF_enc_CSSE'
 # model_name = 'UNext_CMRF_PP'
 # model_name = 'TransUNet'  # TransUNet model
-# model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
+model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
-model_name = 'U-KAN'
+# model_name = 'U-KAN'
 
-test_session = "session1"         #
+test_session = "session2"         #
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -109,12 +109,12 @@ test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/te
 # test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/test'
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
-# logger_path        = save_path + session_name + ".log"
-logger_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/Experiments/train_logs/'
+logger_path        = save_path + session_name + ".log"
+# logger_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/Experiments/train_logs/'
 visualize_path     = save_path + 'visualize_val/'
 
 
