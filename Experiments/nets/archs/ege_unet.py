@@ -191,14 +191,22 @@ class EGEUNet(nn.Module):
             self.GAB4 = group_aggregation_bridge(c_list[4], c_list[3])
             self.GAB5 = group_aggregation_bridge(c_list[5], c_list[4])
             print('group_aggregation_bridge was used')
-        if gt_ds:
-            self.gt_conv1 = nn.Sequential(nn.Conv2d(c_list[4], 1, 1))
-            self.gt_conv2 = nn.Sequential(nn.Conv2d(c_list[3], 1, 1))
-            self.gt_conv3 = nn.Sequential(nn.Conv2d(c_list[2], 1, 1))
-            self.gt_conv4 = nn.Sequential(nn.Conv2d(c_list[1], 1, 1))
-            self.gt_conv5 = nn.Sequential(nn.Conv2d(c_list[0], 1, 1))
-            print('gt deep supervision was used')
+        # if gt_ds:
+        #     self.gt_conv1 = nn.Sequential(nn.Conv2d(c_list[4], 1, 1))
+        #     self.gt_conv2 = nn.Sequential(nn.Conv2d(c_list[3], 1, 1))
+        #     self.gt_conv3 = nn.Sequential(nn.Conv2d(c_list[2], 1, 1))
+        #     self.gt_conv4 = nn.Sequential(nn.Conv2d(c_list[1], 1, 1))
+        #     self.gt_conv5 = nn.Sequential(nn.Conv2d(c_list[0], 1, 1))
+        #     print('gt deep supervision was used')
         
+        ########################################################
+        self.gt_conv1 = nn.Sequential(nn.Conv2d(c_list[4], 1, 1))
+        self.gt_conv2 = nn.Sequential(nn.Conv2d(c_list[3], 1, 1))
+        self.gt_conv3 = nn.Sequential(nn.Conv2d(c_list[2], 1, 1))
+        self.gt_conv4 = nn.Sequential(nn.Conv2d(c_list[1], 1, 1))
+        self.gt_conv5 = nn.Sequential(nn.Conv2d(c_list[0], 1, 1))
+        
+        ########################################################
         self.decoder1 = nn.Sequential(
             Grouped_multi_axis_Hadamard_Product_Attention(c_list[5], c_list[4]),
         ) 
