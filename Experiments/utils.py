@@ -107,6 +107,18 @@ class WeightedDiceBCE(nn.Module):
 
         return dice_BCE_loss
 
+class GT_BceDiceLoss(nn.Module):
+    def __init__(self, wb=1, wd=1):
+        super(GT_BceDiceLoss, self).__init__()
+        self.bcedice = WeightedDiceBCE(wb, wd)
+
+    def forward(self, gt_pre, out, target):
+        bcediceloss = self.bcedice(out, target)
+        gt_pre5, gt_pre4, gt_pre3, gt_pre2, gt_pre1 = gt_pre
+        gt_loss = self.bcedice(gt_pre5, target) * 0.1 + self.bcedice(gt_pre4, target) * 0.2 + self.bcedice(gt_pre3, target) * 0.3 + self.bcedice(gt_pre2, target) * 0.4 + self.bcedice(gt_pre1, target) * 0.5
+        return bcediceloss + gt_loss
+
+
 class DSAdapterLoss(nn.Module):
     """
     Wraps an existing 2-arg loss (pred, target) to support deep supervision tuples:
