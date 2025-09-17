@@ -70,6 +70,61 @@ class CMRF(nn.Module):
         y          = self.pwconv2(y)
         return x_residual + y if self.add else y
 
+from nets.archs.odconv import ODConv2d
+
+class ODConvBNAct(nn.Module):
+    def __init__(self, c1, c2, k=3, s=1, p=0, g=1, d=1, use_bn=True, act=nn.GELU(),
+                 reduction=0.0625, kernel_num=1):
+        super().__init__()
+        self.conv = ODConv2d(c1, c2, k, stride=s, padding=p, dilation=d, groups=g,
+                             reduction=reduction, kernel_num=kernel_num)
+        self.bn   = nn.BatchNorm2d(c2) if use_bn else nn.Identity()
+        self.act  = act if isinstance(act, nn.Module) else nn.Identity()
+    def forward(self, x):
+        return self.act(self.bn(self.conv(x)))
+    
+# Lightweight Cascade Multi-Receptive Fields Module
+class CMRF_OD(nn.Module):
+    """CMRF Module with args(ch_in, ch_out, number, shortcut, groups, expansion)."""
+    def __init__(self, c1, c2, N=8, shortcut=True, g=1, e=0.5):
+        super().__init__()
+        
+        self.N         = N
+        self.c         = int(c2 * e / self.N)
+        self.add       = shortcut and c1 == c2
+        
+        odc_kernel_num_pw=1
+        odc_kernel_num_dw=1
+        odc_reduction=0.0625
+        # self.pwconv1   = Conv(c1, c2//self.N, 1, 1)
+        # self.pwconv2   = Conv(c2//2, c2, 1, 1)
+        # self.m         = nn.ModuleList(DWConv(self.c, self.c, k=3, act=False) for _ in range(N-1))
+        self.pwconv1 = ODConvBNAct(c1, c2//self.N, k=1, p=0, g=1,
+                                       kernel_num=odc_kernel_num_pw, reduction=odc_reduction)
+        self.pwconv2 = ODConvBNAct(c2//2, c2,        k=1, p=0, g=1,
+                                       kernel_num=odc_kernel_num_pw, reduction=odc_reduction)
+        # depth-wise 3×3 stack
+        self.m = nn.ModuleList(
+            ODConvBNAct(self.c, self.c, k=3, p=1, g=self.c,
+                        kernel_num=odc_kernel_num_dw, reduction=odc_reduction, act=nn.Identity())
+            for _ in range(N-1)
+        )
+        
+
+    def forward(self, x):
+        """Forward pass through CMRF Module."""
+        x_residual = x
+        x          = self.pwconv1(x)
+
+        x          = [x[:, 0::2, :, :], x[:, 1::2, :, :]]
+        x.extend(m(x[-1]) for m in self.m)
+        x[0]       = x[0] +  x[1] 
+        x.pop(1)
+        
+        y          = torch.cat(x, dim=1) 
+        y          = self.pwconv2(y)
+        return x_residual + y if self.add else y
+
 
 '''
 U-shape/U-like Model

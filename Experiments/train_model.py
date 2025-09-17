@@ -42,6 +42,7 @@ from nets.TransUNet import TransUNet
 
 from nets.archs.u_kan import UKAN
 from nets.archs.UNext_CMRF_GS_wavelet import UNext_CMRF_GS_Wavelet
+from nets.archs.UNext_CMRF_GS_wavelet_OD import UNext_CMRF_GS_Wavelet_OD
 
 from nets.archs.UNext_CMRF_GAB_wavelet import UNext_CMRF_GAB_Wavelet
 
@@ -213,6 +214,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GS_Wavelet(n_channels=config.n_channels, n_classes=config.n_labels)
 
+    elif model_type == 'UNext_CMRF_GS_Wavelet_OD':
+        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_CMRF_GS_Wavelet_OD(n_channels=config.n_channels, n_classes=config.n_labels)
+
     elif model_type == 'TransUNet':
         model = TransUNet(n_channels=config.n_channels, n_classes=config.n_labels)
         # good defaults for ViT-based models:
@@ -234,6 +239,16 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
     model = model.cuda()
     print("Model Loaded!!")
+
+    from thop import profile
+
+    dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
+    macs, params = profile(model, inputs=(dummy_input,), verbose=False)
+    model_params = params / 1e6
+    model_gflops = macs / 1e9
+
+    print(f"Params: {model_params:.2f} M")
+    print(f"GFLOPs: {model_gflops:.2f} G")
 
     checkpoint_path = os.path.join(config.model_path, f'best_model-{model_type}.pth.tar')
     start_epoch = 0
