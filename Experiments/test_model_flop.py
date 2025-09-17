@@ -65,6 +65,8 @@ from nets.archs.UNext_CMRF_GS import UNext_CMRF_GS
 from nets.TransUNet import TransUNet
 from nets.archs.u_kan import UKAN
 from nets.archs.UNext_CMRF_GS_wavelet import UNext_CMRF_GS_Wavelet
+
+from nets.archs.UNext_CMRF_GAB_wavelet import UNext_CMRF_GAB_Wavelet    
 ######################################################
 
 class AverageMeter(object):
@@ -373,6 +375,10 @@ if __name__ == '__main__':
     elif model_type == 'UNext_CMRF_GAB':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GAB(n_channels=config.n_channels, n_classes=config.n_labels)
+
+    elif model_type == 'UNext_CMRF_GAB_wavelet':
+        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_CMRF_GAB_Wavelet(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_GS':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
