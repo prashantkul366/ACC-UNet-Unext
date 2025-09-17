@@ -578,6 +578,8 @@ class UNext_CMRF_GAB_Wavelet(nn.Module):
         #             torch.sigmoid(gt2_up), torch.sigmoid(gt1_up)), out
         # return out
 
+        # sdfsfsfs
+
 # class UNext_S(nn.Module):
 
 #     ## Conv 3 + MLP 2 + shifted MLP w less parameters
