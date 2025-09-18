@@ -135,9 +135,11 @@ def get_final_prob(model_out, n_classes=1):
 
 
 # def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pred, dice_ens):
-def vis_and_save_heatmap(model, input_img, img_RGB, labs,
-                         vis_save_path, dice_pred, dice_ens,
-                         pred_img_path):
+# def vis_and_save_heatmap(model, input_img, img_RGB, labs,
+#                          vis_save_path, dice_pred, dice_ens,
+#                          pred_img_path):
+def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pred, dice_ens,
+                         mask_dir, side_dir):
 
     model.eval()
 
@@ -193,12 +195,40 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs,
 
     # plt.savefig(pred_vis_path+'_predict'+model_type+'.png',dpi=300)
 
-    # base name (e.g., "12" from "path/12.png")
     fname = os.path.splitext(os.path.basename(vis_save_path))[0]
-    
-    # save image in the new folder
-    out_path = os.path.join(pred_img_path, f"{fname}_predict{model_type}.png")
-    plt.savefig(out_path, dpi=300)
+
+    # --- 1) Save predicted mask only ---
+    mask_file = os.path.join(mask_dir, f"{fname}_mask_{model_type}.png")
+    plt.figure(figsize=(5,5))
+    plt.imshow((output >= 0.5) * 1.0, cmap="gray")
+    plt.axis("off")
+    plt.tight_layout()
+    plt.savefig(mask_file, dpi=300, bbox_inches="tight", pad_inches=0)
+    plt.close()
+
+    # --- 2) Save side-by-side figure ---
+    side_file = os.path.join(side_dir, f"{fname}_side_{model_type}.png")
+    plt.figure(figsize=(12,4))
+
+    plt.subplot(1,3,1)
+    plt.imshow(input_img)
+    plt.axis("off")
+    plt.title("Input")
+
+    plt.subplot(1,3,2)
+    plt.imshow(labs, cmap="gray")
+    plt.axis("off")
+    plt.title("Ground Truth")
+
+    plt.subplot(1,3,3)
+    plt.imshow((output >= 0.5) * 1.0, cmap="gray")
+    plt.axis("off")
+    plt.title("Prediction")
+
+    plt.tight_layout()
+    plt.savefig(side_file, dpi=300)
+    plt.close()
+
 
     if(False):
         
@@ -327,6 +357,14 @@ if __name__ == '__main__':
     # NEW: folder only for predicted images
     pred_img_path = os.path.join(save_path, "predicted_images")
     os.makedirs(pred_img_path, exist_ok=True)
+
+    # NEW: folders for predicted outputs
+    pred_img_path = os.path.join(save_path, "predicted_images")
+    mask_dir = os.path.join(pred_img_path, "masks")
+    side_dir = os.path.join(pred_img_path, "side_by_side")
+
+    os.makedirs(mask_dir, exist_ok=True)
+    os.makedirs(side_dir, exist_ok=True)
 
 
     checkpoint = torch.load(model_path, map_location='cuda')
@@ -491,13 +529,23 @@ if __name__ == '__main__':
             #                                         dice_ens=dice_ens
             #                                     )
 
+            # dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
+            #                                     model, input_img, None, lab,
+            #                                     vis_path + str(i),          # pickles still go here
+            #                                     dice_pred=dice_pred,
+            #                                     dice_ens=dice_ens,
+            #                                     pred_img_path=pred_img_path # new folder for .pngs
+            #                                 )
+
             dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
-                                                model, input_img, None, lab,
-                                                vis_path + str(i),          # pickles still go here
-                                                dice_pred=dice_pred,
-                                                dice_ens=dice_ens,
-                                                pred_img_path=pred_img_path # new folder for .pngs
-                                            )
+                                                    model, input_img, None, lab,
+                                                    vis_path + str(i),
+                                                    dice_pred=dice_pred,
+                                                    dice_ens=dice_ens,
+                                                    mask_dir=mask_dir,
+                                                    side_dir=side_dir
+                                                )
+
 
             dice_pred+=dice_pred_t
             iou_pred+=iou_pred_t
