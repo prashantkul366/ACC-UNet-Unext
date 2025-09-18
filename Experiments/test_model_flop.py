@@ -181,7 +181,7 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pre
     output = output[0,0,:,:].cpu().detach().numpy()
 
     ################################################################################
-    labs = np.rot90(labs, k=1)          # try k=1 (90° CCW), or k=3 (270°) if needed
+    labs = np.rot90(labs, k=3)          # try k=1 (90° CCW), or k=3 (270°) if needed
     output = np.rot90(output, k=1)
     predict_save = np.rot90(predict_save, k=1)
     ################################################################################
