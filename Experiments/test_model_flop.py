@@ -181,11 +181,10 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pre
     output = output[0,0,:,:].cpu().detach().numpy()
 
     ################################################################################
-    # apply same rotation to labels and outputs
-    labs = np.rot90(labs, k=1)           # try k=1 (90° CCW)
-    output = np.rot90(output, k=1)
-    predict_save = np.rot90(predict_save, k=1)
-
+    # apply horizontal flip to labels and outputs
+    labs = np.fliplr(labs)
+    output = np.fliplr(output)
+    predict_save = np.fliplr(predict_save)
     ################################################################################
 
     if(True):
