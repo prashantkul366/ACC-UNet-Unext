@@ -573,11 +573,11 @@ class UNext_CMRF_GAB_Wavelet_OD(nn.Module):
         logits = self.final(out0)
         out = torch.sigmoid(logits) if logits.shape[1] == 1 else logits
 
-        # return out 
-        if self.use_gab and self.gt_ds:
-            return (torch.sigmoid(gt4_up), torch.sigmoid(gt3_up),
-                    torch.sigmoid(gt2_up), torch.sigmoid(gt1_up)), out
-        return out
+        return out 
+        # if self.use_gab and self.gt_ds:
+        #     return (torch.sigmoid(gt4_up), torch.sigmoid(gt3_up),
+        #             torch.sigmoid(gt2_up), torch.sigmoid(gt1_up)), out
+        # return out
 
         # sdfsfsfs
 
