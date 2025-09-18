@@ -75,7 +75,7 @@ model_name = 'UNext_CMRF_GS_Wavelet_OD'  # CMRF encoder + Global Semnantic + SIM
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
 # model_name = 'U-KAN'
 
-test_session = "session1"         #
+test_session = "session2"         #
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -112,7 +112,7 @@ test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/te
 # test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/test'
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
