@@ -134,7 +134,11 @@ def get_final_prob(model_out, n_classes=1):
     return final
 
 
-def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pred, dice_ens):
+# def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pred, dice_ens):
+def vis_and_save_heatmap(model, input_img, img_RGB, labs,
+                         vis_save_path, dice_pred, dice_ens,
+                         pred_img_path):
+
     model.eval()
 
     start_time = time.time()
@@ -184,10 +188,17 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
         },
         open(vis_save_path+'.p','wb'))
 
-    pred_vis_path = os.path.join(vis_save_path, 'predicted_masks')
-    os.makedirs(pred_vis_path, exist_ok=True)
+    # pred_vis_path = os.path.join(vis_save_path, 'predicted_masks')
+    # os.makedirs(pred_vis_path, exist_ok=True)
 
-    plt.savefig(pred_vis_path+'_predict'+model_type+'.png',dpi=300)
+    # plt.savefig(pred_vis_path+'_predict'+model_type+'.png',dpi=300)
+
+    # base name (e.g., "12" from "path/12.png")
+    fname = os.path.splitext(os.path.basename(vis_save_path))[0]
+    
+    # save image in the new folder
+    out_path = os.path.join(pred_img_path, f"{fname}_predict{model_type}.png")
+    plt.savefig(out_path, dpi=300)
 
     if(False):
         
@@ -311,6 +322,12 @@ if __name__ == '__main__':
     vis_path = save_path + 'visualize_test/'
     if not os.path.exists(vis_path):
         os.makedirs(vis_path)
+
+
+    # NEW: folder only for predicted images
+    pred_img_path = os.path.join(save_path, "predicted_images")
+    os.makedirs(pred_img_path, exist_ok=True)
+
 
     checkpoint = torch.load(model_path, map_location='cuda')
 
@@ -467,12 +484,20 @@ if __name__ == '__main__':
             # dice_pred_t,iou_pred_t = vis_and_save_heatmap(model, input_img, None, lab,
             #                                               vis_path+str(i)+'.png',
             #                                    dice_pred=dice_pred, dice_ens=dice_ens)
+            # dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
+            #                                         model, input_img, None, lab,
+            #                                         vis_path + str(i) + '.png',
+            #                                         dice_pred=dice_pred,
+            #                                         dice_ens=dice_ens
+            #                                     )
+
             dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
-                                                    model, input_img, None, lab,
-                                                    vis_path + str(i) + '.png',
-                                                    dice_pred=dice_pred,
-                                                    dice_ens=dice_ens
-                                                )
+                                                model, input_img, None, lab,
+                                                vis_path + str(i),          # pickles still go here
+                                                dice_pred=dice_pred,
+                                                dice_ens=dice_ens,
+                                                pred_img_path=pred_img_path # new folder for .pngs
+                                            )
 
             dice_pred+=dice_pred_t
             iou_pred+=iou_pred_t
