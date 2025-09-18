@@ -184,7 +184,10 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
         },
         open(vis_save_path+'.p','wb'))
 
-    plt.savefig(vis_save_path+'_predict'+model_type+'.png',dpi=300)
+    pred_vis_path = os.path.join(vis_save_path, 'predicted_masks')
+    os.makedirs(pred_vis_path, exist_ok=True)
+
+    plt.savefig(pred_vis_path+'_predict'+model_type+'.png',dpi=300)
 
     if(False):
         
