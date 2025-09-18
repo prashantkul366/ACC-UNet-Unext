@@ -211,7 +211,7 @@ class OverlapPatchEmbed(nn.Module):
 
         return x, H, W
 
-class UNext_CMRF_GAB_Wavelet(nn.Module):
+class UNext_CMRF_GAB_Wavelet_OD(nn.Module):
 
     ## Conv 3 + MLP 2 + shifted MLP
     def __init__(self, n_channels=3, n_classes=1,  deep_supervision=False,img_size=224, patch_size=16, in_chans=3,  embed_dims=[ 128, 160, 256],
@@ -222,7 +222,7 @@ class UNext_CMRF_GAB_Wavelet(nn.Module):
         
         self.use_gab = use_gab
         self.gt_ds   = gt_ds
-        print("UNext CMRF Encoders + GAB w Wavelet Pooling Initiated")
+        print("UNext CMRF OD Encoders + GAB w Wavelet Pooling Initiated")
         print("GT_DS:", self.gt_ds)
         # self.encoder1 = nn.Conv2d(n_channels, 16, 3, stride=1, padding=1)  
         # self.encoder2 = nn.Conv2d(16, 32, 3, stride=1, padding=1)  
@@ -573,11 +573,11 @@ class UNext_CMRF_GAB_Wavelet(nn.Module):
         logits = self.final(out0)
         out = torch.sigmoid(logits) if logits.shape[1] == 1 else logits
 
-        return out 
-        # if self.use_gab and self.gt_ds:
-        #     return (torch.sigmoid(gt4_up), torch.sigmoid(gt3_up),
-        #             torch.sigmoid(gt2_up), torch.sigmoid(gt1_up)), out
-        # return out
+        # return out 
+        if self.use_gab and self.gt_ds:
+            return (torch.sigmoid(gt4_up), torch.sigmoid(gt3_up),
+                    torch.sigmoid(gt2_up), torch.sigmoid(gt1_up)), out
+        return out
 
         # sdfsfsfs
 
