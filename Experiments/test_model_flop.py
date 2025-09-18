@@ -181,10 +181,15 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pre
     output = output[0,0,:,:].cpu().detach().numpy()
 
     ################################################################################
-    # apply horizontal flip to labels and outputs
+    # apply horizontal + vertical flip to labels and outputs
     labs = np.fliplr(labs)
+    labs = np.flipud(labs)
+
     output = np.fliplr(output)
+    output = np.flipud(output)
+
     predict_save = np.fliplr(predict_save)
+    predict_save = np.flipud(predict_save)
     ################################################################################
 
     if(True):
