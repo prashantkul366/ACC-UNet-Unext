@@ -236,9 +236,16 @@ class HausdorffDTLoss(nn.Module):
 
         # pred = torch.sigmoid(pred)
 
-        pred_dt = torch.from_numpy(self.distance_field(pred.cpu().numpy())).float()
-        target_dt = torch.from_numpy(self.distance_field(target.cpu().numpy())).float()
+        # pred_dt = torch.from_numpy(self.distance_field(pred.cpu().numpy())).float()
+        # target_dt = torch.from_numpy(self.distance_field(target.cpu().numpy())).float()
 
+        pred_dt = torch.from_numpy(
+                    self.distance_field(pred.detach().cpu().numpy())
+                ).float()
+
+        target_dt = torch.from_numpy(
+                    self.distance_field(target.detach().cpu().numpy())
+                ).float()
         pred_error = (pred - target) ** 2
         distance = pred_dt ** self.alpha + target_dt ** self.alpha
 
