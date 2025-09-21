@@ -46,6 +46,7 @@ from nets.archs.UNext_CMRF_GS_wavelet_OD import UNext_CMRF_GS_Wavelet_OD
 
 from nets.archs.UNext_CMRF_GAB_wavelet import UNext_CMRF_GAB_Wavelet
 from nets.archs.UNext_CMRF_GAB_wavelet_OD import UNext_CMRF_GAB_Wavelet_OD
+from nets.archs.UNext_CMRF_GS_wavelet_hd import UNext_CMRF_GS_Wavelet_hd
 ######################################################
 
 
@@ -55,7 +56,7 @@ import json
 from Train_one_epoch import train_one_epoch
 import Config as config
 from torchvision import transforms
-from utils import CosineAnnealingWarmRestarts, WeightedDiceBCE, DSAdapterLoss
+from utils import CosineAnnealingWarmRestarts, WeightedDiceBCE, DSAdapterLoss, WeightedDiceBCEHausdorff
 
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
@@ -217,6 +218,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     elif model_type == 'UNext_CMRF_GS_Wavelet':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GS_Wavelet(n_channels=config.n_channels, n_classes=config.n_labels)
+    
+    elif model_type == 'UNext_CMRF_GS_Wavelet_hd':
+        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_CMRF_GS_Wavelet_hd(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_GS_Wavelet_OD':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
@@ -285,13 +290,14 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
 
     # criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
+    criterion = WeightedDiceBCEHausdorff(dice_weight=0.4,BCE_weight=0.4,hausdorff_weight=0.2, n_labels=config.n_labels)
 
     # GAB Deep supervision wrapper
-    criterion = DSAdapterLoss(
-        base_loss=WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5, n_labels=config.n_labels),
-        ds_weights=(0.2, 0.3, 0.4, 0.5),   # match your preferred scheme
-        main_weight=1.0
-    )
+    # criterion = DSAdapterLoss(
+    #     base_loss=WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5, n_labels=config.n_labels),
+    #     ds_weights=(0.2, 0.3, 0.4, 0.5),   # match your preferred scheme
+    #     main_weight=1.0
+    # )
 
     # if config.cosineLR is True:
     #     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=1e-4)

@@ -7,6 +7,7 @@ We thankfully acknowledge the contributions of the authors
 import numpy as np
 from sklearn.metrics import roc_auc_score,jaccard_score
 import cv2
+import torch
 from torch import nn
 import torch.nn.functional as F
 import math
@@ -107,6 +108,37 @@ class WeightedDiceBCE(nn.Module):
 
         return dice_BCE_loss
 
+class WeightedDiceBCEHausdorff(nn.Module):
+    def __init__(self, dice_weight=0.4, BCE_weight=0.4, hausdorff_weight=0.2, n_labels=1):
+        super(WeightedDiceBCEHausdorff, self).__init__()
+        self.BCE_loss = WeightedBCE(weights=[0.5, 0.5], n_labels=n_labels)
+        self.dice_loss = WeightedDiceLoss(weights=[0.5, 0.5], n_labels=n_labels)
+        self.hausdorff_loss = HausdorffDTLoss(alpha=2.0)  
+        
+        self.n_labels = n_labels
+        self.BCE_weight = BCE_weight
+        self.dice_weight = dice_weight
+        self.hausdorff_weight = hausdorff_weight
+
+    def _show_dice(self, inputs, targets):
+        inputs = (inputs >= 0.5).float()
+        targets = (targets > 0).float()
+        hard_dice_coeff = 1.0 - self.dice_loss(inputs, targets)
+        return hard_dice_coeff
+
+    def forward(self, inputs, targets):
+        dice = self.dice_loss(inputs, targets)
+        BCE = self.BCE_loss(inputs, targets)
+        hausdorff = self.hausdorff_loss(inputs, targets)
+
+        total_loss = (
+            self.dice_weight * dice
+            + self.BCE_weight * BCE
+            + self.hausdorff_weight * hausdorff
+        )
+
+        return total_loss
+
 class GT_BceDiceLoss(nn.Module):
     def __init__(self, wb=1, wd=1):
         super(GT_BceDiceLoss, self).__init__()
@@ -157,6 +189,72 @@ class DSAdapterLoss(nn.Module):
             _, final_pred = inputs
             return self.base._show_dice(final_pred, targets)
         return self.base._show_dice(inputs, targets)
+
+
+class HausdorffDTLoss(nn.Module):
+    """Binary Hausdorff loss based on distance transform"""
+
+    def __init__(self, alpha=2.0, **kwargs):
+        super(HausdorffDTLoss, self).__init__()
+        self.alpha = alpha
+
+    @torch.no_grad()
+    def distance_field(self, img: np.ndarray) -> np.ndarray:
+        field = np.zeros_like(img)
+
+        for batch in range(len(img)):
+            fg_mask = img[batch] > 0.5
+
+            if fg_mask.any():
+                bg_mask = ~fg_mask
+
+                fg_dist = edt(fg_mask)
+                bg_dist = edt(bg_mask)
+
+                field[batch] = fg_dist + bg_dist
+
+        return field
+
+    def forward(
+        self, pred: torch.Tensor, target: torch.Tensor, debug=False
+    ) -> torch.Tensor:
+        """
+        Uses one binary channel: 1 - fg, 0 - bg
+        pred: (b, 1, x, y, z) or (b, 1, x, y)
+        target: (b, 1, x, y, z) or (b, 1, x, y)
+        """
+        assert pred.dim() == 4 or pred.dim() == 5, "Only 2D and 3D supported"
+        assert (
+            pred.dim() == target.dim()
+        ), "Prediction and target need to be of same dimension"
+
+        # pred = torch.sigmoid(pred)
+
+        pred_dt = torch.from_numpy(self.distance_field(pred.cpu().numpy())).float()
+        target_dt = torch.from_numpy(self.distance_field(target.cpu().numpy())).float()
+
+        pred_error = (pred - target) ** 2
+        distance = pred_dt ** self.alpha + target_dt ** self.alpha
+
+        dt_field = pred_error * distance
+        loss = dt_field.mean()
+
+        if debug:
+            return (
+                loss.cpu().numpy(),
+                (
+                    dt_field.cpu().numpy()[0, 0],
+                    pred_error.cpu().numpy()[0, 0],
+                    distance.cpu().numpy()[0, 0],
+                    pred_dt.cpu().numpy()[0, 0],
+                    target_dt.cpu().numpy()[0, 0],
+                ),
+            )
+
+        else:
+            return loss
+
+
 
 def auc_on_batch(masks, pred):
     '''Computes the mean Area Under ROC Curve over a batch during training'''
