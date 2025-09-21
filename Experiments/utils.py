@@ -127,12 +127,13 @@ class WeightedDiceBCEHausdorff(nn.Module):
         return hard_dice_coeff
 
     def forward(self, inputs, targets):
+        # if targets.dim() == 3:  # (B, H, W)
+        #     targets = targets.unsqueeze(1)
         dice = self.dice_loss(inputs, targets)
-        BCE = self.BCE_loss(inputs, targets)
-        hausdorff = self.hausdorff_loss(inputs, targets)
-
         print("Dice:", dice.shape, dice.item())
+        BCE = self.BCE_loss(inputs, targets)
         print("BCE:", BCE.shape, BCE.item())
+        hausdorff = self.hausdorff_loss(inputs, targets)
         print("Hausdorff:", hausdorff.shape, hausdorff.item())
 
 
