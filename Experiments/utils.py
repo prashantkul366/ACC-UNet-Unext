@@ -15,6 +15,9 @@ from functools import wraps
 import warnings
 import weakref
 from torch.optim.optimizer import Optimizer
+import numpy as np
+from scipy.ndimage import distance_transform_edt as edt
+
 
 class WeightedBCE(nn.Module):
 
