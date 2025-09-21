@@ -386,9 +386,9 @@ if __name__ == '__main__':
         os.makedirs(config.save_path)
 
     print("Check 1")
-    if os.path.isfile(config.logger_path):
-        import sys
-        sys.exit()
+    # if os.path.isfile(config.logger_path):
+    #     import sys
+    #     sys.exit()
 
     print("Sys Exit Bypass")
     logger = logger_config(log_path=config.logger_path)

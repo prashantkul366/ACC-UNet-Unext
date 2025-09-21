@@ -131,8 +131,11 @@ class WeightedDiceBCEHausdorff(nn.Module):
         BCE = self.BCE_loss(inputs, targets)
         hausdorff = self.hausdorff_loss(inputs, targets)
 
-        print(dice.shape, BCE.shape, hausdorff.shape)
-        
+        print("Dice:", dice.shape, dice.item())
+        print("BCE:", BCE.shape, BCE.item())
+        print("Hausdorff:", hausdorff.shape, hausdorff.item())
+
+
         total_loss = (
             self.dice_weight * dice
             + self.BCE_weight * BCE
