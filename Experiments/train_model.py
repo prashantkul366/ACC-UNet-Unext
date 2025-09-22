@@ -310,9 +310,9 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     #         lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
 
     if config.cosineLR is True:
-        lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
+        # lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
         # lr_scheduler = CosineAnnealingLR(optimizer, T_max=config['epochs'], eta_min=config['min_lr'])
-        # lr_scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=0.00001)
+        lr_scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=0.00001)
         # lr_scheduler = torch_lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=1e-5)
 
 
