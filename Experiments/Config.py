@@ -99,10 +99,10 @@ test_session = "session1"         #
 
 # MoNuSeg
 
-dataset_path = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/MoNuSeg'
-train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/Val_Folder'
-test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/Test_Folder'
+dataset_path = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset'
+train_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/train'
+val_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/val'
+test_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/test'
 
 
 # ISIC 18
