@@ -249,15 +249,15 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     model = model.cuda()
     print("Model Loaded!!")
 
-    from thop import profile
+    # from thop import profile
 
-    dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
-    macs, params = profile(model, inputs=(dummy_input,), verbose=False)
-    model_params = params / 1e6
-    model_gflops = macs / 1e9
+    # dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
+    # macs, params = profile(model, inputs=(dummy_input,), verbose=False)
+    # model_params = params / 1e6
+    # model_gflops = macs / 1e9
 
-    print(f"Params: {model_params:.2f} M")
-    print(f"GFLOPs: {model_gflops:.2f} G")
+    # print(f"Params: {model_params:.2f} M")
+    # print(f"GFLOPs: {model_gflops:.2f} G")
 
     checkpoint_path = os.path.join(config.model_path, f'best_model-{model_type}.pth.tar')
     start_epoch = 0

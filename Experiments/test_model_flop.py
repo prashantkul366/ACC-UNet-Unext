@@ -372,7 +372,7 @@ if __name__ == '__main__':
     os.makedirs(pred_img_path, exist_ok=True)
 
     # NEW: folders for predicted outputs
-    pred_img_path = os.path.join(save_path, "predicted_images")
+    # pred_img_path = os.path.join(save_path, "predicted_images")
     mask_dir = os.path.join(pred_img_path, "masks")
     side_dir = os.path.join(pred_img_path, "side_by_side")
 
@@ -381,6 +381,15 @@ if __name__ == '__main__':
 
 
     checkpoint = torch.load(model_path, map_location='cuda')
+    state_dict = checkpoint['state_dict']
+
+    clean_state_dict = {
+                        k: v for k, v in state_dict.items()
+                        if "total_ops" not in k and "total_params" not in k
+                        }
+
+    # load with strict=False so extra keys don’t break
+    
 
     fp = open(save_path+'test.result','a')
     fp.write(str(datetime.now())+'\n')
@@ -492,13 +501,15 @@ if __name__ == '__main__':
         model = nn.DataParallel(model, device_ids=[0,1,2,3])
 
     # model.load_state_dict(checkpoint['state_dict'])
+    model.load_state_dict(clean_state_dict, strict=False)
+    print("✅ Clean model weights loaded!")
     print(model_type)
     print('Model loaded !')
 
     dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
-    # macs, params = profile(model, inputs=(dummy_input,), verbose=False)
-    # model_params = params / 1e6
-    # model_gflops = macs / 1e9
+    macs, params = profile(model, inputs=(dummy_input,), verbose=False)
+    model_params = params / 1e6
+    model_gflops = macs / 1e9
     tf_test = ValGenerator(output_size=[config.img_size, config.img_size])
     test_dataset = ImageToImage2D(config.test_dataset, tf_test,image_size=config.img_size)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
@@ -602,8 +613,8 @@ if __name__ == '__main__':
     print(f"Sensitivity: {sensitivity_meter.avg * 100:.2f}%")
     print(f"Specificity: {specificity_meter.avg * 100:.2f}%")
     print(f"Accuracy: {accuracy_meter.avg * 100:.2f}%")
-    # print(f"Params: {model_params:.2f} M")
-    # print(f"GFLOPs: {model_gflops:.2f} G")
+    print(f"Params: {model_params:.2f} M")
+    print(f"GFLOPs: {model_gflops:.2f} G")
     print(f"Avg GPU Time/Image: {gpu_time_meter.avg:.4f} sec")
 
 
@@ -613,8 +624,8 @@ if __name__ == '__main__':
     fp.write(f"Sensitivity: {sensitivity_meter.avg * 100:.2f}%\n")
     fp.write(f"Specificity: {specificity_meter.avg * 100:.2f}%\n")
     fp.write(f"Accuracy: {accuracy_meter.avg * 100:.2f}%\n")
-    # fp.write(f"Params (M): {model_params:.2f}\n")
-    # fp.write(f"GFLOPs: {model_gflops:.2f}\n")
+    fp.write(f"Params (M): {model_params:.2f}\n")
+    fp.write(f"GFLOPs: {model_gflops:.2f}\n")
     fp.write(f"Avg GPU Time (s): {gpu_time_meter.avg:.4f}\n")
     
     
@@ -632,8 +643,8 @@ if __name__ == '__main__':
     'Sensitivity (%)': [float(sensitivity_meter.avg * 100)],
     'Specificity (%)': [float(specificity_meter.avg * 100)],
     'Accuracy (%)': [float(accuracy_meter.avg * 100)],
-    # 'Params (M)': [float(model_params)],
-    # 'GFLOPs': [float(model_gflops)],
+    'Params (M)': [float(model_params)],
+    'GFLOPs': [float(model_gflops)],
     'Avg GPU Time (s)': [float(gpu_time_meter.avg)],
     }
 
