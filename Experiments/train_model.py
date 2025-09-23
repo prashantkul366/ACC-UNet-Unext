@@ -292,10 +292,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     # criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
 
     ### For Unext
-    criterion = WeightedDiceBCE(dice_weight=1,BCE_weight=0.5, n_labels=config.n_labels)
+    # criterion = WeightedDiceBCE(dice_weight=1,BCE_weight=0.5, n_labels=config.n_labels)
 
 
-    # criterion = WeightedDiceBCEHausdorff(dice_weight=0.4,BCE_weight=0.4,hausdorff_weight=0.2, n_labels=config.n_labels)
+    criterion = WeightedDiceBCEHausdorff(dice_weight=0.4,BCE_weight=0.4,hausdorff_weight=0.2, n_labels=config.n_labels)
 
     # GAB Deep supervision wrapper
     # criterion = DSAdapterLoss(
