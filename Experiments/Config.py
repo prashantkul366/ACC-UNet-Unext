@@ -70,7 +70,8 @@ batch_size = 8
 # model_name = 'TransUNet'  # TransUNet model
 # model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
 # model_name = 'UNext_CMRF_GAB_wavelet'  # CMRF encoder + GAB fusion + wavelet
-model_name = 'UNext_CMRF_GAB_wavelet_OD'  # CMRF encoder + GAB fusion + wavelet + ODConv
+# model_name = 'UNext_CMRF_GAB_wavelet_OD'  # CMRF encoder + GAB fusion + wavelet + ODConv
+model_name = 'UNext_CMRF_BS_GS_Wavelet'  # CMRF encoder + BSConv + GS + SIM augmentation + wavelet
 # model_name = 'UNext_CMRF_GS_Wavelet_OD'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet + ODConv
 # model_name = 'UNext_CMRF_GS_Wavelet_hd'  
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
@@ -91,18 +92,18 @@ test_session = "session1"         #
 # logger_path        = save_path + session_name + ".log"
 # visualize_path     = save_path + 'visualize_val/'
 
-# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 
 # MoNuSeg
 
-dataset_path = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset'
-train_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/train'
-val_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/val'
-test_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/test'
+# dataset_path = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset'
+# train_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/train'
+# val_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/val'
+# test_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/test'
 
 
 # ISIC 18
