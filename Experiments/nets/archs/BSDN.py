@@ -15,6 +15,19 @@ import math
 
 
 
+def autopad(k, p=None, d=1):  
+    '''
+    k: kernel
+    p: padding
+    d: dilation
+    '''
+    if d > 1:
+        # actual kernel-size
+        k = d * (k - 1) + 1 if isinstance(k, int) else [d * (x - 1) + 1 for x in k] # actual kernel-size
+    if p is None:
+        # auto-pad
+        p = k // 2 if isinstance(k, int) else [x // 2 for x in k] # auto-pad
+    return p
 
 class Conv(nn.Module):
     """Standard convolution with args(ch_in, ch_out, kernel, stride, paddin g, groups, dilation, activation)."""
@@ -345,69 +358,69 @@ def make_layer(block, n_layers):
     return nn.Sequential(*layers)
 
 
-@ARCH_REGISTRY.register()
-class BSRN(nn.Module):
-    def __init__(self, num_in_ch=3, num_feat=64, num_block=8, num_out_ch=3, upscale=4,
-                 conv='BSConvU', upsampler='pixelshuffledirect', p=0.25):
-        super(BSRN, self).__init__()
-        kwargs = {'padding': 1}
-        if conv == 'BSConvS':
-            kwargs = {'p': p}
-        print(conv)
-        if conv == 'DepthWiseConv':
-            self.conv = DepthWiseConv
-        elif conv == 'BSConvU':
-            self.conv = BSConvU
-        elif conv == 'BSConvS':
-            self.conv = BSConvS
-        else:
-            self.conv = nn.Conv2d
-        self.fea_conv = self.conv(num_in_ch * 4, num_feat, kernel_size=3, **kwargs)
+# @ARCH_REGISTRY.register()
+# class BSRN(nn.Module):
+#     def __init__(self, num_in_ch=3, num_feat=64, num_block=8, num_out_ch=3, upscale=4,
+#                  conv='BSConvU', upsampler='pixelshuffledirect', p=0.25):
+#         super(BSRN, self).__init__()
+#         kwargs = {'padding': 1}
+#         if conv == 'BSConvS':
+#             kwargs = {'p': p}
+#         print(conv)
+#         if conv == 'DepthWiseConv':
+#             self.conv = DepthWiseConv
+#         elif conv == 'BSConvU':
+#             self.conv = BSConvU
+#         elif conv == 'BSConvS':
+#             self.conv = BSConvS
+#         else:
+#             self.conv = nn.Conv2d
+#         self.fea_conv = self.conv(num_in_ch * 4, num_feat, kernel_size=3, **kwargs)
 
-        self.B1 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
-        self.B2 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
-        self.B3 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
-        self.B4 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
-        self.B5 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
-        self.B6 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
-        self.B7 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
-        self.B8 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
+#         self.B1 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
+#         self.B2 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
+#         self.B3 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
+#         self.B4 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
+#         self.B5 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
+#         self.B6 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
+#         self.B7 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
+#         self.B8 = ESDB(in_channels=num_feat, out_channels=num_feat, conv=self.conv, p=p)
 
-        self.c1 = nn.Conv2d(num_feat * num_block, num_feat, 1)
-        self.GELU = nn.GELU()
+#         self.c1 = nn.Conv2d(num_feat * num_block, num_feat, 1)
+#         self.GELU = nn.GELU()
 
-        self.c2 = self.conv(num_feat, num_feat, kernel_size=3, **kwargs)
+#         self.c2 = self.conv(num_feat, num_feat, kernel_size=3, **kwargs)
 
 
-        if upsampler == 'pixelshuffledirect':
-            self.upsampler = Upsamplers.PixelShuffleDirect(scale=upscale, num_feat=num_feat, num_out_ch=num_out_ch)
-        elif upsampler == 'pixelshuffleblock':
-            self.upsampler = Upsamplers.PixelShuffleBlcok(in_feat=num_feat, num_feat=num_feat, num_out_ch=num_out_ch)
-        elif upsampler == 'nearestconv':
-            self.upsampler = Upsamplers.NearestConv(in_ch=num_feat, num_feat=num_feat, num_out_ch=num_out_ch)
-        elif upsampler == 'pa':
-            self.upsampler = Upsamplers.PA_UP(nf=num_feat, unf=24, out_nc=num_out_ch)
-        else:
-            raise NotImplementedError(("Check the Upsampeler. None or not support yet"))
+#         if upsampler == 'pixelshuffledirect':
+#             self.upsampler = Upsamplers.PixelShuffleDirect(scale=upscale, num_feat=num_feat, num_out_ch=num_out_ch)
+#         elif upsampler == 'pixelshuffleblock':
+#             self.upsampler = Upsamplers.PixelShuffleBlcok(in_feat=num_feat, num_feat=num_feat, num_out_ch=num_out_ch)
+#         elif upsampler == 'nearestconv':
+#             self.upsampler = Upsamplers.NearestConv(in_ch=num_feat, num_feat=num_feat, num_out_ch=num_out_ch)
+#         elif upsampler == 'pa':
+#             self.upsampler = Upsamplers.PA_UP(nf=num_feat, unf=24, out_nc=num_out_ch)
+#         else:
+#             raise NotImplementedError(("Check the Upsampeler. None or not support yet"))
 
-    def forward(self, input):
-        input = torch.cat([input, input, input, input], dim=1)
-        out_fea = self.fea_conv(input)
-        out_B1 = self.B1(out_fea)
-        out_B2 = self.B2(out_B1)
-        out_B3 = self.B3(out_B2)
-        out_B4 = self.B4(out_B3)
-        out_B5 = self.B5(out_B4)
-        out_B6 = self.B6(out_B5)
-        out_B7 = self.B7(out_B6)
-        out_B8 = self.B8(out_B7)
+#     def forward(self, input):
+#         input = torch.cat([input, input, input, input], dim=1)
+#         out_fea = self.fea_conv(input)
+#         out_B1 = self.B1(out_fea)
+#         out_B2 = self.B2(out_B1)
+#         out_B3 = self.B3(out_B2)
+#         out_B4 = self.B4(out_B3)
+#         out_B5 = self.B5(out_B4)
+#         out_B6 = self.B6(out_B5)
+#         out_B7 = self.B7(out_B6)
+#         out_B8 = self.B8(out_B7)
 
-        trunk = torch.cat([out_B1, out_B2, out_B3, out_B4, out_B5, out_B6, out_B7, out_B8], dim=1)
-        out_B = self.c1(trunk)
-        out_B = self.GELU(out_B)
+#         trunk = torch.cat([out_B1, out_B2, out_B3, out_B4, out_B5, out_B6, out_B7, out_B8], dim=1)
+#         out_B = self.c1(trunk)
+#         out_B = self.GELU(out_B)
 
-        out_lr = self.c2(out_B) + out_fea
+#         out_lr = self.c2(out_B) + out_fea
 
-        output = self.upsampler(out_lr)
+#         output = self.upsampler(out_lr)
 
-        return output
+#         return output
