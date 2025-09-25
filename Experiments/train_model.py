@@ -296,10 +296,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     # model = nn.DataParallel(model, device_ids=[0])
 
 
-    # criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
+    criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
 
     ### For Unext
-    criterion = WeightedDiceBCE(dice_weight=1,BCE_weight=0.5, n_labels=config.n_labels)
+    # criterion = WeightedDiceBCE(dice_weight=1,BCE_weight=0.5, n_labels=config.n_labels)
 
 
     # criterion = WeightedDiceBCEHausdorff(dice_weight=0.4,BCE_weight=0.4,hausdorff_weight=0.2, n_labels=config.n_labels)
@@ -317,10 +317,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     #         lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
 
     if config.cosineLR is True:
-        # lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
+        lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
         # lr_scheduler = CosineAnnealingLR(optimizer, T_max=config['epochs'], eta_min=config['min_lr'])
         # lr_scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=0.00001)
-        lr_scheduler = torch_lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=1e-5)
+        # lr_scheduler = torch_lr_scheduler.CosineAnnealingLR(optimizer, T_max=400, eta_min=1e-5)
 
 
     else:
