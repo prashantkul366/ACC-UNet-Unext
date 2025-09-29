@@ -115,10 +115,10 @@ val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/val
 test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/test'
 
 # Glas
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Glas'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Glas'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
 
 # BUSI
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/'
