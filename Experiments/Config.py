@@ -44,8 +44,8 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-# task_name = 'ISIC18_UNET'
-task_name = 'Glas'
+task_name = 'ISIC18_UNET'
+# task_name = 'Glas'
 # task_name = 'BUSI_UNET'
 
 learning_rate = 1e-3
@@ -60,7 +60,7 @@ batch_size = 8
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
-model_name = 'UNeXt'
+# model_name = 'UNeXt'
 # model_name = 'UNext_InceptionNext_MLFC'
 # model_name = 'UNext_CMRF'   # CMRF encoder
 # model_name = 'UNext_CMRF_enc_dec'  # CMRF encoder + decoder
@@ -73,7 +73,7 @@ model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_GAB_wavelet'  # CMRF encoder + GAB fusion + wavelet
 # model_name = 'UNext_CMRF_GAB_wavelet_OD'  # CMRF encoder + GAB fusion + wavelet + ODConv
 # model_name = 'UNext_CMRF_BS_GS_Wavelet'  # CMRF encoder + BSConv + GS + SIM augmentation + wavelet
-# model_name = 'UNext_CMRF_BSRB_GS_Wavelet'  # CMRF encoder + BSRB + GS + SIM augmentation + wavelet
+model_name = 'UNext_CMRF_BSRB_GS_Wavelet'  # CMRF encoder + BSRB + GS + SIM augmentation + wavelet
 # model_name = 'UNext_CMRF_GS_Wavelet_OD'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet + ODConv
 # model_name = 'UNext_CMRF_GS_Wavelet_hd'  
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
@@ -109,16 +109,16 @@ test_session = "session1"         #
 
 
 # ISIC 18
-# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1'
-# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/train'
-# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/val'
-# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/test'
+dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1'
+train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/train'
+val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/val'
+test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/test'
 
 # Glas
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Glas'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Glas'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
 
 # BUSI
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/'
@@ -134,8 +134,6 @@ tensorboard_folder = save_path + 'tensorboard_logs/'
 logger_path        = save_path + ".log"
 # logger_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/Experiments/train_logs/session_name/.log'
 visualize_path     = save_path + 'visualize_val/'
-
-
 
 
 
