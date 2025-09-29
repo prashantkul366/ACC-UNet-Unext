@@ -63,10 +63,9 @@ class CMRF_BS(nn.Module):
         self.pwconv1   = Conv(c1, c2//self.N, 1, 1)
         self.pwconv2   = Conv(c2//2, c2, 1, 1)
         # self.m         = nn.ModuleList(DWConv(self.c, self.c, k=3, act=False) for _ in range(N-1))
-        self.m = nn.ModuleList(
-                        BSConvU(self.c, self.c, kernel_size=3, stride=1, padding=1, bias=True)
-                        for _ in range(N-1)
-                    )
+        # self.m = nn.ModuleList(
+        #                 BSConvU(self.c, self.c, kernel_size=3, stride=1, padding=1, bias=True)
+        #                 for _ in range(N-1)
 
 
 
@@ -85,6 +84,61 @@ class CMRF_BS(nn.Module):
         return x_residual + y if self.add else y
 
 
+# Lightweight Cascade Multi-Receptive Fields Module with BSRB
+class CMRF_BSRB(nn.Module):
+    """CMRF Module with args(ch_in, ch_out, number, shortcut, groups, expansion)."""
+    def __init__(self, c1, c2, N=8, shortcut=True, g=1, e=0.5):
+        super().__init__()
+        
+        self.N         = N
+        self.c         = int(c2 * e / self.N)
+        assert (c2 // self.N) % 2 == 0, "Channel split must be even for slicing"
+        self.add       = shortcut and c1 == c2
+        
+        self.pwconv1   = Conv(c1, c2//self.N, 1, 1)
+        self.pwconv2   = Conv(c2//2, c2, 1, 1)
+        # self.m         = nn.ModuleList(DWConv(self.c, self.c, k=3, act=False) for _ in range(N-1))
+        self.m = nn.ModuleList(BSRB(self.c, self.c) for _ in range(N-1))
+
+    def forward(self, x):
+        """Forward pass through CMRF Module."""
+        x_residual = x
+        x          = self.pwconv1(x)
+
+        x          = [x[:, 0::2, :, :], x[:, 1::2, :, :]]
+        x.extend(m(x[-1]) for m in self.m)
+        x[0]       = x[0] +  x[1] 
+        x.pop(1)
+        
+        y          = torch.cat(x, dim=1) 
+        y          = self.pwconv2(y)
+        return x_residual + y if self.add else y
+
+
+
+class BSRB(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1):
+        super().__init__()
+        self.bsconv = BSConvU(in_channels, out_channels, kernel_size, stride, padding)
+        self.act    = nn.GELU()
+
+        # if channels differ, add projection for residual
+        self.proj = None
+        if in_channels != out_channels:
+            self.proj = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, bias=False)
+
+    def forward(self, x):
+        residual = x
+        out = self.bsconv(x)
+
+        if self.proj is not None:   # project residual if shape mismatch
+            residual = self.proj(residual)
+
+        out = out + residual
+        out = self.act(out)
+        return out
+
+    
 class DepthWiseConv(nn.Module):
     def __init__(self, in_ch, out_ch, kernel_size=3, stride=1, padding=1,
                  dilation=1, bias=True, padding_mode="zeros", with_norm=False, bn_kwargs=None):
