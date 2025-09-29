@@ -181,24 +181,29 @@ class ImageToImage2D(Dataset):
         mask_path_json = os.path.join(self.output_path, image_filename + ".json")
 
         mask = cv2.imread(os.path.join(self.output_path, image_filename[: -3] + "png"),0)
-        # if os.path.exists(mask_path_img):
-        #     mask = cv2.imread(mask_path_img, 0)
-        # elif os.path.exists(mask_path_json):
-        #     import json
-        #     with open(mask_path_json, 'r') as f:
-        #         ann_data = json.load(f)
+        mask_path_img = os.path.join(self.output_path, image_filename.rsplit('.', 1)[0] + ".png")
+        mask_path_json = os.path.join(self.output_path, image_filename + ".json")
 
-        #     # build blank mask
-        #     mask = np.zeros((self.image_size, self.image_size), dtype=np.uint8)
+        if os.path.exists(mask_path_img):
+            # Case 1: classic dataset with PNG masks
+            mask = cv2.imread(mask_path_img, 0)
+        elif os.path.exists(mask_path_json):
+            # Case 2: Glas dataset with JSON masks
+            import json
+            with open(mask_path_json, 'r') as f:
+                ann_data = json.load(f)
 
-        #     # parse polygons (depends on Glas format)
-        #     for ann in ann_data["annotations"]:
-        #         pts = np.array(ann["polygon"], dtype=np.int32)   # polygon points
-        #         pts = pts.reshape((-1, 1, 2))
-        #         cv2.fillPoly(mask, [pts], 1)
+            # start with blank mask
+            mask = np.zeros((self.image_size, self.image_size), dtype=np.uint8)
 
-        # else:
-        #     raise ValueError(f"Mask not found for {image_filename}")
+            # Glas JSON usually has polygon lists
+            for ann in ann_data.get("annotations", []):
+                if "polygon" in ann:
+                    pts = np.array(ann["polygon"], dtype=np.int32)
+                    pts = pts.reshape((-1, 1, 2))
+                    cv2.fillPoly(mask, [pts], 1)
+        else:
+            raise ValueError(f"No mask found for {image_filename}")
 
         
         if mask is None:
