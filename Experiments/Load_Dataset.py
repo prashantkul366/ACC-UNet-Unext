@@ -129,8 +129,17 @@ class ImageToImage2D(Dataset):
         self.image_size = image_size        
         # self.input_path = os.path.join(dataset_path, 'img')
         # self.output_path = os.path.join(dataset_path, 'labelcol')
-        self.input_path = os.path.join(dataset_path, 'images')
-        self.output_path = os.path.join(dataset_path, 'masks')
+        # self.input_path = os.path.join(dataset_path, 'images')
+        # self.output_path = os.path.join(dataset_path, 'masks')
+        if os.path.exists(os.path.join(dataset_path, 'images')):
+            self.input_path = os.path.join(dataset_path, 'images')
+            self.output_path = os.path.join(dataset_path, 'masks')
+        elif os.path.exists(os.path.join(dataset_path, 'img')):
+            self.input_path = os.path.join(dataset_path, 'img')
+            self.output_path = os.path.join(dataset_path, 'ann')
+        else:
+            raise ValueError("Dataset must have either (images+masks) or (img+ann) subfolders")
+
         # self.images_list = os.listdir(self.input_path)
         self.images_list = [
                             f for f in os.listdir(self.input_path)
@@ -167,7 +176,31 @@ class ImageToImage2D(Dataset):
         # print(np.max(image), np.min(image))
         # print("2",image.shape)
         # read mask image
+
+        mask_path_img = os.path.join(self.output_path, image_filename[:-3] + "png")
+        mask_path_json = os.path.join(self.output_path, image_filename + ".json")
+
         mask = cv2.imread(os.path.join(self.output_path, image_filename[: -3] + "png"),0)
+        # if os.path.exists(mask_path_img):
+        #     mask = cv2.imread(mask_path_img, 0)
+        # elif os.path.exists(mask_path_json):
+        #     import json
+        #     with open(mask_path_json, 'r') as f:
+        #         ann_data = json.load(f)
+
+        #     # build blank mask
+        #     mask = np.zeros((self.image_size, self.image_size), dtype=np.uint8)
+
+        #     # parse polygons (depends on Glas format)
+        #     for ann in ann_data["annotations"]:
+        #         pts = np.array(ann["polygon"], dtype=np.int32)   # polygon points
+        #         pts = pts.reshape((-1, 1, 2))
+        #         cv2.fillPoly(mask, [pts], 1)
+
+        # else:
+        #     raise ValueError(f"Mask not found for {image_filename}")
+
+        
         if mask is None:
             raise ValueError(f" Failed to load mask: {os.path.join(self.output_path, image_filename[: -3] + 'png')}")
         # print("mask",image_filename[: -3] + "png")
