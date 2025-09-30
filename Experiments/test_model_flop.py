@@ -74,6 +74,8 @@ from nets.archs.UNext_CMRF_GS_wavelet_hd import UNext_CMRF_GS_Wavelet_hd
 from nets.archs.UNext_CMRF_BS_GS_wavelet import UNext_CMRF_BS_GS_Wavelet
 from nets.archs.UNext_CMRF_BSRB_GS_wavelet import UNext_CMRF_BSRB_GS_Wavelet
 
+from nets.archs.UNext_CMRF_BSRB_GS import UNext_CMRF_BSRB_GS
+
 ######################################################
 
 class AverageMeter(object):
@@ -493,6 +495,9 @@ if __name__ == '__main__':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_BSRB_GS_Wavelet(n_channels=config.n_channels, n_classes=config.n_labels)
 
+    elif model_type == 'UNext_CMRF_BSRB_GS':
+        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_CMRF_BSRB_GS(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type.split('_')[0] == 'MultiResUnet1':          
         model = MultiResUnet(n_channels=config.n_channels,n_classes=config.n_labels,nfilt=int(model_type.split('_')[1]), alpha=float(model_type.split('_')[2]))
