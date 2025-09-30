@@ -323,10 +323,9 @@ class UNext_CMRF_BSRB_GS(nn.Module):
 
         # F.max_pool2d
         ############# Max pool pass #############
-        out = F.relu(F.max_pool2d(self.encoder1(x)));        t1 = out   # (B,16,112,112)
-        out = F.relu(F.max_pool2d(self.encoder2(out)));      t2 = out   # (B,32,56,56)
-        out = F.relu(F.max_pool2d(self.encoder3(out)));      t3 = out   # (B,128,28,28)
-
+        out = F.relu(F.max_pool2d(self.encoder1(x), kernel_size=2, stride=2)); t1 = out   # (B,16,112,112)
+        out = F.relu(F.max_pool2d(self.encoder2(out), kernel_size=2, stride=2)); t2 = out # (B,32,56,56)
+        out = F.relu(F.max_pool2d(self.encoder3(out), kernel_size=2, stride=2)); t3 = out # (B,128,28,28)
 
         # --- stage 4 (tokenized MLP) to get t4 ---
         out, H, W = self.patch_embed3(out)
