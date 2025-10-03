@@ -308,6 +308,11 @@ if __name__ == '__main__':
         model_type = config.model_name
         model_path = "./MoNuSeg/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
+    elif config.task_name =="Kvasir-Seg":
+        test_num = 99
+        model_type = config.model_name
+        model_path = "./Kvasir-Seg/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
+
     #################################################################################################################
 
 
