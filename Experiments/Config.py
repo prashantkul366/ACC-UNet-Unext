@@ -26,7 +26,7 @@ epochs = 1000
 # epochs = 400
 # img_size = 224
 img_size = 256
-print_frequency = 100
+print_frequency = 2
 save_frequency = 100
 vis_frequency = 100
 early_stopping_patience = 100
@@ -45,8 +45,8 @@ resume_checkpoint = False  # or False
 
 
 # task_name = 'ISIC18_UNET'
-# task_name = 'MoNuSeg'
-task_name = 'Kvasir-Seg'
+task_name = 'MoNuSeg'
+# task_name = 'Kvasir-Seg'
 # task_name = 'Glas'
 # task_name = 'BUSI_UNET'
 
@@ -109,10 +109,10 @@ test_session = "session1"         #
 
 # MoNuSeg
 
-# dataset_path = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset'
-# train_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/train'
-# val_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/val'
-# test_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/test'
+dataset_path = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset'
+train_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/train'
+val_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/val'
+test_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/test'
 
 
 # ISIC 18
@@ -135,10 +135,10 @@ test_session = "session1"         #
 
 # Kvasir-Seg
 
-dataset_path = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG'
-train_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/train'
-val_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/val'
-test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/test'
+# dataset_path = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG'
+# train_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/train'
+# val_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/val'
+# test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/test'
 
 
 session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
