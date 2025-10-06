@@ -167,7 +167,17 @@ class ImageToImage2D(Dataset):
         # print(np.max(image), np.min(image))
         # print("2",image.shape)
         # read mask image
-        mask = cv2.imread(os.path.join(self.output_path, image_filename[: -3] + "png"),0)
+
+        #################
+        # mask = cv2.imread(os.path.join(self.output_path, image_filename[: -3] + "png"),0)
+        ################
+        stem, _ = os.path.splitext(image_filename)
+        mask_path = os.path.join(self.output_path, stem + ".png")
+        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+        if mask is None:
+            raise ValueError(f"Failed to load mask: {mask_path}")
+        ##########################################################
+        
         if mask is None:
             raise ValueError(f" Failed to load mask: {os.path.join(self.output_path, image_filename[: -3] + 'png')}")
         # print("mask",image_filename[: -3] + "png")
