@@ -118,9 +118,9 @@ test_session = "session1"         #
 # CVC-ClinicDB
 
 dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC-ClinicDB'
-train_dataset = '/content/drive/MyDrive/Akanksha/research_datasets/CVC-ClinicDB/train'
-val_dataset = '/content/drive/MyDrive/Akanksha/research_datasets/CVC-ClinicDB/val'
-test_dataset = '/content/drive/MyDrive/Akanksha/research_datasets/CVC-ClinicDB/test'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC-ClinicDB/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC-ClinicDB/val'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC-ClinicDB/test'
 
 
 
