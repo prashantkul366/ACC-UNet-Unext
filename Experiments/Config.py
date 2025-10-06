@@ -26,7 +26,7 @@ epochs = 1000
 # epochs = 400
 # img_size = 224
 img_size = 256
-print_frequency = 2
+print_frequency = 20
 save_frequency = 100
 vis_frequency = 100
 early_stopping_patience = 100
@@ -45,7 +45,8 @@ resume_checkpoint = False  # or False
 
 
 # task_name = 'ISIC18_UNET'
-task_name = 'MoNuSeg'
+# task_name = 'MoNuSeg'
+task_name = 'CVC-ClinicDB'
 # task_name = 'Kvasir-Seg'
 # task_name = 'Glas'
 # task_name = 'BUSI_UNET'
@@ -64,8 +65,8 @@ batch_size = 8
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-# model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+model_name = 'UNeXt'
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
@@ -109,10 +110,18 @@ test_session = "session1"         #
 
 # MoNuSeg
 
-dataset_path = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset'
-train_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/train'
-val_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/val'
-test_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/test'
+# dataset_path = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset'
+# train_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/train'
+# val_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/val'
+# test_dataset = '/content/drive/MyDrive/Akanksha/Monuseg_Dataset/test'
+
+# CVC-ClinicDB
+
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC-ClinicDB'
+train_dataset = '/content/drive/MyDrive/Akanksha/research_datasets/CVC-ClinicDB/train'
+val_dataset = '/content/drive/MyDrive/Akanksha/research_datasets/CVC-ClinicDB/val'
+test_dataset = '/content/drive/MyDrive/Akanksha/research_datasets/CVC-ClinicDB/test'
+
 
 
 # ISIC 18
