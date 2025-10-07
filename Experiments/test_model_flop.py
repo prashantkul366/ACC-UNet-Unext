@@ -318,6 +318,11 @@ if __name__ == '__main__':
         model_type = config.model_name
         model_path = "./CVC-ClinicDB/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
+    elif config.task_name =="BUSI":
+        test_num = 130
+        model_type = config.model_name
+        model_path = "./BUSI/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
+
     #################################################################################################################
 
 
