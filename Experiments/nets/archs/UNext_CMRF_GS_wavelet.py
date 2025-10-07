@@ -210,6 +210,7 @@ class OverlapPatchEmbed(nn.Module):
 
         return x, H, W
 
+
 class UNext_CMRF_GS_Wavelet(nn.Module):
 
     ## Conv 3 + MLP 2 + shifted MLP
