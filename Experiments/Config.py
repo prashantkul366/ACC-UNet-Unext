@@ -153,7 +153,9 @@ test_session = "session1"         #
 
 # test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/test'
 # ClinicDB
-test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/CVC-ClinicDB'
+# test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/CVC-ClinicDB'
+# ColonDB
+test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/CVC-ColonDB'
 
 session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
