@@ -50,8 +50,8 @@ resume_checkpoint = False  # or False
 # task_name = 'Kvasir-Seg'
 # task_name = 'BUSI'
 # task_name = 'Glas'
-task_name = 'ClinicDB'
-# task_name = 'ColonDB'
+# task_name = 'ClinicDB'
+task_name = 'ColonDB'
 # task_name = 'BUSI_UNET'
 
 learning_rate = 1e-3
@@ -68,8 +68,8 @@ batch_size = 8
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-# model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+model_name = 'UNeXt'
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
