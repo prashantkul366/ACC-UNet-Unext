@@ -26,7 +26,7 @@ epochs = 1000
 # epochs = 400
 # img_size = 224
 img_size = 256
-print_frequency = 20
+print_frequency = 1
 save_frequency = 100
 vis_frequency = 100
 early_stopping_patience = 100
@@ -52,7 +52,9 @@ resume_checkpoint = False  # or False
 # task_name = 'Glas'
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
-task_name = 'BUSI_80-20'
+# task_name = 'BUSI_80-20'
+task_name = 'STARE'
+# task_name = 'DRIVE'
 # task_name = 'BUSI_UNET'
 
 learning_rate = 1e-3
@@ -69,8 +71,8 @@ batch_size = 8
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-# model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+model_name = 'UNeXt'
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
@@ -160,11 +162,16 @@ test_session = "session1"         #
 
 
 # BUSI_80-20
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
+# STARE
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10/test'
 
 
 session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
