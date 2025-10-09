@@ -26,7 +26,7 @@ epochs = 1000
 # epochs = 400
 # img_size = 224
 img_size = 256
-print_frequency = 30
+print_frequency = 20
 save_frequency = 100
 vis_frequency = 100
 early_stopping_patience = 100
@@ -51,7 +51,8 @@ resume_checkpoint = False  # or False
 # task_name = 'BUSI'
 # task_name = 'Glas'
 # task_name = 'ClinicDB'
-task_name = 'ColonDB'
+# task_name = 'ColonDB'
+task_name = 'BUSI_80-20'
 # task_name = 'BUSI_UNET'
 
 learning_rate = 1e-3
@@ -68,8 +69,8 @@ batch_size = 8
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-# model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+model_name = 'UNeXt'
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
@@ -152,10 +153,19 @@ test_session = "session1"         #
 # val_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/val'
 
 # test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/test'
-# ClinicDB
-# test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/CVC-ClinicDB'
-# ColonDB
-test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/CVC-ColonDB'
+    # ClinicDB
+    # test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/CVC-ClinicDB'
+    # ColonDB
+    # test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/CVC-ColonDB'
+
+
+# BUSI_80-20
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_split'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_split/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_split/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_split/test'
+
+
 
 session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
