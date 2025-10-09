@@ -313,6 +313,16 @@ if __name__ == '__main__':
         model_type = config.model_name
         model_path = "./Kvasir-Seg/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
+    elif config.task_name =="ClinicDB":
+        test_num = 65
+        model_type = config.model_name
+        model_path = "./Kvasir-Seg/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
+
+    # elif config.task_name =="ColonDB":
+    #     test_num = 65
+    #     model_type = config.model_name
+    #     model_path = "./Kvasir-Seg/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
+
     elif config.task_name =="CVC-ClinicDB":
         test_num = 62
         model_type = config.model_name

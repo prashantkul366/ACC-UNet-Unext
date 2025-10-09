@@ -49,7 +49,9 @@ resume_checkpoint = False  # or False
 # task_name = 'CVC-ClinicDB'
 # task_name = 'Kvasir-Seg'
 # task_name = 'BUSI'
-task_name = 'Glas'
+# task_name = 'Glas'
+task_name = 'ClinicDB'
+# task_name = 'ColonDB'
 # task_name = 'BUSI_UNET'
 
 learning_rate = 1e-3
@@ -132,10 +134,10 @@ test_session = "session1"         #
 # test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic1/test'
 
 # Glas
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Glas'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Glas'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
 
 # BUSI
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/BUSI_ACC/'
@@ -148,8 +150,10 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Glas/test'
 # dataset_path = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG'
 # train_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/train'
 # val_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/val'
-# test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/test'
 
+# test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/Kvasir-SEG/test'
+# ClinicDB
+test_dataset = '/content/drive/MyDrive/Akanksha/PFNET_2_2_8_2/PFNet/data/CVC-ClinicDB'
 
 session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'

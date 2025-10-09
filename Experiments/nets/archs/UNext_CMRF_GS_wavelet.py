@@ -346,6 +346,7 @@ class UNext_CMRF_GS_Wavelet(nn.Module):
 
         # ---- pass concatenated global semantic through block2 ONLY ----
         g_tokens = g.flatten(2).transpose(1, 2)                   # (B,49,256)
+        
         for blk in self.block2:
             g_tokens = blk(g_tokens, self.gs_size, self.gs_size)
         # g_tokens = self.norm4(g_tokens)
@@ -359,7 +360,9 @@ class UNext_CMRF_GS_Wavelet(nn.Module):
         ### Stage 4
 
         # out = F.relu(F.interpolate(self.dbn1(self.decoder1(out)),scale_factor=(2,2),mode ='bilinear'))
+
         out = F.relu(F.interpolate(self.dbn1(self.decoder1(out_main)), scale_factor=(2, 2), mode='bilinear'))
+        
         if t4.shape[2:] != out.shape[2:]:
            t4 = F.interpolate(t4, size=out.shape[2:], mode='bilinear', align_corners=True)
 
