@@ -160,10 +160,10 @@ test_session = "session1"         #
 
 
 # BUSI_80-20
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_split'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_split/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_split/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_split/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 
