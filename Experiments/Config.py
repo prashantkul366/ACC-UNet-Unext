@@ -53,8 +53,8 @@ resume_checkpoint = False  # or False
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 # task_name = 'BUSI_80-20'
-task_name = 'STARE'
-# task_name = 'DRIVE'
+# task_name = 'STARE'
+task_name = 'DRIVE'
 # task_name = 'BUSI_UNET'
 
 learning_rate = 1e-3
@@ -71,8 +71,8 @@ batch_size = 8
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-# model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+model_name = 'UNeXt'
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
@@ -95,7 +95,7 @@ model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM au
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
 # model_name = 'U-KAN'
 
-test_session = "session2"         #
+test_session = "session1"         #
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -168,20 +168,20 @@ test_session = "session2"         #
 # test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 # STARE
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10/test'
 
 # DRIVE
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/DRIVE'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/DRIVE/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/DRIVE/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/DRIVE/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/DRIVE'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/DRIVE/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/DRIVE/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/DRIVE/test'
 
 
 
-session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
