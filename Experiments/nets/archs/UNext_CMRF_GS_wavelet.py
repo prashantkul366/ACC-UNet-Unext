@@ -373,7 +373,7 @@ class UNext_CMRF_GS_Wavelet(nn.Module):
         _,_,H,W = out.shape
         out = out.flatten(2).transpose(1,2)
         for i, blk in enumerate(self.dblock1):
-            out = blk(out, H, W)
+            out = blk(out, H, W) 
 
         ### Stage 3
         
