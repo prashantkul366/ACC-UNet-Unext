@@ -216,36 +216,72 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pre
 
     fname = os.path.splitext(os.path.basename(vis_save_path))[0]
 
-    # --- 1) Save predicted mask only ---
+    # # --- 1) Save predicted mask only ---
+    # mask_file = os.path.join(mask_dir, f"{fname}_mask_{model_type}.png")
+    # plt.figure(figsize=(5,5))
+    # plt.imshow((output >= 0.5) * 1.0, cmap="gray")
+    # plt.axis("off")
+    # plt.tight_layout()
+    # plt.savefig(mask_file, dpi=300, bbox_inches="tight", pad_inches=0)
+    # plt.close()
+
+    # # --- 2) Save side-by-side figure ---
+    # side_file = os.path.join(side_dir, f"{fname}_side_{model_type}.png")
+    # plt.figure(figsize=(12,4))
+
+    # plt.subplot(1,3,1)
+    # plt.imshow(input_img)
+    # plt.axis("off")
+    # plt.title("Input")
+
+    # plt.subplot(1,3,2)
+    # plt.imshow(labs, cmap="gray")
+    # plt.axis("off")
+    # plt.title("Ground Truth")
+
+    # plt.subplot(1,3,3)
+    # plt.imshow((output >= 0.5) * 1.0, cmap="gray")
+    # plt.axis("off")
+    # plt.title("Prediction")
+
+    # plt.tight_layout()
+    # plt.savefig(side_file, dpi=300)
+    # plt.close()
+
+    # --- 1) Save predicted mask only (pixel-perfect) ---
     mask_file = os.path.join(mask_dir, f"{fname}_mask_{model_type}.png")
-    plt.figure(figsize=(5,5))
-    plt.imshow((output >= 0.5) * 1.0, cmap="gray")
-    plt.axis("off")
-    plt.tight_layout()
-    plt.savefig(mask_file, dpi=300, bbox_inches="tight", pad_inches=0)
-    plt.close()
+    pred_mask = (output >= 0.5).astype(np.uint8) * 255  # binary mask → 0/255
+    cv2.imwrite(mask_file, pred_mask)  # save exact resolution (no scaling)
 
-    # --- 2) Save side-by-side figure ---
+    # Optional overlay visualization (nice for inspection)
+    # overlay = cv2.addWeighted(
+    #     (input_img * 255).astype(np.uint8), 0.7,
+    #     cv2.cvtColor(pred_mask, cv2.COLOR_GRAY2BGR), 0.3, 0
+    # )
+    # cv2.imwrite(os.path.join(mask_dir, f"{fname}_overlay_{model_type}.png"), overlay)
+
+    # --- 2) Save side-by-side figure (high-res + no interpolation) ---
     side_file = os.path.join(side_dir, f"{fname}_side_{model_type}.png")
-    plt.figure(figsize=(12,4))
 
-    plt.subplot(1,3,1)
+    plt.figure(figsize=(12, 4))
+
+    plt.subplot(1, 3, 1)
     plt.imshow(input_img)
     plt.axis("off")
     plt.title("Input")
 
-    plt.subplot(1,3,2)
-    plt.imshow(labs, cmap="gray")
+    plt.subplot(1, 3, 2)
+    plt.imshow(labs, cmap="gray", interpolation='nearest')
     plt.axis("off")
     plt.title("Ground Truth")
 
-    plt.subplot(1,3,3)
-    plt.imshow((output >= 0.5) * 1.0, cmap="gray")
+    plt.subplot(1, 3, 3)
+    plt.imshow(pred_mask, cmap="gray", interpolation='nearest')
     plt.axis("off")
     plt.title("Prediction")
 
     plt.tight_layout()
-    plt.savefig(side_file, dpi=300)
+    plt.savefig(side_file, dpi=600, bbox_inches="tight", pad_inches=0)
     plt.close()
 
 
