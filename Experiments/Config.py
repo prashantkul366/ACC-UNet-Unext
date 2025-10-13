@@ -71,8 +71,8 @@ batch_size = 8
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-model_name = 'UNeXt'
-# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+# model_name = 'UNeXt'
+model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
