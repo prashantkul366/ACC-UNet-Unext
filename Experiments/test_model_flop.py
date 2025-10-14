@@ -249,9 +249,13 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pre
     # plt.close()
 
     # --- 1) Save predicted mask only (pixel-perfect) ---
-    mask_file = os.path.join(mask_dir, f"{fname}_mask_{model_type}.png")
+    mask_file = os.path.join(mask_dir, f"{fname}.png")
+    print(f"pred file path {mask_file}")
+    # mask_file = os.path.join(mask_dir, f"{vis_path}.png")
     pred_mask = (output >= 0.5).astype(np.uint8) * 255  # binary mask → 0/255
     cv2.imwrite(mask_file, pred_mask)  # save exact resolution (no scaling)
+
+
 
     # Optional overlay visualization (nice for inspection)
     # overlay = cv2.addWeighted(
@@ -302,6 +306,7 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pre
 
     # return dice_pred_tmp, iou_tmp
     return dice_pred_tmp, iou_tmp, output
+
 
 
 
@@ -606,7 +611,7 @@ if __name__ == '__main__':
 
     # model.load_state_dict(checkpoint['state_dict'])
     model.load_state_dict(clean_state_dict, strict=False)
-    print("✅ Clean model weights loaded!")
+    print(" Clean model weights loaded!")
     print(model_type)
     print('Model loaded !')
 
