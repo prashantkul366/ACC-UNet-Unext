@@ -54,7 +54,8 @@ resume_checkpoint = False  # or False
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 # task_name = 'BUSI_80-20'
-task_name = 'CVC_ClinicDB_80-20'
+# task_name = 'CVC_ClinicDB_80-20'
+task_name = 'Glas_80-20'
 # task_name = 'STARE'
 # task_name = 'DRIVE'
 # task_name = 'BUSI_UNET'
@@ -73,7 +74,7 @@ batch_size = 8
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-# model_name = 'UNeXt'
+model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
@@ -95,7 +96,7 @@ batch_size = 8
 # model_name = 'UNext_CMRF_GS_Wavelet_hd'  
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
-model_name = 'U-KAN'
+# model_name = 'U-KAN'
 
 test_session = "session1"         #
 
@@ -120,6 +121,13 @@ test_session = "session1"         #
 # train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/train'
 # val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/val'
 # test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/test'
+
+# Glas 80-20
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20/test'
+
 
 
 # MoNuSeg
@@ -177,10 +185,10 @@ test_session = "session1"         #
 
 
 # CVC_ClinicDB_80-20
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
 
 # STARE
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10'
