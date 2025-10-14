@@ -67,7 +67,7 @@ batch_size = 8
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
-model_name = 'UCTransNet'
+# model_name = 'UCTransNet'
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
@@ -95,7 +95,7 @@ model_name = 'UCTransNet'
 # model_name = 'UNext_CMRF_GS_Wavelet_hd'  
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
-# model_name = 'U-KAN'
+model_name = 'U-KAN'
 
 test_session = "session1"         #
 
