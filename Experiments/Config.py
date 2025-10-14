@@ -26,7 +26,7 @@ epochs = 10000
 # epochs = 400
 # img_size = 224
 img_size = 256
-print_frequency = 40
+print_frequency = 200
 save_frequency = 100
 vis_frequency = 100
 early_stopping_patience = 100
@@ -44,7 +44,8 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-task_name = 'ISIC18_UNET'
+# task_name = 'ISIC18_UNET'
+task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
 # task_name = 'CVC-ClinicDB'
 # task_name = 'Kvasir-Seg'
@@ -72,8 +73,8 @@ batch_size = 8
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-# model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+model_name = 'UNeXt'
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
@@ -109,10 +110,16 @@ test_session = "session1"         #
 # logger_path        = save_path + session_name + ".log"
 # visualize_path     = save_path + 'visualize_val/'
 
-dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+
+# ISIC 17
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/val'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/test'
 
 
 # MoNuSeg
