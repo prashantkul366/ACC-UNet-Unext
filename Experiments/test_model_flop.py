@@ -385,7 +385,7 @@ if __name__ == '__main__':
         model_path = "./BUSI_80-20/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
     elif config.task_name =="CVC_ClinicDB_80-20":
-        test_num = 130
+        test_num = 123
         model_type = config.model_name
         model_path = "./CVC_ClinicDB_80-20/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
