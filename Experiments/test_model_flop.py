@@ -250,7 +250,7 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pre
 
     # --- 1) Save predicted mask only (pixel-perfect) ---
     mask_file = os.path.join(mask_dir, f"{fname}.png")
-    print(f"pred file path {mask_file}")
+    # print(f"pred file path {mask_file}")
     # mask_file = os.path.join(mask_dir, f"{vis_path}.png")
     pred_mask = (output >= 0.5).astype(np.uint8) * 255  # binary mask → 0/255
     cv2.imwrite(mask_file, pred_mask)  # save exact resolution (no scaling)
