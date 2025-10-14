@@ -45,7 +45,7 @@ resume_checkpoint = False  # or False
 
 
 # task_name = 'ISIC18_UNET'
-task_name = 'ISIC17'
+# task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
 # task_name = 'CVC-ClinicDB'
 # task_name = 'Kvasir-Seg'
@@ -54,7 +54,7 @@ task_name = 'ISIC17'
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 # task_name = 'BUSI_80-20'
-# task_name = 'CVC_ClinicDB_80-20'
+task_name = 'CVC_ClinicDB_80-20'
 # task_name = 'STARE'
 # task_name = 'DRIVE'
 # task_name = 'BUSI_UNET'
@@ -68,13 +68,13 @@ batch_size = 8
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
-# model_name = 'UNet_base'
+model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
 
 
 # model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
@@ -116,10 +116,10 @@ test_session = "session1"         #
 # test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 # ISIC 17
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/val'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/val'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/test'
 
 
 # MoNuSeg
@@ -177,10 +177,10 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Data
 
 
 # CVC_ClinicDB_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
 
 # STARE
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10'
