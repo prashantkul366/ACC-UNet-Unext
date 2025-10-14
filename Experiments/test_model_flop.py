@@ -674,15 +674,25 @@ if __name__ == '__main__':
             #                                     pred_img_path=pred_img_path # new folder for .pngs
             #                                 )
 
-            dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
-                                                    model, input_img, None, lab,
-                                                    vis_path + str(i),
-                                                    dice_pred=dice_pred,
-                                                    dice_ens=dice_ens,
-                                                    mask_dir=mask_dir,
-                                                    side_dir=side_dir
-                                                )
+            # dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
+            #                                         model, input_img, None, lab,
+            #                                         vis_path + str(i),
+            #                                         dice_pred=dice_pred,
+            #                                         dice_ens=dice_ens,
+            #                                         mask_dir=mask_dir,
+            #                                         side_dir=side_dir
+            #                                     )
 
+            original_filename = os.path.splitext(names[0])[0]  # e.g. "ISIC_0036347"
+
+            dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
+                model, input_img, None, lab,
+                vis_path + original_filename,    # ✅ use real filename here
+                dice_pred=dice_pred,
+                dice_ens=dice_ens,
+                mask_dir=mask_dir,
+                side_dir=side_dir
+            )
 
             dice_pred+=dice_pred_t
             iou_pred+=iou_pred_t
