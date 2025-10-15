@@ -136,8 +136,8 @@ test_session = "session1"         #
 # TNBC 80-20
 dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20'
 train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20/test'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20/val'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20/val'
 
 
 # MoNuSeg
