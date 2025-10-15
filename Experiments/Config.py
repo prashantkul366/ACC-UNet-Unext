@@ -24,8 +24,7 @@ n_channels = 3
 n_labels = 1
 epochs = 10000
 # epochs = 400
-img_size = 224
-# img_size = 256
+
 print_frequency = 200
 save_frequency = 100
 vis_frequency = 100
@@ -69,13 +68,13 @@ batch_size = 8
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
-# model_name = 'UNet_base'
+model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
 
 
 # model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
@@ -98,6 +97,11 @@ model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM au
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
 # model_name = 'U-KAN'
 
+if model_name == 'SwinUnet' :
+    img_size = 224
+else :
+    img_size = 256
+    
 test_session = "session1"         #
 
 
