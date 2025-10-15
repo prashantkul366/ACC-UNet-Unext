@@ -307,8 +307,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     # model = nn.DataParallel(model, device_ids=[0])
 
 
-    criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
-    lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
+    # criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
+    # lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
          
     if model_type == 'UNeXt':
         # criterion = WeightedDiceBCE(dice_weight=1,BCE_weight=1, n_labels=config.n_labels)

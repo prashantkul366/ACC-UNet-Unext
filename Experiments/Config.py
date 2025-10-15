@@ -54,7 +54,8 @@ resume_checkpoint = False  # or False
 # task_name = 'ColonDB'
 # task_name = 'BUSI_80-20'
 # task_name = 'CVC_ClinicDB_80-20'
-task_name = 'Glas_80-20'
+# task_name = 'Glas_80-20'
+task_name = 'TNBC_80-20'
 # task_name = 'STARE'
 # task_name = 'DRIVE'
 # task_name = 'BUSI_UNET'
@@ -64,7 +65,7 @@ learning_rate = 1e-3
 # batch_size = 32
 batch_size = 8
 
-model_name = 'ACC_UNet'
+# model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
@@ -73,7 +74,7 @@ model_name = 'ACC_UNet'
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-# model_name = 'UNeXt'
+model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
@@ -127,11 +128,16 @@ test_session = "session1"         #
 # test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted/test'
 
 # Glas 80-20
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_GlaS_80_20/test'
 
+# TNBC 80-20
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_TNBC_80_20/test'
 
 
 # MoNuSeg

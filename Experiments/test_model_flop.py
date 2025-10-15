@@ -399,6 +399,11 @@ if __name__ == '__main__':
         model_type = config.model_name
         model_path = "./Glas_80-20/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
+    elif config.task_name =="TNBC_80-20":
+        test_num = 10
+        model_type = config.model_name
+        model_path = "./TNBC_80-20/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
+
 
 
     #################################################################################################################
