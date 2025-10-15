@@ -97,7 +97,7 @@ model_name = 'ACC_UNet'
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
 # model_name = 'U-KAN'
 
-if model_name == 'SwinUnet' :
+if model_name == 'SwinUnet' or model_name == 'UCTransNet':
     img_size = 224
 else :
     img_size = 256
