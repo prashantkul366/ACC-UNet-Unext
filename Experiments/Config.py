@@ -66,7 +66,7 @@ learning_rate = 1e-3
 batch_size = 8
 
 # model_name = 'ACC_UNet'
-# model_name = 'SwinUnet'
+model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
 # model_name = 'UNet_base'
@@ -96,7 +96,7 @@ batch_size = 8
 # model_name = 'UNext_CMRF_GS_Wavelet_hd'  
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
-model_name = 'U-KAN'
+# model_name = 'U-KAN'
 
 if model_name == 'SwinUnet' or model_name == 'UCTransNet':
     img_size = 224
