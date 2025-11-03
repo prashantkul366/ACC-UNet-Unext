@@ -75,7 +75,7 @@ batch_size = 8
 # model_name = 'UCTransNet'
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
-model_name = 'MultiResUnet1_32_1.67'
+# model_name = 'MultiResUnet1_32_1.67'
 
 
 # model_name = 'UNeXt'
@@ -89,7 +89,7 @@ model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
 # model_name = 'UNext_CMRF_enc_CSSE'
 # model_name = 'UNext_CMRF_PP'
-# model_name = 'TransUNet'  # TransUNet model
+model_name = 'TransUNet'  # TransUNet model
 # model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
 # model_name = 'UNext_CMRF_GAB_wavelet'  # CMRF encoder + GAB fusion + wavelet
 # model_name = 'UNext_CMRF_GAB_wavelet_OD'  # CMRF encoder + GAB fusion + wavelet + ODConv
