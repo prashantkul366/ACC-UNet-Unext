@@ -53,8 +53,8 @@ resume_checkpoint = False  # or False
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-# task_name = 'BUSI_80-20'
-task_name = 'BUSI_80-20_mod'
+task_name = 'BUSI_80-20'
+# task_name = 'BUSI_80-20_mod'
 
 # task_name = 'CVC_ClinicDB_80-20'
 # task_name = 'Glas_80-20'
@@ -78,8 +78,8 @@ batch_size = 8
 # model_name = 'MultiResUnet1_32_1.67'
 
 
-# model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+model_name = 'UNeXt'
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
@@ -133,17 +133,17 @@ test_session = "session1"         #
 
 
 # BUSI_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 # BUSI_80-20_mod
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test_mod'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test_mod'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test_mod'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test_mod'
 
 
 # Glas 80-20
