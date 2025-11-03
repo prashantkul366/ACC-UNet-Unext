@@ -43,7 +43,7 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-# task_name = 'ISIC18_UNET'
+task_name = 'ISIC18_UNET'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
 # task_name = 'CVC-ClinicDB'
