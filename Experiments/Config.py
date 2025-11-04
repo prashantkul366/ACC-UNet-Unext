@@ -79,7 +79,7 @@ batch_size = 8
 
 
 # model_name = 'UNeXt'
-# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 
 # model_name = 'UNext_InceptionNext_MLFC'
@@ -100,7 +100,7 @@ batch_size = 8
 # model_name = 'UNext_CMRF_GS_Wavelet_hd'  
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
-model_name = 'U-KAN'
+# model_name = 'U-KAN'
 
 if model_name == 'SwinUnet' or model_name == 'UCTransNet':
     img_size = 224
