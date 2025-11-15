@@ -1,5 +1,5 @@
 import torch.nn as nn
-from vit_seg_modeling_KAN_fJNB import VisionTransformer, CONFIGS
+from .vit_seg_modeling_KAN_fJNB import VisionTransformer, CONFIGS
 
 class TransUNet_KAN_fJNB(nn.Module):
     def __init__(
