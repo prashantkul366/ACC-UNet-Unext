@@ -56,7 +56,7 @@ class MambaLayer(nn.Module):
                 d_state=d_state,  # SSM state expansion factor
                 d_conv=d_conv,    # Local convolution width
                 expand=expand,    # Block expansion factor
-                # bimamba_type="v3",
+                bimamba_type="v2",
                 # nslices=num_slices,
         )
     
