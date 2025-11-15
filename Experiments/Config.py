@@ -43,7 +43,7 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-task_name = 'ISIC18_UNET'
+# task_name = 'ISIC18_UNET'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
 # task_name = 'CVC-ClinicDB'
@@ -53,7 +53,7 @@ task_name = 'ISIC18_UNET'
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-# task_name = 'BUSI_80-20'
+task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_mod'
 
 # task_name = 'CVC_ClinicDB_80-20'
@@ -79,8 +79,9 @@ batch_size = 8
 
 
 # model_name = 'UNeXt'
-model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
+# model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
+model_name = 'Segmamba'
 
 # model_name = 'UNext_InceptionNext_MLFC'
 # model_name = 'UNext_CMRF'   # CMRF encoder
@@ -102,7 +103,7 @@ model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM au
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
 # model_name = 'U-KAN'
 
-if model_name == 'SwinUnet' or model_name == 'UCTransNet':
+if model_name == 'SwinUnet' or model_name == 'UCTransNet' or model_name == 'Segmamba':
     img_size = 224
 else :
     img_size = 256
@@ -120,10 +121,10 @@ test_session = "session1"         #
 # logger_path        = save_path + session_name + ".log"
 # visualize_path     = save_path + 'visualize_val/'
 
-dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 # ISIC 17
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted'
@@ -133,10 +134,10 @@ test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/te
 
 
 # BUSI_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 # BUSI_80-20_mod
