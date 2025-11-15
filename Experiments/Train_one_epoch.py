@@ -62,7 +62,9 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # Take variable and put them to GPU
         images, masks = sampled_batch['image'], sampled_batch['label']
         images, masks = images.cuda(), masks.cuda()
-        print("Mask unique:", torch.unique(masks))
+        if masks.dim() == 3:
+            masks = masks.unsqueeze(1)
+        # print("Mask unique:", torch.unique(masks))
 
         # masks = masks.float()  # Ensure it's not accidentally long
         # masks = torch.clamp(masks, 0.0, 1.0)  # Clamp to [0, 1]

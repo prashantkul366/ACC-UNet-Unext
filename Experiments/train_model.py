@@ -256,7 +256,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
     elif model_type == 'Segmamba':
         model = SegMamba(
-            in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
+            in_chans=config.n_channels, out_chans=2, depths=[2, 2, 2, 2],
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
         lr = 1e-4
 
@@ -315,6 +315,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
 
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
+    if model_type == 'Segmamba':
+        criterion = WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5, n_labels=2)
     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
          
     # if model_type == 'UNeXt':
