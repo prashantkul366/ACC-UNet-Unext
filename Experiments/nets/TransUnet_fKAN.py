@@ -7,7 +7,7 @@ class TransUNet_KAN_fJNB(nn.Module):
         n_channels=1,
         n_classes=1,
         img_size=224,
-        vit_name="ViT-B_16",
+        vit_name="R50-ViT-B_16",
     ):
         super().__init__()
         config_vit = CONFIGS[vit_name]
