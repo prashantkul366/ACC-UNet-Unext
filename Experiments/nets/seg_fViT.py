@@ -219,6 +219,35 @@ class SegViT_fKAN(nn.Module):
         #You may need to ensure these resolutions line up with your up/down path;
         #if not, you can F.interpolate(f_i, size=...) to correct.
 
+        # # ---- UNETR-style encoder path ----
+        # enc1 = self.encoder1(x_in)    # full-res input
+        # enc2 = self.encoder2(f1)
+        # enc3 = self.encoder3(f2)
+        # enc4 = self.encoder4(f3)
+        # enc_hidden = self.encoder5(x_bottleneck)  # bottleneck
+
+        # # print("enc1:", enc1.shape)
+        # # print("enc2:", enc2.shape)
+        # # print("enc3:", enc3.shape)
+        # # print("enc4:", enc4.shape)
+        # # print("enc_hidden:", enc_hidden.shape)
+
+        # # ---- Decoder path (SegMamba-like) ----
+        # # dec3 = self.decoder5(enc_hidden, enc4)
+        # # dec2 = self.decoder4(dec3, enc3)
+        # # dec1 = self.decoder3(dec2, enc2)
+        # # dec0 = self.decoder2(dec1, enc1)
+        # # out = self.decoder1(dec0)
+
+        # dec3 = self.decoder5(enc_hidden, enc2)  # 16→32, skip 32×32
+        # dec2 = self.decoder4(dec3,     enc3)    # 32→64
+        # dec1 = self.decoder3(dec2,     enc4)    # 64→128
+        # dec0 = self.decoder2(dec1,     enc1)    # 128→256
+        # out = self.decoder1(dec0)
+
+        # logits = self.out(out)
+        # return logits
+
         # ---- UNETR-style encoder path ----
         enc1 = self.encoder1(x_in)    # full-res input
         enc2 = self.encoder2(f1)
@@ -226,24 +255,30 @@ class SegViT_fKAN(nn.Module):
         enc4 = self.encoder4(f3)
         enc_hidden = self.encoder5(x_bottleneck)  # bottleneck
 
-        # print("enc1:", enc1.shape)
-        # print("enc2:", enc2.shape)
-        # print("enc3:", enc3.shape)
-        # print("enc4:", enc4.shape)
-        # print("enc_hidden:", enc_hidden.shape)
+        # ---------- ALIGN SPATIAL SIZES FOR SKIPS ----------
+        # base (bottleneck) resolution
+        h0, w0 = enc_hidden.shape[-2:]
+
+        # after decoder5 upsample -> 2*h0
+        enc4 = F.interpolate(enc4, size=(2 * h0, 2 * w0),
+                            mode="bilinear", align_corners=False)
+        # after decoder4 upsample -> 4*h0
+        enc3 = F.interpolate(enc3, size=(4 * h0, 4 * w0),
+                            mode="bilinear", align_corners=False)
+        # after decoder3 upsample -> 8*h0
+        enc2 = F.interpolate(enc2, size=(8 * h0, 8 * w0),
+                            mode="bilinear", align_corners=False)
+        # after decoder2 upsample -> 16*h0 (should match input size if img_size consistent)
+        enc1 = F.interpolate(enc1, size=(16 * h0, 16 * w0),
+                            mode="bilinear", align_corners=False)
 
         # ---- Decoder path (SegMamba-like) ----
-        # dec3 = self.decoder5(enc_hidden, enc4)
-        # dec2 = self.decoder4(dec3, enc3)
-        # dec1 = self.decoder3(dec2, enc2)
-        # dec0 = self.decoder2(dec1, enc1)
-        # out = self.decoder1(dec0)
-
-        dec3 = self.decoder5(enc_hidden, enc2)  # 16→32, skip 32×32
-        dec2 = self.decoder4(dec3,     enc3)    # 32→64
-        dec1 = self.decoder3(dec2,     enc4)    # 64→128
-        dec0 = self.decoder2(dec1,     enc1)    # 128→256
+        dec3 = self.decoder5(enc_hidden, enc4)
+        dec2 = self.decoder4(dec3, enc3)
+        dec1 = self.decoder3(dec2, enc2)
+        dec0 = self.decoder2(dec1, enc1)
         out = self.decoder1(dec0)
-        
+
         logits = self.out(out)
         return logits
+
