@@ -332,7 +332,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
 
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
-    if model_type == 'Segmamba':
+    if model_type == 'Segmamba' or model_type == 'SegViT_fKAN':
         criterion = BinaryDiceBCE(dice_weight=0.5, BCE_weight=0.5)
     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
          
