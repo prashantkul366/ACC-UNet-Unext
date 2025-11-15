@@ -226,18 +226,24 @@ class SegViT_fKAN(nn.Module):
         enc4 = self.encoder4(f3)
         enc_hidden = self.encoder5(x_bottleneck)  # bottleneck
 
-        print("enc1:", enc1.shape)
-        print("enc2:", enc2.shape)
-        print("enc3:", enc3.shape)
-        print("enc4:", enc4.shape)
-        print("enc_hidden:", enc_hidden.shape)
+        # print("enc1:", enc1.shape)
+        # print("enc2:", enc2.shape)
+        # print("enc3:", enc3.shape)
+        # print("enc4:", enc4.shape)
+        # print("enc_hidden:", enc_hidden.shape)
 
         # ---- Decoder path (SegMamba-like) ----
-        dec3 = self.decoder5(enc_hidden, enc4)
-        dec2 = self.decoder4(dec3, enc3)
-        dec1 = self.decoder3(dec2, enc2)
-        dec0 = self.decoder2(dec1, enc1)
-        out = self.decoder1(dec0)
+        # dec3 = self.decoder5(enc_hidden, enc4)
+        # dec2 = self.decoder4(dec3, enc3)
+        # dec1 = self.decoder3(dec2, enc2)
+        # dec0 = self.decoder2(dec1, enc1)
+        # out = self.decoder1(dec0)
 
+        dec3 = self.decoder5(enc_hidden, enc2)  # 16→32, skip 32×32
+        dec2 = self.decoder4(dec3,     enc3)    # 32→64
+        dec1 = self.decoder3(dec2,     enc4)    # 64→128
+        dec0 = self.decoder2(dec1,     enc1)    # 128→256
+        out = self.decoder1(dec0)
+        
         logits = self.out(out)
         return logits
