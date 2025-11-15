@@ -57,6 +57,7 @@ from nets.archs.UNext_CMRF_BSRB_GS import UNext_CMRF_BSRB_GS
 from nets.segmamba import SegMamba
 # from nets.TransUnet_fKAN import TransUNet_KAN_fJNB
 from nets.TransUNet_Vit_fKAN import TransUNet as TransUNet_KAN_fJNB
+from nets.seg_fViT import SegViT_fKAN
 
 ####################################################
 
@@ -181,7 +182,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         # lr = 1e-4  
 
     elif model_type == 'UNext_InceptionNext_MLFC':
-        model = UNext_InceptionNext_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)
+        # model = UNext_InceptionNext_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)
+        pass
         # lr = 1e-4  
 
     elif model_type == 'UNext_CMRF':
@@ -265,7 +267,16 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     elif model_type == 'TransUNet_fJNB':
         model = TransUNet_KAN_fJNB(n_channels=config.n_channels, n_classes=config.n_labels)
         lr = 1e-4  
-        
+
+    elif model_type == 'SegViT_fKAN':
+        model = SegViT_fKAN(
+            in_chans=config.n_channels,
+            out_chans=config.n_labels,
+            img_size=config.img_size,       
+            vit_name="R50-ViT-B_16",        
+        )
+        lr = 1e-4
+
     else: 
         raise TypeError('Please enter a valid name for the model type')
 

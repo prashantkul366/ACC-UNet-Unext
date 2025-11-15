@@ -235,7 +235,7 @@ class UnetrBasicBlock(nn.Module):
         """
 
         super().__init__()
-
+        print("in unetr block")
         if res_block:
             self.layer = UnetResBlock(
                 spatial_dims=spatial_dims,
