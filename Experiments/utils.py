@@ -396,8 +396,8 @@ def save_on_batch(images1, masks, pred, names, vis_path):
         mask_tmp[mask_tmp>0] = 255
         mask_tmp[mask_tmp<=0] = 0
 
-        cv2.imwrite(vis_path+ names[i][:-4]+"_pred.jpg", pred_tmp)
-        cv2.imwrite(vis_path+names[i][:-4]+"_gt.jpg", mask_tmp)
+        # cv2.imwrite(vis_path+ names[i][:-4]+"_pred.jpg", pred_tmp)
+        # cv2.imwrite(vis_path+names[i][:-4]+"_gt.jpg", mask_tmp)
 
 
 
