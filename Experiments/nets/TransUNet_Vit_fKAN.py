@@ -41,6 +41,7 @@ class TransUNet(nn.Module):
         cfg.n_classes = n_classes
 
         # build the TransUNet (VisionTransformer acts as the TransUNet in this repo)
+        print("TransUNet ViT fKAN file using")
         self.vit = VisionTransformer(cfg, img_size=img_size, zero_head=False, vis=vis)
 
         # try to load pretrained weights if the path is set in vit_seg_configs
