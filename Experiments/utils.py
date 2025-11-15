@@ -149,6 +149,64 @@ class WeightedDiceBCEHausdorff(nn.Module):
 
         return total_loss
 
+
+class BinaryDiceBCE(nn.Module):
+    """
+    Simple binary Dice + BCE loss for models with 1 output channel and masks in {0,1}.
+    Compatible with Train_one_epoch: provides _get_name and _show_dice.
+    """
+    def __init__(self, dice_weight=0.5, BCE_weight=0.5, smooth=1e-5):
+        super().__init__()
+        self.dice_weight = dice_weight
+        self.BCE_weight = BCE_weight
+        self.smooth = smooth
+        self.BCE_loss = nn.BCEWithLogitsLoss()
+
+    def forward(self, inputs, targets):
+        """
+        inputs: [B, 1, H, W] (logits)
+        targets: [B, 1, H, W] or [B, H, W] in {0,1}
+        """
+        if targets.dim() == 3:        # (B, H, W)
+            targets = targets.unsqueeze(1)  # -> (B, 1, H, W)
+
+        targets = targets.float()
+
+        # BCE term (on logits)
+        BCE = self.BCE_loss(inputs, targets)
+
+        # Dice term (on probabilities)
+        probs = torch.sigmoid(inputs)
+        dims = (1, 2, 3)
+        intersection = (probs * targets).sum(dim=dims)
+        denom = probs.sum(dim=dims) + targets.sum(dim=dims) + self.smooth
+        dice_score = (2.0 * intersection + self.smooth) / denom
+        dice_loss = 1.0 - dice_score.mean()
+
+        dice_BCE_loss = self.dice_weight * dice_loss + self.BCE_weight * BCE
+        return dice_BCE_loss
+
+    def _get_name(self):
+        # so Train_one_epoch can print a name
+        return "BinaryDiceBCE"
+
+    @torch.no_grad()
+    def _show_dice(self, inputs, targets):
+        """
+        Used by Train_one_epoch just for logging.
+        Returns scalar dice score.
+        """
+        if targets.dim() == 3:
+            targets = targets.unsqueeze(1)
+        targets = targets.float()
+        probs = torch.sigmoid(inputs)
+
+        dims = (1, 2, 3)
+        intersection = (probs * targets).sum(dim=dims)
+        denom = probs.sum(dim=dims) + targets.sum(dim=dims) + self.smooth
+        dice_score = (2.0 * intersection + self.smooth) / denom
+        return dice_score.mean()
+
 class GT_BceDiceLoss(nn.Module):
     def __init__(self, wb=1, wd=1):
         super(GT_BceDiceLoss, self).__init__()
