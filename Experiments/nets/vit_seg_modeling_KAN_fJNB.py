@@ -18,9 +18,9 @@ from torch.nn.modules.utils import _pair
 from scipy import ndimage
 from . import vit_seg_configs as configs
 # from .vit_seg_modeling_resnet_skip import ResNetV2
-from vit_seg_modelling_resnet_skip import ResNetV2
+from .vit_seg_modelling_resnet_skip import ResNetV2
 # from .kan import KAN 
-from kan_fJNB import KAN
+from .kan_fJNB import KAN
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from jacobi_polynomials import jacobi_polynomial
+from .jacobi_polynomials import jacobi_polynomial
 
 
 class FractionalJacobiNeuralBlock(nn.Module):
