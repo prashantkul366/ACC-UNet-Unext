@@ -266,7 +266,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
             n_channels=config.n_channels,
             n_classes=config.n_labels,
             img_size=config.img_size,
-            vit_name="R50-ViT-B_16",   
+            vit_name="ViT-B_16",   
         )
         lr = 1e-4  
     else: 
