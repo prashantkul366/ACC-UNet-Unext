@@ -40,7 +40,7 @@ class SegViT_fKAN(nn.Module):
         self.img_size = img_size
         self.feat_size = list(feat_size)
         print(f"SegViT_fKAN using")
-        
+
         # ---- ViT-fKAN encoder config ----
         config_vit = CONFIGS[vit_name]
         config_vit.classifier = "seg"
@@ -58,10 +58,15 @@ class SegViT_fKAN(nn.Module):
         res_skip_channels = config_vit.skip_channels  # e.g. [256, 512, 1024, 2048]
 
         # Project ResNet features to our desired feat_size for the UNETR decoder
+        # self.res_proj = nn.ModuleList([
+        #     nn.Conv2d(res_skip_channels[i], self.feat_size[i], kernel_size=1)
+        #     for i in range(4)
+        # ])
         self.res_proj = nn.ModuleList([
             nn.Conv2d(res_skip_channels[i], self.feat_size[i], kernel_size=1)
-            for i in range(4)
+            for i in range(3)   # we only use f1,f2,f3
         ])
+
 
         # Project token embedding (ViT output) into a spatial "bottleneck" feat map
         # and then into feat_size[-1] channels.
@@ -209,7 +214,7 @@ class SegViT_fKAN(nn.Module):
         f1 = self.res_proj[0](res_features[0])  # [B, feat_size[0], H/4, W/4]  (depending on ResNet)
         f2 = self.res_proj[1](res_features[1])  # [B, feat_size[1], ...]
         f3 = self.res_proj[2](res_features[2])  # [B, feat_size[2], ...]
-        f4 = self.res_proj[3](res_features[3])  # [B, feat_size[3], ...]
+        
 
         #You may need to ensure these resolutions line up with your up/down path;
         #if not, you can F.interpolate(f_i, size=...) to correct.
