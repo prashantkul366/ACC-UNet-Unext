@@ -103,7 +103,7 @@ class JacobiRKAN(nn.Module):
             raise ValueError('Parameter degree must be between one and six (inclusive).')
 
         self.degree = degree
-
+        print("jacobi rkan initiated")
         # Define the trainable parameters
         self.alpha = nn.Parameter(torch.ones(1))
         self.beta = nn.Parameter(torch.ones(1))
