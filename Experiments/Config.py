@@ -81,9 +81,11 @@ batch_size = 4
 # model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
+model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
+
 # model_name = 'Segmamba'
 # model_name = 'TransUNet_fJNB'
-model_name = 'SegViT_fKAN'
+# model_name = 'SegViT_fKAN'
 
 # model_name = 'UNext_InceptionNext_MLFC'
 # model_name = 'UNext_CMRF'   # CMRF encoder

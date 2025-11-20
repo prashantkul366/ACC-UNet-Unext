@@ -53,6 +53,8 @@ from nets.archs.UNext_CMRF_BSRB_GS_wavelet import UNext_CMRF_BSRB_GS_Wavelet
 
 from nets.archs.UNext_CMRF_BSRB_GS import UNext_CMRF_BSRB_GS
 
+from nets.archs.UNext_CMRF_GS_wavelet_rkan import UNext_CMRF_GS_Wavelet_rKAN
+
 ######################################################
 # from nets.segmamba import SegMamba
 # from nets.TransUnet_fKAN import TransUNet_KAN_fJNB
@@ -242,6 +244,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     elif model_type == 'UNext_CMRF_BS_GS_Wavelet':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_BS_GS_Wavelet(n_channels=config.n_channels, n_classes=config.n_labels)
+
+    elif model_type == 'UNext_CMRF_GS_Wavelet_rKAN':
+        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_CMRF_GS_Wavelet_rKAN(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_BSRB_GS_Wavelet':
         # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
