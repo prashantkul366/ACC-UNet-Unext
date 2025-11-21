@@ -39,6 +39,7 @@ class Conv(nn.Module):
 class DWConv(Conv):
     """Depth-wise convolution with args(ch_in, ch_out, kernel, stride, dilation, activation)."""
     def __init__(self, c1, c2, k=1, s=1, d=1, act=True):
+        kernel_size = k
         super().__init__(c1, c2, k, s, g=math.gcd(c1, c2), d=d, act=act)
 
     
