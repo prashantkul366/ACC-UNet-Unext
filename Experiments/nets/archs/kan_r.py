@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import math
 
-from .rkan import JacobiRKAN , PadeRKAN
+from .rkan import JacobiRKAN
 
 class KANLinear(torch.nn.Module):
     def __init__(
