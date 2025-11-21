@@ -24,7 +24,7 @@ class KANLinear(torch.nn.Module):
         self.out_features = out_features
         self.grid_size = grid_size
         self.spline_order = spline_order
-        print("kan linear with rkan inititiated")
+        print("kan linear with rkan pade inititiated")
         h = (grid_range[1] - grid_range[0]) / grid_size
         grid = (
             (
@@ -51,7 +51,8 @@ class KANLinear(torch.nn.Module):
         self.enable_standalone_scale_spline = enable_standalone_scale_spline
         # self.base_activation = base_activation()
 
-        self.base_activation = JacobiRKAN(3)
+        # self.base_activation = JacobiRKAN(3)
+        self.base_activation = PadeRKAN(2, 6)
         self.grid_eps = grid_eps
 
         self.reset_parameters()
