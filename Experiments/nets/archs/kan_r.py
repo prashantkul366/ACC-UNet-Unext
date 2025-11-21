@@ -51,8 +51,8 @@ class KANLinear(torch.nn.Module):
         self.enable_standalone_scale_spline = enable_standalone_scale_spline
         # self.base_activation = base_activation()
 
-        # self.base_activation = JacobiRKAN(3)
-        self.base_activation = PadeRKAN(2, 6)
+        self.base_activation = JacobiRKAN(3)
+        # self.base_activation = PadeRKAN(2, 6)
         self.grid_eps = grid_eps
 
         self.reset_parameters()
