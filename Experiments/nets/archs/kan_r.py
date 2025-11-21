@@ -24,7 +24,7 @@ class KANLinear(torch.nn.Module):
         self.out_features = out_features
         self.grid_size = grid_size
         self.spline_order = spline_order
-        print("kan linear with rkan pade inititiated")
+        print("kan linear with rkan inititiated")
         h = (grid_range[1] - grid_range[0]) / grid_size
         grid = (
             (
