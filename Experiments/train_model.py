@@ -54,6 +54,7 @@ from nets.archs.UNext_CMRF_BSRB_GS_wavelet import UNext_CMRF_BSRB_GS_Wavelet
 from nets.archs.UNext_CMRF_BSRB_GS import UNext_CMRF_BSRB_GS
 
 from nets.archs.UNext_CMRF_GS_wavelet_rkan import UNext_CMRF_GS_Wavelet_rKAN
+from nets.archs.archs_InceptionNext_MLFC_fKAN import UNext_InceptionNext_MLFC_fKAN
 
 ######################################################
 # from nets.segmamba import SegMamba
@@ -263,6 +264,11 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         # lr = 1e-4
         # optimizer = torch.optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()),
                                     # lr=lr, weight_decay=0.01)
+
+    elif model_type == 'UNext_InceptionNext_MLFC_fKAN':
+        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
+        model = UNext_InceptionNext_MLFC_fKAN(n_channels=config.n_channels, n_classes=config.n_labels)
+
 
     # elif model_type == 'Segmamba':
     #     model = SegMamba(
