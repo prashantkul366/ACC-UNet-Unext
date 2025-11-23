@@ -393,7 +393,7 @@ class UNext_InceptionNext_MLFC_fKAN(nn.Module):
                  depths=[1, 1, 1], sr_ratios=[8, 4, 2, 1], **kwargs):
         super().__init__()
         
-        print("UNext InceptionNext MLFC Initiated")
+        print("UNext InceptionNext MLFC with fKAN Initiated")
         # self.encoder1 = nn.Conv2d(3, 16, 3, stride=1, padding=1)  
         # self.encoder2 = nn.Conv2d(16, 32, 3, stride=1, padding=1)  
         # self.encoder3 = nn.Conv2d(32, 128, 3, stride=1, padding=1)
