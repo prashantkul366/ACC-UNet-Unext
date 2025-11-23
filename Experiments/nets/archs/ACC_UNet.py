@@ -436,13 +436,13 @@ class MLFC(torch.nn.Module):
         # print("t3:", x3.shape)
         # print("t4:", x4.shape)
 
-        print("MLFC input shapes:")
-        print("x1:", x1.shape, "expected C:", self.in_filters1)
-        print("x2:", x2.shape, "expected C:", self.in_filters2)
-        print("x3:", x3.shape, "expected C:", self.in_filters3)
-        print("x4:", x4.shape, "expected C:", self.in_filters4)
-        print("self.in_filters (sum):", self.in_filters)
-        
+        # print("MLFC input shapes:")
+        # print("x1:", x1.shape, "expected C:", self.in_filters1)
+        # print("x2:", x2.shape, "expected C:", self.in_filters2)
+        # print("x3:", x3.shape, "expected C:", self.in_filters3)
+        # print("x4:", x4.shape, "expected C:", self.in_filters4)
+        # print("self.in_filters (sum):", self.in_filters)
+
         for i in range(len(self.cnv_blks1)):
             x_c1 = self.act(
                 self.bns1[i](
