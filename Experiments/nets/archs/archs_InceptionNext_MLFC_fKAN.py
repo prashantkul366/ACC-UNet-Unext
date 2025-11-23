@@ -422,8 +422,10 @@ class UNext_InceptionNext_MLFC_fKAN(nn.Module):
         )
 
         
+        
 
-        self.skip_fusion = MLFC(16, 32, 128, 160, lenn=1)
+        # self.skip_fusion = MLFC(16, 32, 128, 160, lenn=1)
+        self.skip_fusion = MLFC(80, 128, 160, 160, lenn=1)
         # self.skip_fusion = MLFC(*[80, 128, 160, 160], lenn=1)
 
         self.ebn1 = nn.BatchNorm2d(16)
@@ -538,19 +540,19 @@ class UNext_InceptionNext_MLFC_fKAN(nn.Module):
         out = out.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
         t4 = out
 
-        # print(f"BEFORE MLFC FUSION")
-        # print(f"t1 shape: {t1.shape}")
-        # print(f"t2 shape: {t2.shape}")
-        # print(f"t3 shape: {t3.shape}")
-        # print(f"t4 shape: {t4.shape}")
+        print(f"BEFORE MLFC FUSION")
+        print(f"t1 shape: {t1.shape}")
+        print(f"t2 shape: {t2.shape}")
+        print(f"t3 shape: {t3.shape}")
+        print(f"t4 shape: {t4.shape}")
 
         t1, t2, t3, t4 = self.skip_fusion(t1, t2, t3, t4)       # MLFC FUSION   
 
-        # print(f"AFTER MLFC FUSION")
-        # print(f"t1 shape: {t1.shape}")
-        # print(f"t2 shape: {t2.shape}")
-        # print(f"t3 shape: {t3.shape}")
-        # print(f"t4 shape: {t4.shape}")
+        print(f"AFTER MLFC FUSION")
+        print(f"t1 shape: {t1.shape}")
+        print(f"t2 shape: {t2.shape}")
+        print(f"t3 shape: {t3.shape}")
+        print(f"t4 shape: {t4.shape}")
         ### Bottleneck
 
         out ,H,W= self.patch_embed4(out)
