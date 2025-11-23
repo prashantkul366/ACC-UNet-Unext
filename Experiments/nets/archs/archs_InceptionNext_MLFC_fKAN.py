@@ -13,10 +13,10 @@ import matplotlib.pyplot as plt
 # from utils import *
 __all__ = ['UNext_InceptionNext_MLFC']
 
-from inceptionnext import MetaNeXtStage, InceptionDWConv2d
-# from nets.archs.inceptionnext import MetaNeXtStage, InceptionDWConv2d
-from ACC_UNet import MLFC  
-# from nets.archs.ACC_UNet import MLFC
+# from inceptionnext import MetaNeXtStage, InceptionDWConv2d
+from nets.archs.inceptionnext import MetaNeXtStage, InceptionDWConv2d
+# from ACC_UNet import MLFC  
+from nets.archs.ACC_UNet import MLFC
 
 from functools import partial 
 import timm
