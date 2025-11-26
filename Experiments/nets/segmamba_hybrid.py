@@ -251,39 +251,141 @@ class MambaVisionMixer(nn.Module):
             **factory_kwargs,
         )
 
+    def _check_tensor(self, name, x):
+        if x is None:
+            raise RuntimeError(f"[MambaVisionMixer] {name} is None")
+        if not torch.isfinite(x).all():
+            raise RuntimeError(
+                f"[MambaVisionMixer] Non-finite values in {name}: "
+                f"min={x.min().item()}, max={x.max().item()}"
+            )
     def forward(self, hidden_states):
         """
         hidden_states: (B, L, D)
         Returns: same shape as hidden_states
         """
-        _, seqlen, _ = hidden_states.shape
-        xz = self.in_proj(hidden_states)
-        xz = rearrange(xz, "b l d -> b d l")
-        x, z = xz.chunk(2, dim=1)
-        A = -torch.exp(self.A_log.float())
-        x = F.silu(F.conv1d(input=x, weight=self.conv1d_x.weight, bias=self.conv1d_x.bias, padding='same', groups=self.d_inner//2))
-        z = F.silu(F.conv1d(input=z, weight=self.conv1d_z.weight, bias=self.conv1d_z.bias, padding='same', groups=self.d_inner//2))
-        x_dbl = self.x_proj(rearrange(x, "b d l -> (b l) d"))
-        dt, B, C = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=-1)
-        dt = rearrange(self.dt_proj(dt), "(b l) d -> b d l", l=seqlen)
-        B = rearrange(B, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
-        C = rearrange(C, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
-        y = selective_scan_fn(x, 
-                              dt, 
-                              A, 
-                              B, 
-                              C, 
-                              self.D.float(), 
-                              z=None, 
-                              delta_bias=self.dt_proj.bias.float(), 
-                              delta_softplus=True, 
-                              return_last_state=None)
+        if hidden_states.dim() != 3:
+            raise RuntimeError(
+                f"[MambaVisionMixer] Expected (B, L, D), got {hidden_states.shape}"
+            )
         
-        y = torch.cat([y, z], dim=1)
-        y = rearrange(y, "b d l -> b l d")
-        out = self.out_proj(y)
-        return out
+        B, seqlen, D = hidden_states.shape
+        if D != self.d_model:
+            raise RuntimeError(
+                f"[MambaVisionMixer] d_model mismatch: got {D}, expected {self.d_model}"
+            )
 
+        self._check_tensor("hidden_states", hidden_states)
+
+        # xz = self.in_proj(hidden_states)
+        # xz = rearrange(xz, "b l d -> b d l")
+        # x, z = xz.chunk(2, dim=1)
+        # A = -torch.exp(self.A_log.float())
+        # x = F.silu(F.conv1d(input=x, weight=self.conv1d_x.weight, bias=self.conv1d_x.bias, padding='same', groups=self.d_inner//2))
+        # z = F.silu(F.conv1d(input=z, weight=self.conv1d_z.weight, bias=self.conv1d_z.bias, padding='same', groups=self.d_inner//2))
+        # x_dbl = self.x_proj(rearrange(x, "b d l -> (b l) d"))
+        # dt, B, C = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=-1)
+        # dt = rearrange(self.dt_proj(dt), "(b l) d -> b d l", l=seqlen)
+        # B = rearrange(B, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
+        # C = rearrange(C, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
+        # y = selective_scan_fn(x, 
+        #                       dt, 
+        #                       A, 
+        #                       B, 
+        #                       C, 
+        #                       self.D.float(), 
+        #                       z=None, 
+        #                       delta_bias=self.dt_proj.bias.float(), 
+        #                       delta_softplus=True, 
+        #                       return_last_state=None)
+        
+        # y = torch.cat([y, z], dim=1)
+        # y = rearrange(y, "b d l -> b l d")
+        # out = self.out_proj(y)
+        # return out
+        try:
+            xz = self.in_proj(hidden_states)          # (B, L, d_inner)
+            self._check_tensor("xz", xz)
+
+            xz = rearrange(xz, "b l d -> b d l")      # (B, d_inner, L)
+            x, z = xz.chunk(2, dim=1)                # each (B, d_inner/2, L)
+            self._check_tensor("x_before_conv", x)
+            self._check_tensor("z_before_conv", z)
+
+            A = -torch.exp(self.A_log.float())        # (d_inner/2, d_state)
+
+            x = F.silu(
+                F.conv1d(
+                    input=x,
+                    weight=self.conv1d_x.weight,
+                    bias=self.conv1d_x.bias,
+                    padding="same",
+                    groups=self.d_inner // 2,
+                )
+            )
+            z = F.silu(
+                F.conv1d(
+                    input=z,
+                    weight=self.conv1d_z.weight,
+                    bias=self.conv1d_z.bias,
+                    padding="same",
+                    groups=self.d_inner // 2,
+                )
+            )
+
+            self._check_tensor("x_after_conv", x)
+            self._check_tensor("z_after_conv", z)
+
+            x_dbl = self.x_proj(rearrange(x, "b d l -> (b l) d"))
+            self._check_tensor("x_dbl", x_dbl)
+
+            dt, Bmat, Cmat = torch.split(
+                x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=-1
+            )
+
+            dt = rearrange(self.dt_proj(dt), "(b l) d -> b d l", l=seqlen)
+            Bmat = rearrange(Bmat, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
+            Cmat = rearrange(Cmat, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
+
+            self._check_tensor("dt", dt)
+            self._check_tensor("Bmat", Bmat)
+            self._check_tensor("Cmat", Cmat)
+
+            y = selective_scan_fn(
+                x,
+                dt,
+                A,
+                Bmat,
+                Cmat,
+                self.D.float(),
+                z=None,
+                delta_bias=self.dt_proj.bias.float(),
+                delta_softplus=True,
+                return_last_state=None,
+            )
+
+            self._check_tensor("y_after_scan", y)
+
+            y = torch.cat([y, z], dim=1)
+            y = rearrange(y, "b d l -> b l d")
+            out = self.out_proj(y)
+            self._check_tensor("out", out)
+            return out
+
+        except RuntimeError as e:
+            # Catch low-level CUDA assert and re-raise with context
+            if "device-side assert" in str(e).lower():
+                raise RuntimeError(
+                    "[MambaVisionMixer] CUDA device-side assert inside selective_scan_fn "
+                    f"or conv1d.\n"
+                    f"hidden_states shape: {hidden_states.shape}, "
+                    f"d_model={self.d_model}, d_inner={self.d_inner}, "
+                    f"d_state={self.d_state}, seq_len={seqlen}"
+                ) from e
+            else:
+                raise
+
+            
 class MambaLayer(nn.Module):
     """
     Tri-oriented Spatial Mamba Block (TSMamba) operating on 3D features.
