@@ -487,17 +487,17 @@ class MambaEncoder(nn.Module):
         outs = []
         for i in range(4):
             x = self.downsample_layers[i](x)
-            print(f"[MambaEncoder] after downsample[{i}]:", x.shape)
+            # print(f"[MambaEncoder] after downsample[{i}]:", x.shape)
             x = self.gscs[i](x)
-            print(f"[MambaEncoder] after GSC[{i}]:", x.shape)
+            # print(f"[MambaEncoder] after GSC[{i}]:", x.shape)
             x = self.stages[i](x)
-            print(f"[MambaEncoder] after stage[{i}] (TSMamba):", x.shape)
+            # print(f"[MambaEncoder] after stage[{i}] (TSMamba):", x.shape)
 
             if i in self.out_indices:
                 norm_layer = getattr(self, f'norm{i}')
                 x_out = norm_layer(x)
                 x_out = self.mlps[i](x_out)
-                print(f"[MambaEncoder] outs[{i}]:", x_out.shape)
+                # print(f"[MambaEncoder] outs[{i}]:", x_out.shape)
                 outs.append(x_out)
 
         return tuple(outs)
@@ -690,59 +690,59 @@ class SegMamba(nn.Module):
         - squeeze depth back -> [B, out_chans, H, W]
         """
         squeeze_depth = False
-        print("[SegMamba] x_in:", x_in.shape) 
+        # print("[SegMamba] x_in:", x_in.shape) 
 
         if x_in.dim() == 4:
             # [B, C, H, W] -> [B, C, 1, H, W]
             x_in = x_in.unsqueeze(2)
             squeeze_depth = True
-        print("[SegMamba] x_in after unsqueeze:", x_in.shape)
+        # print("[SegMamba] x_in after unsqueeze:", x_in.shape)
 
         # --- Encoder path with Mamba features as in your original code ---
         outs = self.vit(x_in)        # tuple of 4 feature maps
-        for i, f in enumerate(outs):
-            print(f"[SegMamba] vit outs[{i}]:", f.shape)
+        # for i, f in enumerate(outs):
+        #     print(f"[SegMamba] vit outs[{i}]:", f.shape)
 
         enc1 = self.encoder1(x_in)   # skip at full res
-        print("[SegMamba] enc1:", enc1.shape)
+        # print("[SegMamba] enc1:", enc1.shape)
 
         x2 = outs[0]
         enc2 = self.encoder2(x2)
-        print("[SegMamba] enc2:", enc2.shape)
+        # print("[SegMamba] enc2:", enc2.shape)
 
         x3 = outs[1]
         enc3 = self.encoder3(x3)
-        print("[SegMamba] enc3:", enc3.shape)
+        # print("[SegMamba] enc3:", enc3.shape)
 
         x4 = outs[2]
         enc4 = self.encoder4(x4)
-        print("[SegMamba] enc4:", enc4.shape)
+        # print("[SegMamba] enc4:", enc4.shape)
 
         enc_hidden = self.encoder5(outs[3])
-        print("[SegMamba] enc_hidden:", enc_hidden.shape)
+        # print("[SegMamba] enc_hidden:", enc_hidden.shape)
 
         # --- Decoder path ---
         dec3 = self.decoder5(enc_hidden, enc4)
-        print("[SegMamba] dec3:", dec3.shape)
+        # print("[SegMamba] dec3:", dec3.shape)
 
         dec2 = self.decoder4(dec3, enc3)
-        print("[SegMamba] dec2:", dec2.shape)
+        # print("[SegMamba] dec2:", dec2.shape)
 
         dec1 = self.decoder3(dec2, enc2)
-        print("[SegMamba] dec1:", dec1.shape)
+        # print("[SegMamba] dec1:", dec1.shape)
 
         dec0 = self.decoder2(dec1, enc1)
-        print("[SegMamba] dec0:", dec0.shape)
+        # print("[SegMamba] dec0:", dec0.shape)
 
         out = self.decoder1(dec0)     # [B, C, D, H, W]
-        print("[SegMamba] out before final conv:", out.shape)
+        # print("[SegMamba] out before final conv:", out.shape)
 
         out = self.out(out)           # [B, out_chans, D, H, W]
-        print("[SegMamba] out after final conv:", out.shape)
+        # print("[SegMamba] out after final conv:", out.shape)
 
         if squeeze_depth:
             out = out.squeeze(2)      # [B, out_chans, H, W]
-            print("[SegMamba] out after squeeze depth:", out.shape)
+            # print("[SegMamba] out after squeeze depth:", out.shape)
 
         return out
     

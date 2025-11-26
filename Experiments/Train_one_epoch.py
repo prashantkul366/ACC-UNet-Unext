@@ -64,6 +64,10 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         images, masks = images.cuda(), masks.cuda()
         if masks.dim() == 3:
             masks = masks.unsqueeze(1)
+        
+        masks = masks.float()
+        # If your masks are 0 / 255:
+        masks = (masks > 0).float()
         # print("Mask unique:", torch.unique(masks))
 
         # masks = masks.float()  # Ensure it's not accidentally long
