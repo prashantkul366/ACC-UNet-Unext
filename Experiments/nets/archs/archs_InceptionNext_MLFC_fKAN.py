@@ -399,7 +399,7 @@ class UNext_InceptionNext_MLFC_fKAN(nn.Module):
         # self.encoder3 = nn.Conv2d(32, 128, 3, stride=1, padding=1)
 
         self.stem = nn.Sequential(
-            nn.Conv2d(n_channels, 40, kernel_size=4, stride=4),  # 256→64
+            nn.Conv2d(n_channels, 40, kernel_size=4, stride=4),  
             nn.BatchNorm2d(40)
         )
 
