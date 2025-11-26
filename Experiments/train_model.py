@@ -277,7 +277,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     #         feat_size=[48, 96, 192, 384], spatial_dims=3,)
     #     lr = 1e-4
 
-    elif model_type == 'Segmamba':
+    elif model_type == 'Segmamba_hybrid':
         model = SegMamba_hybrid(
             in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
