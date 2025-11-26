@@ -306,6 +306,7 @@ class MambaLayer(nn.Module):
         mlp_dim = int(dim * mlp_ratio)
 
         # LN + MDTA
+        print("At Transformer ")
         self.ln1 = nn.LayerNorm(dim)
         self.attn = TokenMDTA(dim=dim, num_heads=num_heads, bias=True)
 
@@ -313,6 +314,7 @@ class MambaLayer(nn.Module):
         self.ffn1 = FKANMLP(dim, mlp_dim)
 
         # LN + VSSM (MambaVisionMixer)
+        print("At MambaVisionMixer ")
         self.ln3 = nn.LayerNorm(dim)
         self.vssm = MambaVisionMixer(
             d_model=dim,
