@@ -18,37 +18,92 @@ from torch.optim.optimizer import Optimizer
 import numpy as np
 from scipy.ndimage import distance_transform_edt as edt
 
-
 class WeightedBCE(nn.Module):
-
-    def __init__(self, weights=[0.4, 0.6],n_labels=1):
+    def __init__(self, weights=[0.4, 0.6], n_labels=1, eps=1e-12):
         super(WeightedBCE, self).__init__()
         self.weights = weights
         self.n_labels = n_labels
+        self.eps = eps
 
     def forward(self, logit_pixel, truth_pixel):
-        # print("====",logit_pixel.size())
-        if self.n_labels ==1:
-            logit = logit_pixel.view(-1)
-            truth = truth_pixel.view(-1)
-            assert(logit.shape==truth.shape)
-            loss = F.binary_cross_entropy(logit, truth, reduction='none')
+        """
+        logit_pixel: logits from network (NOT passed through sigmoid)
+        truth_pixel: labels in {0,1} (or {0,255}) with same shape
+        """
+        if self.n_labels == 1:
+            logit = logit_pixel.float()
+            truth = truth_pixel.float()
 
-            # ###############################################################
-            # loss = F.binary_cross_entropy_with_logits(logit, truth, reduction='none')
-            # ###############################################################
+            # Make sure shapes match
+            if truth.shape != logit.shape:
+                truth = truth.view_as(logit)
 
-            # print("TRUTH SHAPE:", truth.shape, truth.dtype)
-            # print("TRUTH MIN/MAX:", truth.min().item(), truth.max().item())
+            # If labels are 0/255 etc, normalize to 0/1
+            if truth.max() > 1.0:
+                truth = (truth > 0).float()
 
-            pos = (truth>0.5).float()
-            neg = (truth<0.5).float()
+            # Basic numeric sanity checks
+            if not torch.isfinite(logit).all():
+                raise RuntimeError(
+                    f"[WeightedBCE] Non-finite logits: "
+                    f"min={logit.min().item()}, max={logit.max().item()}"
+                )
+            if not torch.isfinite(truth).all():
+                raise RuntimeError(
+                    f"[WeightedBCE] Non-finite targets: "
+                    f"min={truth.min().item()}, max={truth.max().item()}"
+                )
+
+            # *** USE LOGITS VERSION ***
+            loss = F.binary_cross_entropy_with_logits(
+                logit, truth, reduction='none'
+            )
+
+            pos = (truth > 0.5).float()
+            neg = 1.0 - pos
+
+            # Avoid tiny denominators
+            pos_weight = pos.sum().clamp(min=1.0)
+            neg_weight = neg.sum().clamp(min=1.0)
+
+            weighted = (
+                self.weights[0] * pos * loss / pos_weight +
+                self.weights[1] * neg * loss / neg_weight
+            )
+
+            return weighted.sum()
+
+
+# class WeightedBCE(nn.Module):
+
+#     def __init__(self, weights=[0.4, 0.6],n_labels=1):
+#         super(WeightedBCE, self).__init__()
+#         self.weights = weights
+#         self.n_labels = n_labels
+
+#     def forward(self, logit_pixel, truth_pixel):
+#         # print("====",logit_pixel.size())
+#         if self.n_labels ==1:
+#             logit = logit_pixel.view(-1)
+#             truth = truth_pixel.view(-1)
+#             assert(logit.shape==truth.shape)
+#             loss = F.binary_cross_entropy(logit, truth, reduction='none')
+
+#             # ###############################################################
+#             # loss = F.binary_cross_entropy_with_logits(logit, truth, reduction='none')
+#             # ###############################################################
+
+#             # print("TRUTH SHAPE:", truth.shape, truth.dtype)
+#             # print("TRUTH MIN/MAX:", truth.min().item(), truth.max().item())
+
+#             pos = (truth>0.5).float()
+#             neg = (truth<0.5).float()
             
-            pos_weight = pos.sum().item() + 1e-12
-            neg_weight = neg.sum().item() + 1e-12
-            loss = (self.weights[0]*pos*loss/pos_weight + self.weights[1]*neg*loss/neg_weight).sum()
+#             pos_weight = pos.sum().item() + 1e-12
+#             neg_weight = neg.sum().item() + 1e-12
+#             loss = (self.weights[0]*pos*loss/pos_weight + self.weights[1]*neg*loss/neg_weight).sum()
 
-            return loss
+#             return loss
         
 
 class WeightedDiceLoss(nn.Module):
