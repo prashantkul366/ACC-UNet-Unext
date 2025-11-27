@@ -608,6 +608,71 @@ class MlpChannel(nn.Module):
 #         x = self.forward_features(x)
 #         return x
 
+# class TransformerMambaBlock(nn.Module):
+#     def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
+#                  d_state=8, d_conv=3, expand=1):
+#         super().__init__()
+#         self.dim = dim
+#         self.num_heads = num_heads
+#         mlp_dim = int(dim * mlp_ratio)
+
+#         # LN + MDTA
+#         print("At Transformer ")
+#         self.ln1 = nn.LayerNorm(dim)
+#         self.attn = TokenMDTA(dim=dim, num_heads=num_heads, bias=True)
+
+#         # f-KAN (1)
+#         self.ffn1 = FKANMLP(dim, mlp_dim)
+
+#         # LN + VSSM (MambaVisionMixer)
+#         print("At MambaVisionMixer ")
+#         self.ln3 = nn.LayerNorm(dim)
+#         self.vssm = MambaVisionMixer(
+#             d_model=dim,
+#             d_state=d_state,
+#             d_conv=d_conv,
+#             expand=expand,
+#         )
+
+#         # f-KAN (2)
+#         self.ffn2 = FKANMLP(dim, mlp_dim)
+
+    # def forward(self, x5d):
+    #     # x5d: (B, C, D, H, W)
+    #     B, C = x5d.shape[:2]
+    #     D, H, W = x5d.shape[2:]
+    #     N = D * H * W
+
+    #     # ----- flatten to tokens -----
+    #     x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
+
+    #     # LN -> MDTA -> residual
+    #     h = x
+    #     x_ln = self.ln1(x)
+    #     x_attn, _ = self.attn(x_ln)            # (B, N, C)
+    #     x = x_attn + h
+
+    #     # f-KAN (1) -> residual
+    #     h = x
+    #     x_ffn1 = self.ffn1(x)                  # (B, N, C)
+    #     x = x_ffn1 + h
+
+    #     # LN -> VSSM -> residual
+    #     h = x
+    #     x_ln3 = self.ln3(x)
+    #     x_vssm = self.vssm(x_ln3)              # (B, N, C)
+    #     x = x_vssm + h
+
+    #     # f-KAN (2) -> residual
+    #     h = x
+    #     x_ffn2 = self.ffn2(x)                  # (B, N, C)
+    #     x = x_ffn2 + h
+
+    #     # ----- back to 5D -----
+    #     x_out = x.transpose(1, 2).view(B, C, D, H, W)
+    #     return x_out
+
+    
 class TransformerMambaBlock(nn.Module):
     def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
                  d_state=8, d_conv=3, expand=1):
@@ -616,17 +681,17 @@ class TransformerMambaBlock(nn.Module):
         self.num_heads = num_heads
         mlp_dim = int(dim * mlp_ratio)
 
-        # LN + MDTA
+        # --- Transformer part ---
         print("At Transformer ")
-        self.ln1 = nn.LayerNorm(dim)
+        self.ln1 = nn.LayerNorm(dim)      # for MDTA
         self.attn = TokenMDTA(dim=dim, num_heads=num_heads, bias=True)
 
-        # f-KAN (1)
+        self.ln2 = nn.LayerNorm(dim)      # for first f-KAN
         self.ffn1 = FKANMLP(dim, mlp_dim)
 
-        # LN + VSSM (MambaVisionMixer)
+        # --- Mamba part ---
         print("At MambaVisionMixer ")
-        self.ln3 = nn.LayerNorm(dim)
+        self.ln3 = nn.LayerNorm(dim)      # for VSSM
         self.vssm = MambaVisionMixer(
             d_model=dim,
             d_state=d_state,
@@ -634,7 +699,7 @@ class TransformerMambaBlock(nn.Module):
             expand=expand,
         )
 
-        # f-KAN (2)
+        self.ln4 = nn.LayerNorm(dim)      # for second f-KAN
         self.ffn2 = FKANMLP(dim, mlp_dim)
 
     def forward(self, x5d):
@@ -643,33 +708,34 @@ class TransformerMambaBlock(nn.Module):
         D, H, W = x5d.shape[2:]
         N = D * H * W
 
-        # ----- flatten to tokens -----
+        # ===== flatten to tokens =====
         x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
+        x_in = x                                # original input tokens
 
-        # LN -> MDTA -> residual
-        h = x
-        x_ln = self.ln1(x)
-        x_attn, _ = self.attn(x_ln)            # (B, N, C)
-        x = x_attn + h
+        # ================= TRANSFORMER PART =================
+        # 1) LN -> MDTA -> add residual (orig input)
+        t = self.ln1(x_in)
+        t, _ = self.attn(t)                     # (B, N, C)
+        t = x_in + t                            # attn_residual
 
-        # f-KAN (1) -> residual
-        h = x
-        x_ffn1 = self.ffn1(x)                  # (B, N, C)
-        x = x_ffn1 + h
+        # 2) LN -> f-KAN -> add residual (orig input)
+        u = self.ln2(t)
+        u = self.ffn1(u)                        # (B, N, C)
+        x_tr = x_in + u                         # transformer output
 
-        # LN -> VSSM -> residual
-        h = x
-        x_ln3 = self.ln3(x)
-        x_vssm = self.vssm(x_ln3)              # (B, N, C)
-        x = x_vssm + h
+        # ================== MAMBA PART =====================
+        # 3) LN -> VSSM -> add residual (transformer output)
+        m = self.ln3(x_tr)
+        m = self.vssm(m)                        # (B, N, C)
+        m = x_tr + m                            # mamba_residual
 
-        # f-KAN (2) -> residual
-        h = x
-        x_ffn2 = self.ffn2(x)                  # (B, N, C)
-        x = x_ffn2 + h
+        # 4) LN -> f-KAN -> add residual (transformer output)
+        n = self.ln4(m)
+        n = self.ffn2(n)                        # (B, N, C)
+        x_out_tokens = x_tr + n                 # final output tokens
 
-        # ----- back to 5D -----
-        x_out = x.transpose(1, 2).view(B, C, D, H, W)
+        # ===== back to 5D =====
+        x_out = x_out_tokens.transpose(1, 2).view(B, C, D, H, W)
         return x_out
 
 
