@@ -79,8 +79,7 @@ class LayerNorm(nn.Module):
 #         out = out + x_skip
         
 #         return out
-
- 
+    
 class FKANMLP(nn.Module):
     """
     Simple KAN-based MLP for token features.
@@ -740,6 +739,49 @@ class TransformerMambaBlock(nn.Module):
         return x_out
 
 
+class GSC(nn.Module):
+    def __init__(self, in_channles) -> None:
+        super().__init__()
+
+        self.proj = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
+        self.norm = nn.InstanceNorm3d(in_channles)
+        self.nonliner = nn.ReLU()
+
+        self.proj2 = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
+        self.norm2 = nn.InstanceNorm3d(in_channles)
+        self.nonliner2 = nn.ReLU()
+
+        self.proj3 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
+        self.norm3 = nn.InstanceNorm3d(in_channles)
+        self.nonliner3 = nn.ReLU()
+
+        self.proj4 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
+        self.norm4 = nn.InstanceNorm3d(in_channles)
+        self.nonliner4 = nn.ReLU()
+
+    def forward(self, x):
+
+        x_residual = x 
+
+        x1 = self.proj(x)
+        x1 = self.norm(x1)
+        x1 = self.nonliner(x1)
+
+        x1 = self.proj2(x1)
+        x1 = self.norm2(x1)
+        x1 = self.nonliner2(x1)
+
+        x2 = self.proj3(x)
+        x2 = self.norm3(x2)
+        x2 = self.nonliner3(x2)
+
+        x = x1 + x2
+        x = self.proj4(x)
+        x = self.norm4(x)
+        x = self.nonliner4(x)
+        
+        return x + x_residual
+    
 class MambaEncoder(nn.Module):
     def __init__(
         self,
@@ -790,7 +832,10 @@ class MambaEncoder(nn.Module):
 
         # ---------- Per-stage Transformer+KAN+VSSM blocks ----------
         self.stages = nn.ModuleList()
+        print("at gsc")
+        self.gscs = nn.ModuleList()
         for i in range(4):
+            gsc = GSC(dims[i])
             stage = nn.Sequential(
                 *[
                     TransformerMambaBlock(
@@ -804,6 +849,8 @@ class MambaEncoder(nn.Module):
                     for _ in range(depths[i])
                 ]
             )
+            self.gscs.append(gsc)
+            # cur += depths[i]
             self.stages.append(stage)
 
     def forward_features(self, x):
@@ -820,6 +867,7 @@ class MambaEncoder(nn.Module):
             # 3D downsampling (unchanged)
             x = self.downsample_layers[i](x)
 
+            x = self.gscs[i](x)
             # Token pipeline block(s) on flattened tokens
             x = self.stages[i](x)
 
@@ -875,7 +923,7 @@ class SegMamba(nn.Module):
         self.layer_scale_init_value = layer_scale_init_value
 
         # print("Initializing SegMamba")
-        print("Initializing SegMamba with Hybrid Encoder")
+        print("Initializing SegMamba with Hybrid Encoder along with GSC")
         self.spatial_dims = spatial_dims
         self.vit = MambaEncoder(in_chans, 
                                 depths=depths,
