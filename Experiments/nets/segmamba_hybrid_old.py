@@ -478,234 +478,77 @@ class MlpChannel(nn.Module):
         x = self.fc2(x)
         return x
 
-# class GSC(nn.Module):
-#     def __init__(self, in_channles) -> None:
-#         super().__init__()
-
-#         self.proj = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
-#         self.norm = nn.InstanceNorm3d(in_channles)
-#         self.nonliner = nn.ReLU()
-
-#         self.proj2 = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
-#         self.norm2 = nn.InstanceNorm3d(in_channles)
-#         self.nonliner2 = nn.ReLU()
-
-#         self.proj3 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
-#         self.norm3 = nn.InstanceNorm3d(in_channles)
-#         self.nonliner3 = nn.ReLU()
-
-#         self.proj4 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
-#         self.norm4 = nn.InstanceNorm3d(in_channles)
-#         self.nonliner4 = nn.ReLU()
-
-#     def forward(self, x):
-
-#         x_residual = x 
-
-#         x1 = self.proj(x)
-#         x1 = self.norm(x1)
-#         x1 = self.nonliner(x1)
-
-#         x1 = self.proj2(x1)
-#         x1 = self.norm2(x1)
-#         x1 = self.nonliner2(x1)
-
-#         x2 = self.proj3(x)
-#         x2 = self.norm3(x2)
-#         x2 = self.nonliner3(x2)
-
-#         x = x1 + x2
-#         x = self.proj4(x)
-#         x = self.norm4(x)
-#         x = self.nonliner4(x)
-        
-#         return x + x_residual
-
-# class MambaEncoder(nn.Module):
-#     def __init__(self, in_chans=1, depths=[2, 2, 2, 2], dims=[48, 96, 192, 384],
-#                  drop_path_rate=0., layer_scale_init_value=1e-6, out_indices=[0, 1, 2, 3]):
-#         super().__init__()
-
-#         self.downsample_layers = nn.ModuleList() # stem and 3 intermediate downsampling conv layers
-#         # stem = nn.Sequential(
-#         #       nn.Conv3d(in_chans, dims[0], kernel_size=7, stride=2, padding=3),
-#         #       )
-#         stem = nn.Sequential(
-#                     nn.Conv3d(
-#                         in_chans,
-#                         dims[0],
-#                         kernel_size=(1, 7, 7),
-#                         stride=(1, 2, 2),
-#                         padding=(0, 3, 3),
-#                     ),
-#                 )
-
-#         self.downsample_layers.append(stem)
-#         # for i in range(3):
-#         #     downsample_layer = nn.Sequential(
-#         #         # LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-#         #         nn.InstanceNorm3d(dims[i]),
-#         #         nn.Conv3d(dims[i], dims[i+1], kernel_size=2, stride=2),
-#         #     )
-#         #     self.downsample_layers.append(downsample_layer)
-
-#         for i in range(3):
-#             downsample_layer = nn.Sequential(
-#                 nn.InstanceNorm3d(dims[i]),
-#                 nn.Conv3d(
-#                     dims[i],
-#                     dims[i + 1],
-#                     kernel_size=(1, 2, 2),
-#                     stride=(1, 2, 2),
-#                 ),
-#             )
-#             self.downsample_layers.append(downsample_layer)
-
-#         self.stages = nn.ModuleList()
-#         # self.gscs = nn.ModuleList()
-#         num_slices_list = [64, 32, 16, 8]
-#         cur = 0
-#         for i in range(4):
-#             # gsc = GSC(dims[i])
-
-#             # stage = nn.Sequential(
-#             #     *[MambaLayer(dim=dims[i], num_slices=num_slices_list[i]) for j in range(depths[i])]
-#             # )
-#             MDTA
-#             self.stages.append(stage)
-#             # self.gscs.append(gsc)
-#             cur += depths[i]
-
-#         self.out_indices = out_indices
-
-#         self.mlps = nn.ModuleList()
-#         for i_layer in range(4):
-#             layer = nn.InstanceNorm3d(dims[i_layer])
-#             layer_name = f'norm{i_layer}'
-#             self.add_module(layer_name, layer)
-#             self.mlps.append(MlpChannel(dims[i_layer], 2 * dims[i_layer]))
-
-#     def forward_features(self, x):
-#         outs = []
-#         for i in range(4):
-#             x = self.downsample_layers[i](x)
-#             # print(f"[MambaEncoder] after downsample[{i}]:", x.shape)
-#             x = self.gscs[i](x)
-#             # print(f"[MambaEncoder] after GSC[{i}]:", x.shape)
-#             x = self.stages[i](x)
-#             # print(f"[MambaEncoder] after stage[{i}] (TSMamba):", x.shape)
-
-#             if i in self.out_indices:
-#                 norm_layer = getattr(self, f'norm{i}')
-#                 x_out = norm_layer(x)
-#                 x_out = self.mlps[i](x_out)
-#                 # print(f"[MambaEncoder] outs[{i}]:", x_out.shape)
-#                 outs.append(x_out)
-
-#         return tuple(outs)
-
-#     def forward(self, x):
-#         x = self.forward_features(x)
-#         return x
-
-class TransformerMambaBlock(nn.Module):
-    def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
-                 d_state=8, d_conv=3, expand=1):
+class GSC(nn.Module):
+    def __init__(self, in_channles) -> None:
         super().__init__()
-        self.dim = dim
-        self.num_heads = num_heads
-        mlp_dim = int(dim * mlp_ratio)
 
-        # LN + MDTA
-        print("At Transformer ")
-        self.ln1 = nn.LayerNorm(dim)
-        self.attn = TokenMDTA(dim=dim, num_heads=num_heads, bias=True)
+        self.proj = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
+        self.norm = nn.InstanceNorm3d(in_channles)
+        self.nonliner = nn.ReLU()
 
-        # f-KAN (1)
-        self.ffn1 = FKANMLP(dim, mlp_dim)
+        self.proj2 = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
+        self.norm2 = nn.InstanceNorm3d(in_channles)
+        self.nonliner2 = nn.ReLU()
 
-        # LN + VSSM (MambaVisionMixer)
-        print("At MambaVisionMixer ")
-        self.ln3 = nn.LayerNorm(dim)
-        self.vssm = MambaVisionMixer(
-            d_model=dim,
-            d_state=d_state,
-            d_conv=d_conv,
-            expand=expand,
-        )
+        self.proj3 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
+        self.norm3 = nn.InstanceNorm3d(in_channles)
+        self.nonliner3 = nn.ReLU()
 
-        # f-KAN (2)
-        self.ffn2 = FKANMLP(dim, mlp_dim)
+        self.proj4 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
+        self.norm4 = nn.InstanceNorm3d(in_channles)
+        self.nonliner4 = nn.ReLU()
 
-    def forward(self, x5d):
-        # x5d: (B, C, D, H, W)
-        B, C = x5d.shape[:2]
-        D, H, W = x5d.shape[2:]
-        N = D * H * W
+    def forward(self, x):
 
-        # ----- flatten to tokens -----
-        x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
+        x_residual = x 
 
-        # LN -> MDTA -> residual
-        h = x
-        x_ln = self.ln1(x)
-        x_attn, _ = self.attn(x_ln)            # (B, N, C)
-        x = x_attn + h
+        x1 = self.proj(x)
+        x1 = self.norm(x1)
+        x1 = self.nonliner(x1)
 
-        # f-KAN (1) -> residual
-        h = x
-        x_ffn1 = self.ffn1(x)                  # (B, N, C)
-        x = x_ffn1 + h
+        x1 = self.proj2(x1)
+        x1 = self.norm2(x1)
+        x1 = self.nonliner2(x1)
 
-        # LN -> VSSM -> residual
-        h = x
-        x_ln3 = self.ln3(x)
-        x_vssm = self.vssm(x_ln3)              # (B, N, C)
-        x = x_vssm + h
+        x2 = self.proj3(x)
+        x2 = self.norm3(x2)
+        x2 = self.nonliner3(x2)
 
-        # f-KAN (2) -> residual
-        h = x
-        x_ffn2 = self.ffn2(x)                  # (B, N, C)
-        x = x_ffn2 + h
-
-        # ----- back to 5D -----
-        x_out = x.transpose(1, 2).view(B, C, D, H, W)
-        return x_out
-
+        x = x1 + x2
+        x = self.proj4(x)
+        x = self.norm4(x)
+        x = self.nonliner4(x)
+        
+        return x + x_residual
 
 class MambaEncoder(nn.Module):
-    def __init__(
-        self,
-        in_chans=1,
-        depths=[2, 2, 2, 2],
-        dims=[48, 96, 192, 384],
-        num_heads=4,
-        mlp_ratio=4.0,
-        d_state=8,
-        d_conv=3,
-        expand=1,
-        out_indices=[0, 1, 2, 3],
-    ):
+    def __init__(self, in_chans=1, depths=[2, 2, 2, 2], dims=[48, 96, 192, 384],
+                 drop_path_rate=0., layer_scale_init_value=1e-6, out_indices=[0, 1, 2, 3]):
         super().__init__()
 
-        self.out_indices = out_indices
-
-        # ---------- Downsampling path (kept from old encoder) ----------
-        self.downsample_layers = nn.ModuleList()
-
-        # Stem: Conv3d with (1,7,7) and stride (1,2,2)
+        self.downsample_layers = nn.ModuleList() # stem and 3 intermediate downsampling conv layers
+        # stem = nn.Sequential(
+        #       nn.Conv3d(in_chans, dims[0], kernel_size=7, stride=2, padding=3),
+        #       )
         stem = nn.Sequential(
-            nn.Conv3d(
-                in_chans,
-                dims[0],
-                kernel_size=(1, 7, 7),
-                stride=(1, 2, 2),
-                padding=(0, 3, 3),
-            ),
-        )
-        self.downsample_layers.append(stem)
+                    nn.Conv3d(
+                        in_chans,
+                        dims[0],
+                        kernel_size=(1, 7, 7),
+                        stride=(1, 2, 2),
+                        padding=(0, 3, 3),
+                    ),
+                )
 
-        # Next 3 downsample layers: only H,W downsampled
+        self.downsample_layers.append(stem)
+        # for i in range(3):
+        #     downsample_layer = nn.Sequential(
+        #         # LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
+        #         nn.InstanceNorm3d(dims[i]),
+        #         nn.Conv3d(dims[i], dims[i+1], kernel_size=2, stride=2),
+        #     )
+        #     self.downsample_layers.append(downsample_layer)
+
         for i in range(3):
             downsample_layer = nn.Sequential(
                 nn.InstanceNorm3d(dims[i]),
@@ -718,49 +561,53 @@ class MambaEncoder(nn.Module):
             )
             self.downsample_layers.append(downsample_layer)
 
-        # ---------- Per-stage Transformer+KAN+VSSM blocks ----------
         self.stages = nn.ModuleList()
+        self.gscs = nn.ModuleList()
+        num_slices_list = [64, 32, 16, 8]
+        cur = 0
         for i in range(4):
+            gsc = GSC(dims[i])
+
             stage = nn.Sequential(
-                *[
-                    TransformerMambaBlock(
-                        dim=dims[i],
-                        num_heads=num_heads,
-                        mlp_ratio=mlp_ratio,
-                        d_state=d_state,
-                        d_conv=d_conv,
-                        expand=expand,
-                    )
-                    for _ in range(depths[i])
-                ]
+                *[MambaLayer(dim=dims[i], num_slices=num_slices_list[i]) for j in range(depths[i])]
             )
+            
+
             self.stages.append(stage)
+            self.gscs.append(gsc)
+            cur += depths[i]
+
+        self.out_indices = out_indices
+
+        self.mlps = nn.ModuleList()
+        for i_layer in range(4):
+            layer = nn.InstanceNorm3d(dims[i_layer])
+            layer_name = f'norm{i_layer}'
+            self.add_module(layer_name, layer)
+            self.mlps.append(MlpChannel(dims[i_layer], 2 * dims[i_layer]))
 
     def forward_features(self, x):
-        """
-        x: (B, in_chans, D, H, W)
-
-        After stage 0: (B, dims[0], D, H/2,  W/2)
-        After stage 1: (B, dims[1], D, H/4,  W/4)
-        After stage 2: (B, dims[2], D, H/8,  W/8)
-        After stage 3: (B, dims[3], D, H/16, W/16)
-        """
         outs = []
         for i in range(4):
-            # 3D downsampling (unchanged)
             x = self.downsample_layers[i](x)
-
-            # Token pipeline block(s) on flattened tokens
+            # print(f"[MambaEncoder] after downsample[{i}]:", x.shape)
+            x = self.gscs[i](x)
+            # print(f"[MambaEncoder] after GSC[{i}]:", x.shape)
             x = self.stages[i](x)
+            # print(f"[MambaEncoder] after stage[{i}] (TSMamba):", x.shape)
 
             if i in self.out_indices:
-                outs.append(x)
+                norm_layer = getattr(self, f'norm{i}')
+                x_out = norm_layer(x)
+                x_out = self.mlps[i](x_out)
+                # print(f"[MambaEncoder] outs[{i}]:", x_out.shape)
+                outs.append(x_out)
 
         return tuple(outs)
 
     def forward(self, x):
-        return self.forward_features(x)
-
+        x = self.forward_features(x)
+        return x
 
 # class SegMamba(nn.Module):
 #     def __init__(
@@ -943,145 +790,145 @@ class SegMamba(nn.Module):
                 f"min={x.min().item()}, max={x.max().item()}"
             )
     
-    # def forward(self, x_in):
-    #     """
-    #     x_in: [B, C, H, W] or [B, C, D, H, W]
-    #     """
-    #     squeeze_depth = False
-
-    #     # ---- Input checks ----
-    #     if x_in.dim() not in (4, 5):
-    #         raise RuntimeError(
-    #             f"[SegMamba] Expected 4D or 5D input, got {x_in.dim()}D with shape {x_in.shape}"
-    #         )
-
-    #     if x_in.dim() == 4:
-    #         x_in = x_in.unsqueeze(2)   # [B, C, 1, H, W]
-    #         squeeze_depth = True
-
-    #     if x_in.size(1) != self.in_chans:
-    #         raise RuntimeError(
-    #             f"[SegMamba] Channel mismatch: got {x_in.size(1)} channels, "
-    #             f"expected {self.in_chans}"
-    #         )
-
-    #     self._check_numerics("x_in", x_in)
-
-    #     # --- Encoder path with Mamba features ---
-    #     outs = self.vit(x_in)        # tuple of 4 feature maps
-    #     for i, o in enumerate(outs):
-    #         if o is None:
-    #             raise RuntimeError(f"[SegMamba] vit outs[{i}] is None")
-    #         self._check_numerics(f"vit outs[{i}]", o)
-
-    #     enc1 = self.encoder1(x_in)
-    #     self._check_numerics("enc1", enc1)
-
-    #     x2 = outs[0]
-    #     enc2 = self.encoder2(x2)
-    #     self._check_numerics("enc2", enc2)
-
-    #     x3 = outs[1]
-    #     enc3 = self.encoder3(x3)
-    #     self._check_numerics("enc3", enc3)
-
-    #     x4 = outs[2]
-    #     enc4 = self.encoder4(x4)
-    #     self._check_numerics("enc4", enc4)
-
-    #     enc_hidden = self.encoder5(outs[3])
-    #     self._check_numerics("enc_hidden", enc_hidden)
-
-    #     # --- Decoder path ---
-    #     dec3 = self.decoder5(enc_hidden, enc4)
-    #     self._check_numerics("dec3", dec3)
-
-    #     dec2 = self.decoder4(dec3, enc3)
-    #     self._check_numerics("dec2", dec2)
-
-    #     dec1 = self.decoder3(dec2, enc2)
-    #     self._check_numerics("dec1", dec1)
-
-    #     dec0 = self.decoder2(dec1, enc1)
-    #     self._check_numerics("dec0", dec0)
-
-    #     out = self.decoder1(dec0)
-    #     self._check_numerics("decoder1_out", out)
-
-    #     out = self.out(out)
-    #     self._check_numerics("out_logits_5d", out)
-
-    #     if squeeze_depth:
-    #         out = out.squeeze(2)  # [B, out_chans, H, W]
-    #         self._check_numerics("out_logits_4d", out)
-
-    #     return out
-    
     def forward(self, x_in):
         """
-        x_in comes from your ACC-UNet pipeline as [B, C, H, W].
-
-        We:
-        - unsqueeze a fake depth dim -> [B, C, 1, H, W]
-        - run the 3D Mamba encoder + UNETR blocks
-        - squeeze depth back -> [B, out_chans, H, W]
+        x_in: [B, C, H, W] or [B, C, D, H, W]
         """
         squeeze_depth = False
-        print("[SegMamba] x_in:", x_in.shape) 
+
+        # ---- Input checks ----
+        if x_in.dim() not in (4, 5):
+            raise RuntimeError(
+                f"[SegMamba] Expected 4D or 5D input, got {x_in.dim()}D with shape {x_in.shape}"
+            )
 
         if x_in.dim() == 4:
-            # [B, C, H, W] -> [B, C, 1, H, W]
-            x_in = x_in.unsqueeze(2)
+            x_in = x_in.unsqueeze(2)   # [B, C, 1, H, W]
             squeeze_depth = True
-        print("[SegMamba] x_in after unsqueeze:", x_in.shape)
 
-        # --- Encoder path with Mamba features as in your original code ---
+        if x_in.size(1) != self.in_chans:
+            raise RuntimeError(
+                f"[SegMamba] Channel mismatch: got {x_in.size(1)} channels, "
+                f"expected {self.in_chans}"
+            )
+
+        self._check_numerics("x_in", x_in)
+
+        # --- Encoder path with Mamba features ---
         outs = self.vit(x_in)        # tuple of 4 feature maps
-        for i, f in enumerate(outs):
-            print(f"[SegMamba] vit outs[{i}]:", f.shape)
+        for i, o in enumerate(outs):
+            if o is None:
+                raise RuntimeError(f"[SegMamba] vit outs[{i}] is None")
+            self._check_numerics(f"vit outs[{i}]", o)
 
-        enc1 = self.encoder1(x_in)   # skip at full res
-        print("[SegMamba] enc1:", enc1.shape)
+        enc1 = self.encoder1(x_in)
+        self._check_numerics("enc1", enc1)
 
         x2 = outs[0]
         enc2 = self.encoder2(x2)
-        print("[SegMamba] enc2:", enc2.shape)
+        self._check_numerics("enc2", enc2)
 
         x3 = outs[1]
         enc3 = self.encoder3(x3)
-        print("[SegMamba] enc3:", enc3.shape)
+        self._check_numerics("enc3", enc3)
 
         x4 = outs[2]
         enc4 = self.encoder4(x4)
-        print("[SegMamba] enc4:", enc4.shape)
+        self._check_numerics("enc4", enc4)
 
         enc_hidden = self.encoder5(outs[3])
-        print("[SegMamba] enc_hidden:", enc_hidden.shape)
+        self._check_numerics("enc_hidden", enc_hidden)
 
         # --- Decoder path ---
         dec3 = self.decoder5(enc_hidden, enc4)
-        print("[SegMamba] dec3:", dec3.shape)
+        self._check_numerics("dec3", dec3)
 
         dec2 = self.decoder4(dec3, enc3)
-        print("[SegMamba] dec2:", dec2.shape)
+        self._check_numerics("dec2", dec2)
 
         dec1 = self.decoder3(dec2, enc2)
-        print("[SegMamba] dec1:", dec1.shape)
+        self._check_numerics("dec1", dec1)
 
         dec0 = self.decoder2(dec1, enc1)
-        print("[SegMamba] dec0:", dec0.shape)
+        self._check_numerics("dec0", dec0)
 
-        out = self.decoder1(dec0)     # [B, C, D, H, W]
-        print("[SegMamba] out before final conv:", out.shape)
+        out = self.decoder1(dec0)
+        self._check_numerics("decoder1_out", out)
 
-        out = self.out(out)           # [B, out_chans, D, H, W]
-        print("[SegMamba] out after final conv:", out.shape)
+        out = self.out(out)
+        self._check_numerics("out_logits_5d", out)
 
         if squeeze_depth:
-            out = out.squeeze(2)      # [B, out_chans, H, W]
-            print("[SegMamba] out after squeeze depth:", out.shape)
+            out = out.squeeze(2)  # [B, out_chans, H, W]
+            self._check_numerics("out_logits_4d", out)
 
         return out
+    
+    # def forward(self, x_in):
+    #     """
+    #     x_in comes from your ACC-UNet pipeline as [B, C, H, W].
+
+    #     We:
+    #     - unsqueeze a fake depth dim -> [B, C, 1, H, W]
+    #     - run the 3D Mamba encoder + UNETR blocks
+    #     - squeeze depth back -> [B, out_chans, H, W]
+    #     """
+    #     squeeze_depth = False
+    #     # print("[SegMamba] x_in:", x_in.shape) 
+
+    #     if x_in.dim() == 4:
+    #         # [B, C, H, W] -> [B, C, 1, H, W]
+    #         x_in = x_in.unsqueeze(2)
+    #         squeeze_depth = True
+    #     # print("[SegMamba] x_in after unsqueeze:", x_in.shape)
+
+    #     # --- Encoder path with Mamba features as in your original code ---
+    #     outs = self.vit(x_in)        # tuple of 4 feature maps
+    #     # for i, f in enumerate(outs):
+    #     #     print(f"[SegMamba] vit outs[{i}]:", f.shape)
+
+    #     enc1 = self.encoder1(x_in)   # skip at full res
+    #     # print("[SegMamba] enc1:", enc1.shape)
+
+    #     x2 = outs[0]
+    #     enc2 = self.encoder2(x2)
+    #     # print("[SegMamba] enc2:", enc2.shape)
+
+    #     x3 = outs[1]
+    #     enc3 = self.encoder3(x3)
+    #     # print("[SegMamba] enc3:", enc3.shape)
+
+    #     x4 = outs[2]
+    #     enc4 = self.encoder4(x4)
+    #     # print("[SegMamba] enc4:", enc4.shape)
+
+    #     enc_hidden = self.encoder5(outs[3])
+    #     # print("[SegMamba] enc_hidden:", enc_hidden.shape)
+
+    #     # --- Decoder path ---
+    #     dec3 = self.decoder5(enc_hidden, enc4)
+    #     # print("[SegMamba] dec3:", dec3.shape)
+
+    #     dec2 = self.decoder4(dec3, enc3)
+    #     # print("[SegMamba] dec2:", dec2.shape)
+
+    #     dec1 = self.decoder3(dec2, enc2)
+    #     # print("[SegMamba] dec1:", dec1.shape)
+
+    #     dec0 = self.decoder2(dec1, enc1)
+    #     # print("[SegMamba] dec0:", dec0.shape)
+
+    #     out = self.decoder1(dec0)     # [B, C, D, H, W]
+    #     # print("[SegMamba] out before final conv:", out.shape)
+
+    #     out = self.out(out)           # [B, out_chans, D, H, W]
+    #     # print("[SegMamba] out after final conv:", out.shape)
+
+    #     if squeeze_depth:
+    #         out = out.squeeze(2)      # [B, out_chans, H, W]
+    #         # print("[SegMamba] out after squeeze depth:", out.shape)
+
+    #     return out
     
 
     # def forward(self, x_in):
