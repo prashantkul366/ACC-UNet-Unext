@@ -1012,145 +1012,145 @@ class SegMamba(nn.Module):
                 f"min={x.min().item()}, max={x.max().item()}"
             )
     
-    # def forward(self, x_in):
-    #     """
-    #     x_in: [B, C, H, W] or [B, C, D, H, W]
-    #     """
-    #     squeeze_depth = False
-
-    #     # ---- Input checks ----
-    #     if x_in.dim() not in (4, 5):
-    #         raise RuntimeError(
-    #             f"[SegMamba] Expected 4D or 5D input, got {x_in.dim()}D with shape {x_in.shape}"
-    #         )
-
-    #     if x_in.dim() == 4:
-    #         x_in = x_in.unsqueeze(2)   # [B, C, 1, H, W]
-    #         squeeze_depth = True
-
-    #     if x_in.size(1) != self.in_chans:
-    #         raise RuntimeError(
-    #             f"[SegMamba] Channel mismatch: got {x_in.size(1)} channels, "
-    #             f"expected {self.in_chans}"
-    #         )
-
-    #     self._check_numerics("x_in", x_in)
-
-    #     # --- Encoder path with Mamba features ---
-    #     outs = self.vit(x_in)        # tuple of 4 feature maps
-    #     for i, o in enumerate(outs):
-    #         if o is None:
-    #             raise RuntimeError(f"[SegMamba] vit outs[{i}] is None")
-    #         self._check_numerics(f"vit outs[{i}]", o)
-
-    #     enc1 = self.encoder1(x_in)
-    #     self._check_numerics("enc1", enc1)
-
-    #     x2 = outs[0]
-    #     enc2 = self.encoder2(x2)
-    #     self._check_numerics("enc2", enc2)
-
-    #     x3 = outs[1]
-    #     enc3 = self.encoder3(x3)
-    #     self._check_numerics("enc3", enc3)
-
-    #     x4 = outs[2]
-    #     enc4 = self.encoder4(x4)
-    #     self._check_numerics("enc4", enc4)
-
-    #     enc_hidden = self.encoder5(outs[3])
-    #     self._check_numerics("enc_hidden", enc_hidden)
-
-    #     # --- Decoder path ---
-    #     dec3 = self.decoder5(enc_hidden, enc4)
-    #     self._check_numerics("dec3", dec3)
-
-    #     dec2 = self.decoder4(dec3, enc3)
-    #     self._check_numerics("dec2", dec2)
-
-    #     dec1 = self.decoder3(dec2, enc2)
-    #     self._check_numerics("dec1", dec1)
-
-    #     dec0 = self.decoder2(dec1, enc1)
-    #     self._check_numerics("dec0", dec0)
-
-    #     out = self.decoder1(dec0)
-    #     self._check_numerics("decoder1_out", out)
-
-    #     out = self.out(out)
-    #     self._check_numerics("out_logits_5d", out)
-
-    #     if squeeze_depth:
-    #         out = out.squeeze(2)  # [B, out_chans, H, W]
-    #         self._check_numerics("out_logits_4d", out)
-
-    #     return out
-    
     def forward(self, x_in):
         """
-        x_in comes from your ACC-UNet pipeline as [B, C, H, W].
-
-        We:
-        - unsqueeze a fake depth dim -> [B, C, 1, H, W]
-        - run the 3D Mamba encoder + UNETR blocks
-        - squeeze depth back -> [B, out_chans, H, W]
+        x_in: [B, C, H, W] or [B, C, D, H, W]
         """
         squeeze_depth = False
-        print("[SegMamba] x_in:", x_in.shape) 
+
+        # ---- Input checks ----
+        if x_in.dim() not in (4, 5):
+            raise RuntimeError(
+                f"[SegMamba] Expected 4D or 5D input, got {x_in.dim()}D with shape {x_in.shape}"
+            )
 
         if x_in.dim() == 4:
-            # [B, C, H, W] -> [B, C, 1, H, W]
-            x_in = x_in.unsqueeze(2)
+            x_in = x_in.unsqueeze(2)   # [B, C, 1, H, W]
             squeeze_depth = True
-        print("[SegMamba] x_in after unsqueeze:", x_in.shape)
 
-        # --- Encoder path with Mamba features as in your original code ---
+        if x_in.size(1) != self.in_chans:
+            raise RuntimeError(
+                f"[SegMamba] Channel mismatch: got {x_in.size(1)} channels, "
+                f"expected {self.in_chans}"
+            )
+
+        self._check_numerics("x_in", x_in)
+
+        # --- Encoder path with Mamba features ---
         outs = self.vit(x_in)        # tuple of 4 feature maps
-        for i, f in enumerate(outs):
-            print(f"[SegMamba] vit outs[{i}]:", f.shape)
+        for i, o in enumerate(outs):
+            if o is None:
+                raise RuntimeError(f"[SegMamba] vit outs[{i}] is None")
+            self._check_numerics(f"vit outs[{i}]", o)
 
-        enc1 = self.encoder1(x_in)   # skip at full res
-        print("[SegMamba] enc1:", enc1.shape)
+        enc1 = self.encoder1(x_in)
+        self._check_numerics("enc1", enc1)
 
         x2 = outs[0]
         enc2 = self.encoder2(x2)
-        print("[SegMamba] enc2:", enc2.shape)
+        self._check_numerics("enc2", enc2)
 
         x3 = outs[1]
         enc3 = self.encoder3(x3)
-        print("[SegMamba] enc3:", enc3.shape)
+        self._check_numerics("enc3", enc3)
 
         x4 = outs[2]
         enc4 = self.encoder4(x4)
-        print("[SegMamba] enc4:", enc4.shape)
+        self._check_numerics("enc4", enc4)
 
         enc_hidden = self.encoder5(outs[3])
-        print("[SegMamba] enc_hidden:", enc_hidden.shape)
+        self._check_numerics("enc_hidden", enc_hidden)
 
         # --- Decoder path ---
         dec3 = self.decoder5(enc_hidden, enc4)
-        print("[SegMamba] dec3:", dec3.shape)
+        self._check_numerics("dec3", dec3)
 
         dec2 = self.decoder4(dec3, enc3)
-        print("[SegMamba] dec2:", dec2.shape)
+        self._check_numerics("dec2", dec2)
 
         dec1 = self.decoder3(dec2, enc2)
-        print("[SegMamba] dec1:", dec1.shape)
+        self._check_numerics("dec1", dec1)
 
         dec0 = self.decoder2(dec1, enc1)
-        print("[SegMamba] dec0:", dec0.shape)
+        self._check_numerics("dec0", dec0)
 
-        out = self.decoder1(dec0)     # [B, C, D, H, W]
-        print("[SegMamba] out before final conv:", out.shape)
+        out = self.decoder1(dec0)
+        self._check_numerics("decoder1_out", out)
 
-        out = self.out(out)           # [B, out_chans, D, H, W]
-        print("[SegMamba] out after final conv:", out.shape)
+        out = self.out(out)
+        self._check_numerics("out_logits_5d", out)
 
         if squeeze_depth:
-            out = out.squeeze(2)      # [B, out_chans, H, W]
-            print("[SegMamba] out after squeeze depth:", out.shape)
+            out = out.squeeze(2)  # [B, out_chans, H, W]
+            self._check_numerics("out_logits_4d", out)
 
         return out
+    
+    # def forward(self, x_in):
+    #     """
+    #     x_in comes from your ACC-UNet pipeline as [B, C, H, W].
+
+    #     We:
+    #     - unsqueeze a fake depth dim -> [B, C, 1, H, W]
+    #     - run the 3D Mamba encoder + UNETR blocks
+    #     - squeeze depth back -> [B, out_chans, H, W]
+    #     """
+    #     squeeze_depth = False
+    #     print("[SegMamba] x_in:", x_in.shape) 
+
+    #     if x_in.dim() == 4:
+    #         # [B, C, H, W] -> [B, C, 1, H, W]
+    #         x_in = x_in.unsqueeze(2)
+    #         squeeze_depth = True
+    #     print("[SegMamba] x_in after unsqueeze:", x_in.shape)
+
+    #     # --- Encoder path with Mamba features as in your original code ---
+    #     outs = self.vit(x_in)        # tuple of 4 feature maps
+    #     for i, f in enumerate(outs):
+    #         print(f"[SegMamba] vit outs[{i}]:", f.shape)
+
+    #     enc1 = self.encoder1(x_in)   # skip at full res
+    #     print("[SegMamba] enc1:", enc1.shape)
+
+    #     x2 = outs[0]
+    #     enc2 = self.encoder2(x2)
+    #     print("[SegMamba] enc2:", enc2.shape)
+
+    #     x3 = outs[1]
+    #     enc3 = self.encoder3(x3)
+    #     print("[SegMamba] enc3:", enc3.shape)
+
+    #     x4 = outs[2]
+    #     enc4 = self.encoder4(x4)
+    #     print("[SegMamba] enc4:", enc4.shape)
+
+    #     enc_hidden = self.encoder5(outs[3])
+    #     print("[SegMamba] enc_hidden:", enc_hidden.shape)
+
+    #     # --- Decoder path ---
+    #     dec3 = self.decoder5(enc_hidden, enc4)
+    #     print("[SegMamba] dec3:", dec3.shape)
+
+    #     dec2 = self.decoder4(dec3, enc3)
+    #     print("[SegMamba] dec2:", dec2.shape)
+
+    #     dec1 = self.decoder3(dec2, enc2)
+    #     print("[SegMamba] dec1:", dec1.shape)
+
+    #     dec0 = self.decoder2(dec1, enc1)
+    #     print("[SegMamba] dec0:", dec0.shape)
+
+    #     out = self.decoder1(dec0)     # [B, C, D, H, W]
+    #     print("[SegMamba] out before final conv:", out.shape)
+
+    #     out = self.out(out)           # [B, out_chans, D, H, W]
+    #     print("[SegMamba] out after final conv:", out.shape)
+
+    #     if squeeze_depth:
+    #         out = out.squeeze(2)      # [B, out_chans, H, W]
+    #         print("[SegMamba] out after squeeze depth:", out.shape)
+
+    #     return out
     
 
     # def forward(self, x_in):
