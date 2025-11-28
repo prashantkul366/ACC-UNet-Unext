@@ -514,9 +514,9 @@ class TransformerMambaBlock(nn.Module):
         # convert CAB output back to tokens
         cab_tokens = cab_5d.view(B, C, N).transpose(1, 2)  # (B, N, C)
 
-        cab_tokens = cab_tokens + m 
+        cab_tokens = cab_tokens + m             # Resdual around CAB
     
-        x_out_tokens = x_tr + cab_tokens            # (B, N, C)
+        x_out_tokens = x_tr + cab_tokens            # (B, N, C)  Residual around mamba + CAB
 
         # ===== back to 5D =====
         x_out = x_out_tokens.transpose(1, 2).view(B, C, D, H, W)
