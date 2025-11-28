@@ -51,35 +51,6 @@ class LayerNorm(nn.Module):
 
             return x
 
-# class MambaLayer(nn.Module):
-#     def __init__(self, dim, d_state = 16, d_conv = 4, expand = 2, num_slices=None):
-#         super().__init__()
-#         self.dim = dim
-#         self.norm = nn.LayerNorm(dim)
-#         self.mamba = Mamba(
-#                 d_model=dim, # Model dimension d_model
-#                 d_state=d_state,  # SSM state expansion factor
-#                 d_conv=d_conv,    # Local convolution width
-#                 expand=expand,    # Block expansion factor
-#                 bimamba_type="v2",
-#                 # nslices=num_slices,
-#         )
-    
-#     def forward(self, x):
-#         B, C = x.shape[:2]
-#         x_skip = x
-#         assert C == self.dim
-#         n_tokens = x.shape[2:].numel()
-#         img_dims = x.shape[2:]
-#         x_flat = x.reshape(B, C, n_tokens).transpose(-1, -2)
-#         x_norm = self.norm(x_flat)
-#         x_mamba = self.mamba(x_norm)
-
-#         out = x_mamba.transpose(-1, -2).reshape(B, C, *img_dims)
-#         out = out + x_skip
-        
-#         return out
-    
 class FKANMLP(nn.Module):
     """
     Simple KAN-based MLP for token features.
@@ -385,134 +356,6 @@ class MambaVisionMixer(nn.Module):
             else:
                 raise
 
-class PostVSSMConvBlock(nn.Module):
-    def __init__(self, channels):
-        super().__init__()
-        self.conv = nn.Conv3d(channels, channels, kernel_size=3, padding=1)
-        self.norm = nn.InstanceNorm3d(channels)
-        self.act = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.norm(x)
-        x = self.act(x)
-        return x
-
-class ChannelAttention(nn.Module):
-    def __init__(self, in_channels, reduction_ratio=16):
-        super(ChannelAttention, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Sequential(
-            nn.Linear(in_channels, in_channels // reduction_ratio),
-            nn.ReLU(inplace=True),
-            nn.Linear(in_channels // reduction_ratio, in_channels)
-        )
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, x):
-        b, c, _, _ = x.size()
-        y = self.avg_pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1)
-        y = self.sigmoid(y)
-        return x * y
-
-class ChannelAttention3D(nn.Module):
-    def __init__(self, in_channels, reduction_ratio=16):
-        super().__init__()
-        self.avg_pool = nn.AdaptiveAvgPool3d(1)  # (B, C, D, H, W) -> (B, C, 1, 1, 1)
-        self.mlp = nn.Sequential(
-            nn.Conv3d(in_channels, in_channels // reduction_ratio, kernel_size=1),
-            nn.ReLU(inplace=True),
-            nn.Conv3d(in_channels // reduction_ratio, in_channels, kernel_size=1),
-        )
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, x):
-        # x: (B, C, D, H, W)
-        w = self.avg_pool(x)          # (B, C, 1, 1, 1)
-        w = self.mlp(w)               # (B, C, 1, 1, 1)
-        w = self.sigmoid(w)
-        return x * w
-
-class MambaLayer(nn.Module):
-    """
-    Tri-oriented Spatial Mamba Block (TSMamba) operating on 3D features.
-
-    Input / output: x5d = (B, C, D, H, W)
-
-    Internally:
-      - flatten to tokens (B, N, C)
-      - LN -> MDTA -> res
-      - LN -> f-KAN -> res
-      - LN -> VSSM (MambaVisionMixer) -> res
-      - LN -> f-KAN -> res
-      - reshape back to (B, C, D, H, W)
-    """
-    def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
-                 d_state=8, d_conv=3, expand=1, num_slices=None):
-        super().__init__()
-        self.dim = dim
-        self.num_heads = num_heads
-        mlp_dim = int(dim * mlp_ratio)
-
-        # LN + MDTA
-        print("At Transformer ")
-        self.ln1 = nn.LayerNorm(dim)
-        self.attn = TokenMDTA(dim=dim, num_heads=num_heads, bias=True)
-
-        # LN + f-KAN (1)
-        self.ffn1 = FKANMLP(dim, mlp_dim)
-
-        # LN + VSSM (MambaVisionMixer)
-        print("At MambaVisionMixer ")
-        self.ln3 = nn.LayerNorm(dim)
-        self.vssm = MambaVisionMixer(
-            d_model=dim,
-            d_state=d_state,
-            d_conv=d_conv,
-            expand=expand,
-        )
-
-        # LN + f-KAN (2)
-        self.ffn2 = FKANMLP(dim, mlp_dim)
-
-    def forward(self, x5d):
-        # x5d: (B, C, D, H, W)
-        B, C = x5d.shape[:2]
-        spatial = x5d.shape[2:]             # (D, H, W)
-        N = spatial[0] * spatial[1] * spatial[2]
-
-        # ----- flatten to tokens -----
-        x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
-        # print("[MambaLayer] tokens in:", x.shape)
-
-        # LN -> MDTA -> residual
-        h = x
-        x_ln = self.ln1(x)
-        x_attn, _ = self.attn(x_ln)
-        x = x_attn + h
-
-        # LN -> f-KAN (1) -> residual
-        h = x
-        x_ffn1 = self.ffn1(x)
-        x = x_ffn1 + h
-
-        # LN -> VSSM -> residual
-        h = x
-        x_ln3 = self.ln3(x)
-        x_vssm = self.vssm(x_ln3)    # (B, N, C)
-        x = x_vssm + h
-
-        # LN -> f-KAN (2) -> residual
-        h = x
-        x_ffn2 = self.ffn2(x)
-        x = x_ffn2 + h
-
-        # ----- back to 5D -----
-        x_out = x.transpose(1, 2).view(B, C, *spatial)
-        # print("[MambaLayer] x_out:", x_out.shape)
-        return x_out
-
 class MlpChannel(nn.Module):
     def __init__(self,hidden_size, mlp_dim, ):
         super().__init__()
@@ -526,201 +369,79 @@ class MlpChannel(nn.Module):
         x = self.fc2(x)
         return x
 
-# class GSC(nn.Module):
-#     def __init__(self, in_channles) -> None:
-#         super().__init__()
 
-#         self.proj = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
-#         self.norm = nn.InstanceNorm3d(in_channles)
-#         self.nonliner = nn.ReLU()
+class ChannelAttention3D(nn.Module):
+    """Channel attention for 3D feature maps (B, C, D, H, W)."""
+    def __init__(self, num_feat, squeeze_factor=16):
+        super().__init__()
+        self.attention = nn.Sequential(
+            nn.AdaptiveAvgPool3d(1),  # -> (B, C, 1, 1, 1)
+            nn.Conv3d(num_feat, num_feat // squeeze_factor, 1, padding=0),
+            nn.ReLU(inplace=True),
+            nn.Conv3d(num_feat // squeeze_factor, num_feat, 1, padding=0),
+            nn.Sigmoid(),
+        )
 
-#         self.proj2 = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
-#         self.norm2 = nn.InstanceNorm3d(in_channles)
-#         self.nonliner2 = nn.ReLU()
+    def forward(self, x):
+        y = self.attention(x)
+        return x * y
 
-#         self.proj3 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
-#         self.norm3 = nn.InstanceNorm3d(in_channles)
-#         self.nonliner3 = nn.ReLU()
 
-#         self.proj4 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
-#         self.norm4 = nn.InstanceNorm3d(in_channles)
-#         self.nonliner4 = nn.ReLU()
+class CAB3D(nn.Module):
+    """
+    3D version of CAB. For your case D=1, so this is basically
+    a (1,3,3) conv + channel attention across slices.
+    """
+    def __init__(self, num_feat, is_light_sr=False, compress_ratio=3, squeeze_factor=30):
+        super().__init__()
 
-#     def forward(self, x):
+        if is_light_sr:
+            compress_ratio = 2
+            self.cab = nn.Sequential(
+                nn.Conv3d(num_feat, num_feat // compress_ratio, 1, 1, 0),
+                nn.Conv3d(
+                    num_feat // compress_ratio,
+                    num_feat // compress_ratio,
+                    kernel_size=(1, 3, 3),
+                    stride=1,
+                    padding=(0, 1, 1),
+                    groups=num_feat // compress_ratio,
+                ),
+                nn.GELU(),
+                nn.Conv3d(num_feat // compress_ratio, num_feat, 1, 1, 0),
+                nn.Conv3d(
+                    num_feat,
+                    num_feat,
+                    kernel_size=(1, 3, 3),
+                    stride=1,
+                    padding=(0, 2, 2),
+                    groups=num_feat,
+                    dilation=(1, 2, 2),
+                ),
+                ChannelAttention3D(num_feat, squeeze_factor),
+            )
+        else:
+            self.cab = nn.Sequential(
+                nn.Conv3d(
+                    num_feat, num_feat // compress_ratio,
+                    kernel_size=(1, 3, 3),
+                    stride=1,
+                    padding=(0, 1, 1),
+                ),
+                nn.GELU(),
+                nn.Conv3d(
+                    num_feat // compress_ratio, num_feat,
+                    kernel_size=(1, 3, 3),
+                    stride=1,
+                    padding=(0, 1, 1),
+                ),
+                ChannelAttention3D(num_feat, squeeze_factor),
+            )
 
-#         x_residual = x 
+    def forward(self, x):
+        # x: (B, C, D, H, W)
+        return self.cab(x)
 
-#         x1 = self.proj(x)
-#         x1 = self.norm(x1)
-#         x1 = self.nonliner(x1)
-
-#         x1 = self.proj2(x1)
-#         x1 = self.norm2(x1)
-#         x1 = self.nonliner2(x1)
-
-#         x2 = self.proj3(x)
-#         x2 = self.norm3(x2)
-#         x2 = self.nonliner3(x2)
-
-#         x = x1 + x2
-#         x = self.proj4(x)
-#         x = self.norm4(x)
-#         x = self.nonliner4(x)
-        
-#         return x + x_residual
-
-# class MambaEncoder(nn.Module):
-#     def __init__(self, in_chans=1, depths=[2, 2, 2, 2], dims=[48, 96, 192, 384],
-#                  drop_path_rate=0., layer_scale_init_value=1e-6, out_indices=[0, 1, 2, 3]):
-#         super().__init__()
-
-#         self.downsample_layers = nn.ModuleList() # stem and 3 intermediate downsampling conv layers
-#         # stem = nn.Sequential(
-#         #       nn.Conv3d(in_chans, dims[0], kernel_size=7, stride=2, padding=3),
-#         #       )
-#         stem = nn.Sequential(
-#                     nn.Conv3d(
-#                         in_chans,
-#                         dims[0],
-#                         kernel_size=(1, 7, 7),
-#                         stride=(1, 2, 2),
-#                         padding=(0, 3, 3),
-#                     ),
-#                 )
-
-#         self.downsample_layers.append(stem)
-#         # for i in range(3):
-#         #     downsample_layer = nn.Sequential(
-#         #         # LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-#         #         nn.InstanceNorm3d(dims[i]),
-#         #         nn.Conv3d(dims[i], dims[i+1], kernel_size=2, stride=2),
-#         #     )
-#         #     self.downsample_layers.append(downsample_layer)
-
-#         for i in range(3):
-#             downsample_layer = nn.Sequential(
-#                 nn.InstanceNorm3d(dims[i]),
-#                 nn.Conv3d(
-#                     dims[i],
-#                     dims[i + 1],
-#                     kernel_size=(1, 2, 2),
-#                     stride=(1, 2, 2),
-#                 ),
-#             )
-#             self.downsample_layers.append(downsample_layer)
-
-#         self.stages = nn.ModuleList()
-#         # self.gscs = nn.ModuleList()
-#         num_slices_list = [64, 32, 16, 8]
-#         cur = 0
-#         for i in range(4):
-#             # gsc = GSC(dims[i])
-
-#             # stage = nn.Sequential(
-#             #     *[MambaLayer(dim=dims[i], num_slices=num_slices_list[i]) for j in range(depths[i])]
-#             # )
-#             MDTA
-#             self.stages.append(stage)
-#             # self.gscs.append(gsc)
-#             cur += depths[i]
-
-#         self.out_indices = out_indices
-
-#         self.mlps = nn.ModuleList()
-#         for i_layer in range(4):
-#             layer = nn.InstanceNorm3d(dims[i_layer])
-#             layer_name = f'norm{i_layer}'
-#             self.add_module(layer_name, layer)
-#             self.mlps.append(MlpChannel(dims[i_layer], 2 * dims[i_layer]))
-
-#     def forward_features(self, x):
-#         outs = []
-#         for i in range(4):
-#             x = self.downsample_layers[i](x)
-#             # print(f"[MambaEncoder] after downsample[{i}]:", x.shape)
-#             x = self.gscs[i](x)
-#             # print(f"[MambaEncoder] after GSC[{i}]:", x.shape)
-#             x = self.stages[i](x)
-#             # print(f"[MambaEncoder] after stage[{i}] (TSMamba):", x.shape)
-
-#             if i in self.out_indices:
-#                 norm_layer = getattr(self, f'norm{i}')
-#                 x_out = norm_layer(x)
-#                 x_out = self.mlps[i](x_out)
-#                 # print(f"[MambaEncoder] outs[{i}]:", x_out.shape)
-#                 outs.append(x_out)
-
-#         return tuple(outs)
-
-#     def forward(self, x):
-#         x = self.forward_features(x)
-#         return x
-
-# class TransformerMambaBlock(nn.Module):
-#     def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
-#                  d_state=8, d_conv=3, expand=1):
-#         super().__init__()
-#         self.dim = dim
-#         self.num_heads = num_heads
-#         mlp_dim = int(dim * mlp_ratio)
-
-#         # LN + MDTA
-#         print("At Transformer ")
-#         self.ln1 = nn.LayerNorm(dim)
-#         self.attn = TokenMDTA(dim=dim, num_heads=num_heads, bias=True)
-
-#         # f-KAN (1)
-#         self.ffn1 = FKANMLP(dim, mlp_dim)
-
-#         # LN + VSSM (MambaVisionMixer)
-#         print("At MambaVisionMixer ")
-#         self.ln3 = nn.LayerNorm(dim)
-#         self.vssm = MambaVisionMixer(
-#             d_model=dim,
-#             d_state=d_state,
-#             d_conv=d_conv,
-#             expand=expand,
-#         )
-
-#         # f-KAN (2)
-#         self.ffn2 = FKANMLP(dim, mlp_dim)
-
-    # def forward(self, x5d):
-    #     # x5d: (B, C, D, H, W)
-    #     B, C = x5d.shape[:2]
-    #     D, H, W = x5d.shape[2:]
-    #     N = D * H * W
-
-    #     # ----- flatten to tokens -----
-    #     x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
-
-    #     # LN -> MDTA -> residual
-    #     h = x
-    #     x_ln = self.ln1(x)
-    #     x_attn, _ = self.attn(x_ln)            # (B, N, C)
-    #     x = x_attn + h
-
-    #     # f-KAN (1) -> residual
-    #     h = x
-    #     x_ffn1 = self.ffn1(x)                  # (B, N, C)
-    #     x = x_ffn1 + h
-
-    #     # LN -> VSSM -> residual
-    #     h = x
-    #     x_ln3 = self.ln3(x)
-    #     x_vssm = self.vssm(x_ln3)              # (B, N, C)
-    #     x = x_vssm + h
-
-    #     # f-KAN (2) -> residual
-    #     h = x
-    #     x_ffn2 = self.ffn2(x)                  # (B, N, C)
-    #     x = x_ffn2 + h
-
-    #     # ----- back to 5D -----
-    #     x_out = x.transpose(1, 2).view(B, C, D, H, W)
-    #     return x_out
-
-    
 class TransformerMambaBlock(nn.Module):
     def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
                  d_state=8, d_conv=3, expand=1):
@@ -749,8 +470,10 @@ class TransformerMambaBlock(nn.Module):
 
         # self.ln4 = nn.LayerNorm(dim)      # for second f-KAN
         # self.ffn2 = FKANMLP(dim, mlp_dim)
-        self.post_vssm_conv = PostVSSMConvBlock(dim)
-        self.post_vssm_ca = ChannelAttention3D(dim)
+        # self.post_vssm_conv = PostVSSMConvBlock(dim)
+
+        print("at Channel Attention block")
+        self.cab = CAB3D(dim)
 
     def forward(self, x5d):
         # x5d: (B, C, D, H, W)
@@ -771,6 +494,7 @@ class TransformerMambaBlock(nn.Module):
         # 2) LN -> f-KAN -> add residual (orig input)
         u = self.ln2(t)
         u = self.ffn1(u)                        # (B, N, C)
+        u = u + t                            # f-KAN residual
         x_tr = x_in + u                         # transformer output
 
         # ================== MAMBA PART =====================
@@ -782,19 +506,21 @@ class TransformerMambaBlock(nn.Module):
         # 4) LN -> f-KAN -> add residual (transformer output)
         # n = self.ln4(m)
         # n = self.ffn2(n)                        # (B, N, C)
-        # x_out_tokens = x_tr + n                 # final output tokens
+
+        # --- CAB in 5D ---
+        m_5d = m.transpose(1, 2).view(B, C, D, H, W)  # (B, C, D, H, W)
+        cab_5d = self.cab(m_5d)                       # (B, C, D, H, W)
+
+        # convert CAB output back to tokens
+        cab_tokens = cab_5d.view(B, C, N).transpose(1, 2)  # (B, N, C)
+
+        cab_tokens = cab_tokens + m 
+    
+        x_out_tokens = x_tr + cab_tokens            # (B, N, C)
 
         # ===== back to 5D =====
-        # x_out = x_out_tokens.transpose(1, 2).view(B, C, D, H, W)
-        m_5d = m.transpose(1, 2).view(B, C, D, H, W)   # (B, C, D, H, W)
-
-        res = m_5d
-        y = self.post_vssm_conv(m_5d)   # Conv3d + IN + ReLU
-        y = self.post_vssm_ca(y)        # ChannelAttention3D
-        out = res + y 
-
-        return out
-
+        x_out = x_out_tokens.transpose(1, 2).view(B, C, D, H, W)
+        return x_out
 
 class GSC(nn.Module):
     def __init__(self, in_channles) -> None:
@@ -937,23 +663,6 @@ class MambaEncoder(nn.Module):
         return self.forward_features(x)
 
 
-# class SegMamba(nn.Module):
-#     def __init__(
-#         self,
-#         in_chans=1,
-#         out_chans=13,
-#         depths=[2, 2, 2, 2],
-#         feat_size=[48, 96, 192, 384],
-#         drop_path_rate=0,
-#         layer_scale_init_value=1e-6,
-#         hidden_size: int = 768,
-#         norm_name = "instance",
-#         conv_block: bool = True,
-#         res_block: bool = True,
-#         spatial_dims=3,
-#     ) -> None:
-#         super().__init__()
-
 class SegMamba(nn.Module):
     def __init__(
         self,
@@ -980,7 +689,7 @@ class SegMamba(nn.Module):
         self.layer_scale_init_value = layer_scale_init_value
 
         # print("Initializing SegMamba")
-        print("Initializing SegMamba with Hybrid Encoder along with GSC")
+        print("Initializing SegMamba with Hybrid Encoder along with GSC and Conv + Channel Attention Block")
         self.spatial_dims = spatial_dims
         self.vit = MambaEncoder(in_chans, 
                                 depths=depths,

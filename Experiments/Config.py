@@ -86,7 +86,8 @@ batch_size = 4
 
 # model_name = 'Segmamba'
 # model_name = 'Segmamba_hybrid'
-model_name = 'Segmamba_hybrid_gsc'
+# model_name = 'Segmamba_hybrid_gsc'
+model_name = 'Segmamba_hybrid_gsc_CA'
 # model_name = 'TransUNet_fJNB'
 # model_name = 'SegViT_fKAN'
 
@@ -110,7 +111,7 @@ model_name = 'Segmamba_hybrid_gsc'
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
 # model_name = 'U-KAN'
 
-if model_name == 'SwinUnet' or model_name == 'UCTransNet' or model_name == 'Segmamba' or model_name == 'Segmamba_hybrid'or model_name == 'Segmamba_hybrid_gsc':
+if model_name == 'SwinUnet' or model_name == 'UCTransNet' or model_name == 'Segmamba' or model_name == 'Segmamba_hybrid'or model_name == 'Segmamba_hybrid_gsc' or model_name == 'Segmamba_hybrid_gsc_CA':
     img_size = 224
 else :
     img_size = 256
