@@ -111,10 +111,18 @@ model_name = 'Segmamba_hybrid_gsc_CA'
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
 # model_name = 'U-KAN'
 
-if model_name == 'SwinUnet' or model_name == 'UCTransNet' or model_name == 'Segmamba' or model_name == 'Segmamba_hybrid'or model_name == 'Segmamba_hybrid_gsc' or model_name == 'Segmamba_hybrid_gsc_CA':
-    img_size = 224
-else :
-    img_size = 256
+# if model_name == 'SwinUnet' or model_name == 'UCTransNet' or model_name == 'Segmamba' or model_name == 'Segmamba_hybrid'or model_name == 'Segmamba_hybrid_gsc' or model_name == 'Segmamba_hybrid_gsc_CA':
+#     img_size = 224
+# else :
+#     img_size = 256
+
+models_224 = {
+    'SwinUnet', 'UCTransNet', 'Segmamba', 'Segmamba_hybrid',
+    'Segmamba_hybrid_gsc', 'Segmamba_hybrid_gsc_CA', 'Segmamba_hybrid_gsc_SWAttn',
+    'Segmamba_hybrid_gsc_VSS'
+}
+
+img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
 test_session = "session1"         #
