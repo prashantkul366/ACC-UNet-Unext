@@ -385,6 +385,54 @@ class MambaVisionMixer(nn.Module):
             else:
                 raise
 
+class PostVSSMConvBlock(nn.Module):
+    def __init__(self, channels):
+        super().__init__()
+        self.conv = nn.Conv3d(channels, channels, kernel_size=3, padding=1)
+        self.norm = nn.InstanceNorm3d(channels)
+        self.act = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.norm(x)
+        x = self.act(x)
+        return x
+
+class ChannelAttention(nn.Module):
+    def __init__(self, in_channels, reduction_ratio=16):
+        super(ChannelAttention, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(in_channels, in_channels // reduction_ratio),
+            nn.ReLU(inplace=True),
+            nn.Linear(in_channels // reduction_ratio, in_channels)
+        )
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        b, c, _, _ = x.size()
+        y = self.avg_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1)
+        y = self.sigmoid(y)
+        return x * y
+
+class ChannelAttention3D(nn.Module):
+    def __init__(self, in_channels, reduction_ratio=16):
+        super().__init__()
+        self.avg_pool = nn.AdaptiveAvgPool3d(1)  # (B, C, D, H, W) -> (B, C, 1, 1, 1)
+        self.mlp = nn.Sequential(
+            nn.Conv3d(in_channels, in_channels // reduction_ratio, kernel_size=1),
+            nn.ReLU(inplace=True),
+            nn.Conv3d(in_channels // reduction_ratio, in_channels, kernel_size=1),
+        )
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        # x: (B, C, D, H, W)
+        w = self.avg_pool(x)          # (B, C, 1, 1, 1)
+        w = self.mlp(w)               # (B, C, 1, 1, 1)
+        w = self.sigmoid(w)
+        return x * w
 
 class MambaLayer(nn.Module):
     """
@@ -699,45 +747,10 @@ class TransformerMambaBlock(nn.Module):
             expand=expand,
         )
 
-        self.ln4 = nn.LayerNorm(dim)      # for second f-KAN
-        self.ffn2 = FKANMLP(dim, mlp_dim)
-
-    # OLD DEPRECATED
-    # def forward(self, x5d):
-    #     # x5d: (B, C, D, H, W)
-    #     B, C = x5d.shape[:2]
-    #     D, H, W = x5d.shape[2:]
-    #     N = D * H * W
-
-    #     # ===== flatten to tokens =====
-    #     x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
-    #     x_in = x                                # original input tokens
-
-    #     # ================= TRANSFORMER PART =================
-    #     # 1) LN -> MDTA -> add residual (orig input)
-    #     t = self.ln1(x_in)
-    #     t, _ = self.attn(t)                     # (B, N, C)
-    #     t = x_in + t                            # attn_residual
-
-    #     # 2) LN -> f-KAN -> add residual (orig input)
-    #     u = self.ln2(t)
-    #     u = self.ffn1(u)                        # (B, N, C)
-    #     x_tr = x_in + u                         # transformer output
-
-    #     # ================== MAMBA PART =====================
-    #     # 3) LN -> VSSM -> add residual (transformer output)
-    #     m = self.ln3(x_tr)
-    #     m = self.vssm(m)                        # (B, N, C)
-    #     m = x_tr + m                            # mamba_residual
-
-    #     # 4) LN -> f-KAN -> add residual (transformer output)
-    #     n = self.ln4(m)
-    #     n = self.ffn2(n)                        # (B, N, C)
-    #     x_out_tokens = x_tr + n                 # final output tokens
-
-    #     # ===== back to 5D =====
-    #     x_out = x_out_tokens.transpose(1, 2).view(B, C, D, H, W)
-    #     return x_out
+        # self.ln4 = nn.LayerNorm(dim)      # for second f-KAN
+        # self.ffn2 = FKANMLP(dim, mlp_dim)
+        self.post_vssm_conv = PostVSSMConvBlock(dim)
+        self.post_vssm_ca = ChannelAttention3D(dim)
 
     def forward(self, x5d):
         # x5d: (B, C, D, H, W)
@@ -758,7 +771,6 @@ class TransformerMambaBlock(nn.Module):
         # 2) LN -> f-KAN -> add residual (orig input)
         u = self.ln2(t)
         u = self.ffn1(u)                        # (B, N, C)
-        u = u + t                            # f-KAN residual
         x_tr = x_in + u                         # transformer output
 
         # ================== MAMBA PART =====================
@@ -768,14 +780,21 @@ class TransformerMambaBlock(nn.Module):
         m = x_tr + m                            # mamba_residual
 
         # 4) LN -> f-KAN -> add residual (transformer output)
-        n = self.ln4(m)
-        n = self.ffn2(n)                        # (B, N, C)
-        n = n + m                            # f-KAN residual
-        x_out_tokens = x_tr + n                 # final output tokens
+        # n = self.ln4(m)
+        # n = self.ffn2(n)                        # (B, N, C)
+        # x_out_tokens = x_tr + n                 # final output tokens
 
         # ===== back to 5D =====
-        x_out = x_out_tokens.transpose(1, 2).view(B, C, D, H, W)
-        return x_out
+        # x_out = x_out_tokens.transpose(1, 2).view(B, C, D, H, W)
+        m_5d = m.transpose(1, 2).view(B, C, D, H, W)   # (B, C, D, H, W)
+
+        res = m_5d
+        y = self.post_vssm_conv(m_5d)   # Conv3d + IN + ReLU
+        y = self.post_vssm_ca(y)        # ChannelAttention3D
+        out = res + y 
+
+        return out
+
 
 class GSC(nn.Module):
     def __init__(self, in_channles) -> None:
