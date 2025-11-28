@@ -14,15 +14,23 @@ import torch.nn as nn
 import torch 
 from functools import partial
 import math 
+from typing import Optional, Callable
 
 from monai.networks.blocks.dynunet_block import UnetOutBlock
 from monai.networks.blocks.unetr_block import UnetrBasicBlock, UnetrUpBlock
 from mamba_ssm import Mamba
 import torch.nn.functional as F 
 
+from timm.models.layers import DropPath
 from .kan_fJNB import KAN
 from einops import rearrange, repeat
 from mamba_ssm.ops.selective_scan_interface import selective_scan_fn
+
+try:
+    from selective_scan import selective_scan_fn as selective_scan_fn_v1
+    from selective_scan import selective_scan_ref as selective_scan_ref_v1
+except:
+    pass
 
 class LayerNorm(nn.Module):
     r""" LayerNorm that supports two data formats: channels_last (default) or channels_first.
@@ -50,36 +58,6 @@ class LayerNorm(nn.Module):
             x = self.weight[:, None, None, None] * x + self.bias[:, None, None, None]
 
             return x
-
-# class MambaLayer(nn.Module):
-#     def __init__(self, dim, d_state = 16, d_conv = 4, expand = 2, num_slices=None):
-#         super().__init__()
-#         self.dim = dim
-#         self.norm = nn.LayerNorm(dim)
-#         self.mamba = Mamba(
-#                 d_model=dim, # Model dimension d_model
-#                 d_state=d_state,  # SSM state expansion factor
-#                 d_conv=d_conv,    # Local convolution width
-#                 expand=expand,    # Block expansion factor
-#                 bimamba_type="v2",
-#                 # nslices=num_slices,
-#         )
-    
-#     def forward(self, x):
-#         B, C = x.shape[:2]
-#         x_skip = x
-#         assert C == self.dim
-#         n_tokens = x.shape[2:].numel()
-#         img_dims = x.shape[2:]
-#         x_flat = x.reshape(B, C, n_tokens).transpose(-1, -2)
-#         x_norm = self.norm(x_flat)
-#         x_mamba = self.mamba(x_norm)
-
-#         out = x_mamba.transpose(-1, -2).reshape(B, C, *img_dims)
-#         out = out + x_skip
-        
-#         return out
-    
 class FKANMLP(nn.Module):
     """
     Simple KAN-based MLP for token features.
@@ -173,12 +151,226 @@ class TokenMDTA(nn.Module):
         return out, weights
 
 
-class MambaVisionMixer(nn.Module):
+# class MambaVisionMixer(nn.Module):
+#     def __init__(
+#         self,
+#         d_model,
+#         d_state=16,
+#         d_conv=4,
+#         expand=2,
+#         dt_rank="auto",
+#         dt_min=0.001,
+#         dt_max=0.1,
+#         dt_init="random",
+#         dt_scale=1.0,
+#         dt_init_floor=1e-4,
+#         conv_bias=True,
+#         bias=False,
+#         use_fast_path=True, 
+#         layer_idx=None,
+#         device=None,
+#         dtype=None,
+#     ):
+#         factory_kwargs = {"device": device, "dtype": dtype}
+#         super().__init__()
+#         self.d_model = d_model
+#         self.d_state = d_state
+#         self.d_conv = d_conv
+#         self.expand = expand
+#         self.d_inner = int(self.expand * self.d_model)
+#         self.dt_rank = math.ceil(self.d_model / 16) if dt_rank == "auto" else dt_rank
+#         self.use_fast_path = use_fast_path
+#         self.layer_idx = layer_idx
+#         self.in_proj = nn.Linear(self.d_model, self.d_inner, bias=bias, **factory_kwargs)    
+#         self.x_proj = nn.Linear(
+#             self.d_inner//2, self.dt_rank + self.d_state * 2, bias=False, **factory_kwargs
+#         )
+#         self.dt_proj = nn.Linear(self.dt_rank, self.d_inner//2, bias=True, **factory_kwargs)
+#         dt_init_std = self.dt_rank**-0.5 * dt_scale
+#         if dt_init == "constant":
+#             nn.init.constant_(self.dt_proj.weight, dt_init_std)
+#         elif dt_init == "random":
+#             nn.init.uniform_(self.dt_proj.weight, -dt_init_std, dt_init_std)
+#         else:
+#             raise NotImplementedError
+#         dt = torch.exp(
+#             torch.rand(self.d_inner//2, **factory_kwargs) * (math.log(dt_max) - math.log(dt_min))
+#             + math.log(dt_min)
+#         ).clamp(min=dt_init_floor)
+#         inv_dt = dt + torch.log(-torch.expm1(-dt))
+#         with torch.no_grad():
+#             self.dt_proj.bias.copy_(inv_dt)
+#         self.dt_proj.bias._no_reinit = True
+#         A = repeat(
+#             torch.arange(1, self.d_state + 1, dtype=torch.float32, device=device),
+#             "n -> d n",
+#             d=self.d_inner//2,
+#         ).contiguous()
+#         A_log = torch.log(A)
+#         self.A_log = nn.Parameter(A_log)
+#         self.A_log._no_weight_decay = True
+#         self.D = nn.Parameter(torch.ones(self.d_inner//2, device=device))
+#         self.D._no_weight_decay = True
+#         self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
+#         self.conv1d_x = nn.Conv1d(
+#             in_channels=self.d_inner//2,
+#             out_channels=self.d_inner//2,
+#             bias=conv_bias//2,
+#             kernel_size=d_conv,
+#             groups=self.d_inner//2,
+#             **factory_kwargs,
+#         )
+#         self.conv1d_z = nn.Conv1d(
+#             in_channels=self.d_inner//2,
+#             out_channels=self.d_inner//2,
+#             bias=conv_bias//2,
+#             kernel_size=d_conv,
+#             groups=self.d_inner//2,
+#             **factory_kwargs,
+#         )
+
+#     def _check_tensor(self, name, x):
+#         if x is None:
+#             raise RuntimeError(f"[MambaVisionMixer] {name} is None")
+#         if not torch.isfinite(x).all():
+#             raise RuntimeError(
+#                 f"[MambaVisionMixer] Non-finite values in {name}: "
+#                 f"min={x.min().item()}, max={x.max().item()}"
+#             )
+#     def forward(self, hidden_states):
+#         """
+#         hidden_states: (B, L, D)
+#         Returns: same shape as hidden_states
+#         """
+#         if hidden_states.dim() != 3:
+#             raise RuntimeError(
+#                 f"[MambaVisionMixer] Expected (B, L, D), got {hidden_states.shape}"
+#             )
+        
+#         B, seqlen, D = hidden_states.shape
+#         if D != self.d_model:
+#             raise RuntimeError(
+#                 f"[MambaVisionMixer] d_model mismatch: got {D}, expected {self.d_model}"
+#             )
+
+#         self._check_tensor("hidden_states", hidden_states)
+
+#         # xz = self.in_proj(hidden_states)
+#         # xz = rearrange(xz, "b l d -> b d l")
+#         # x, z = xz.chunk(2, dim=1)
+#         # A = -torch.exp(self.A_log.float())
+#         # x = F.silu(F.conv1d(input=x, weight=self.conv1d_x.weight, bias=self.conv1d_x.bias, padding='same', groups=self.d_inner//2))
+#         # z = F.silu(F.conv1d(input=z, weight=self.conv1d_z.weight, bias=self.conv1d_z.bias, padding='same', groups=self.d_inner//2))
+#         # x_dbl = self.x_proj(rearrange(x, "b d l -> (b l) d"))
+#         # dt, B, C = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=-1)
+#         # dt = rearrange(self.dt_proj(dt), "(b l) d -> b d l", l=seqlen)
+#         # B = rearrange(B, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
+#         # C = rearrange(C, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
+#         # y = selective_scan_fn(x, 
+#         #                       dt, 
+#         #                       A, 
+#         #                       B, 
+#         #                       C, 
+#         #                       self.D.float(), 
+#         #                       z=None, 
+#         #                       delta_bias=self.dt_proj.bias.float(), 
+#         #                       delta_softplus=True, 
+#         #                       return_last_state=None)
+        
+#         # y = torch.cat([y, z], dim=1)
+#         # y = rearrange(y, "b d l -> b l d")
+#         # out = self.out_proj(y)
+#         # return out
+#         try:
+#             xz = self.in_proj(hidden_states)          # (B, L, d_inner)
+#             self._check_tensor("xz", xz)
+
+#             xz = rearrange(xz, "b l d -> b d l")      # (B, d_inner, L)
+#             x, z = xz.chunk(2, dim=1)                # each (B, d_inner/2, L)
+#             self._check_tensor("x_before_conv", x)
+#             self._check_tensor("z_before_conv", z)
+
+#             A = -torch.exp(self.A_log.float())        # (d_inner/2, d_state)
+
+#             x = F.silu(
+#                 F.conv1d(
+#                     input=x,
+#                     weight=self.conv1d_x.weight,
+#                     bias=self.conv1d_x.bias,
+#                     padding="same",
+#                     groups=self.d_inner // 2,
+#                 )
+#             )
+#             z = F.silu(
+#                 F.conv1d(
+#                     input=z,
+#                     weight=self.conv1d_z.weight,
+#                     bias=self.conv1d_z.bias,
+#                     padding="same",
+#                     groups=self.d_inner // 2,
+#                 )
+#             )
+
+#             self._check_tensor("x_after_conv", x)
+#             self._check_tensor("z_after_conv", z)
+
+#             x_dbl = self.x_proj(rearrange(x, "b d l -> (b l) d"))
+#             self._check_tensor("x_dbl", x_dbl)
+
+#             dt, Bmat, Cmat = torch.split(
+#                 x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=-1
+#             )
+
+#             dt = rearrange(self.dt_proj(dt), "(b l) d -> b d l", l=seqlen)
+#             Bmat = rearrange(Bmat, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
+#             Cmat = rearrange(Cmat, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
+
+#             self._check_tensor("dt", dt)
+#             self._check_tensor("Bmat", Bmat)
+#             self._check_tensor("Cmat", Cmat)
+
+#             y = selective_scan_fn(
+#                 x,
+#                 dt,
+#                 A,
+#                 Bmat,
+#                 Cmat,
+#                 self.D.float(),
+#                 z=None,
+#                 delta_bias=self.dt_proj.bias.float(),
+#                 delta_softplus=True,
+#                 return_last_state=None,
+#             )
+
+#             self._check_tensor("y_after_scan", y)
+
+#             y = torch.cat([y, z], dim=1)
+#             y = rearrange(y, "b d l -> b l d")
+#             out = self.out_proj(y)
+#             self._check_tensor("out", out)
+#             return out
+
+#         except RuntimeError as e:
+#             # Catch low-level CUDA assert and re-raise with context
+#             if "device-side assert" in str(e).lower():
+#                 raise RuntimeError(
+#                     "[MambaVisionMixer] CUDA device-side assert inside selective_scan_fn "
+#                     f"or conv1d.\n"
+#                     f"hidden_states shape: {hidden_states.shape}, "
+#                     f"d_model={self.d_model}, d_inner={self.d_inner}, "
+#                     f"d_state={self.d_state}, seq_len={seqlen}"
+#                 ) from e
+#             else:
+#                 raise
+
+
+class SS2D(nn.Module):
     def __init__(
         self,
         d_model,
         d_state=16,
-        d_conv=4,
+        # d_state="auto", # 20240109
+        d_conv=3,
         expand=2,
         dt_rank="auto",
         dt_min=0.001,
@@ -186,284 +378,347 @@ class MambaVisionMixer(nn.Module):
         dt_init="random",
         dt_scale=1.0,
         dt_init_floor=1e-4,
+        dropout=0.,
         conv_bias=True,
         bias=False,
-        use_fast_path=True, 
-        layer_idx=None,
         device=None,
         dtype=None,
+        **kwargs,
     ):
         factory_kwargs = {"device": device, "dtype": dtype}
         super().__init__()
         self.d_model = d_model
         self.d_state = d_state
+        # self.d_state = math.ceil(self.d_model / 6) if d_state == "auto" else d_model # 20240109
         self.d_conv = d_conv
         self.expand = expand
         self.d_inner = int(self.expand * self.d_model)
         self.dt_rank = math.ceil(self.d_model / 16) if dt_rank == "auto" else dt_rank
-        self.use_fast_path = use_fast_path
-        self.layer_idx = layer_idx
-        self.in_proj = nn.Linear(self.d_model, self.d_inner, bias=bias, **factory_kwargs)    
-        self.x_proj = nn.Linear(
-            self.d_inner//2, self.dt_rank + self.d_state * 2, bias=False, **factory_kwargs
+
+        self.in_proj = nn.Linear(self.d_model, self.d_inner * 2, bias=bias, **factory_kwargs)
+        self.conv2d = nn.Conv2d(
+            in_channels=self.d_inner,
+            out_channels=self.d_inner,
+            groups=self.d_inner,
+            bias=conv_bias,
+            kernel_size=d_conv,
+            padding=(d_conv - 1) // 2,
+            **factory_kwargs,
         )
-        self.dt_proj = nn.Linear(self.dt_rank, self.d_inner//2, bias=True, **factory_kwargs)
-        dt_init_std = self.dt_rank**-0.5 * dt_scale
+        self.act = nn.SiLU()
+
+        self.x_proj = (
+            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
+            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
+            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
+            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
+        )
+        self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K=4, N, inner)
+        del self.x_proj
+
+        self.dt_projs = (
+            self.dt_init(self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
+            self.dt_init(self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
+            self.dt_init(self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
+            self.dt_init(self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
+        )
+        self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K=4, inner, rank)
+        self.dt_projs_bias = nn.Parameter(torch.stack([t.bias for t in self.dt_projs], dim=0)) # (K=4, inner)
+        del self.dt_projs
+        
+        self.A_logs = self.A_log_init(self.d_state, self.d_inner, copies=4, merge=True) # (K=4, D, N)
+        self.Ds = self.D_init(self.d_inner, copies=4, merge=True) # (K=4, D, N)
+
+        # self.selective_scan = selective_scan_fn
+        self.forward_core = self.forward_corev0
+
+        self.out_norm = nn.LayerNorm(self.d_inner)
+        self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
+        self.dropout = nn.Dropout(dropout) if dropout > 0. else None
+
+    @staticmethod
+    def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
+        dt_proj = nn.Linear(dt_rank, d_inner, bias=True, **factory_kwargs)
+
+        # Initialize special dt projection to preserve variance at initialization
+        dt_init_std = dt_rank**-0.5 * dt_scale
         if dt_init == "constant":
-            nn.init.constant_(self.dt_proj.weight, dt_init_std)
+            nn.init.constant_(dt_proj.weight, dt_init_std)
         elif dt_init == "random":
-            nn.init.uniform_(self.dt_proj.weight, -dt_init_std, dt_init_std)
+            nn.init.uniform_(dt_proj.weight, -dt_init_std, dt_init_std)
         else:
             raise NotImplementedError
+
+        # Initialize dt bias so that F.softplus(dt_bias) is between dt_min and dt_max
         dt = torch.exp(
-            torch.rand(self.d_inner//2, **factory_kwargs) * (math.log(dt_max) - math.log(dt_min))
+            torch.rand(d_inner, **factory_kwargs) * (math.log(dt_max) - math.log(dt_min))
             + math.log(dt_min)
         ).clamp(min=dt_init_floor)
+        # Inverse of softplus: https://github.com/pytorch/pytorch/issues/72759
         inv_dt = dt + torch.log(-torch.expm1(-dt))
         with torch.no_grad():
-            self.dt_proj.bias.copy_(inv_dt)
-        self.dt_proj.bias._no_reinit = True
+            dt_proj.bias.copy_(inv_dt)
+        # Our initialization would set all Linear.bias to zero, need to mark this one as _no_reinit
+        dt_proj.bias._no_reinit = True
+        
+        return dt_proj
+
+    @staticmethod
+    def A_log_init(d_state, d_inner, copies=1, device=None, merge=True):
+        # S4D real initialization
         A = repeat(
-            torch.arange(1, self.d_state + 1, dtype=torch.float32, device=device),
+            torch.arange(1, d_state + 1, dtype=torch.float32, device=device),
             "n -> d n",
-            d=self.d_inner//2,
+            d=d_inner,
         ).contiguous()
-        A_log = torch.log(A)
-        self.A_log = nn.Parameter(A_log)
-        self.A_log._no_weight_decay = True
-        self.D = nn.Parameter(torch.ones(self.d_inner//2, device=device))
-        self.D._no_weight_decay = True
-        self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
-        self.conv1d_x = nn.Conv1d(
-            in_channels=self.d_inner//2,
-            out_channels=self.d_inner//2,
-            bias=conv_bias//2,
-            kernel_size=d_conv,
-            groups=self.d_inner//2,
-            **factory_kwargs,
-        )
-        self.conv1d_z = nn.Conv1d(
-            in_channels=self.d_inner//2,
-            out_channels=self.d_inner//2,
-            bias=conv_bias//2,
-            kernel_size=d_conv,
-            groups=self.d_inner//2,
-            **factory_kwargs,
-        )
+        A_log = torch.log(A)  # Keep A_log in fp32
+        if copies > 1:
+            A_log = repeat(A_log, "d n -> r d n", r=copies)
+            if merge:
+                A_log = A_log.flatten(0, 1)
+        A_log = nn.Parameter(A_log)
+        A_log._no_weight_decay = True
+        return A_log
 
-    def _check_tensor(self, name, x):
-        if x is None:
-            raise RuntimeError(f"[MambaVisionMixer] {name} is None")
-        if not torch.isfinite(x).all():
-            raise RuntimeError(
-                f"[MambaVisionMixer] Non-finite values in {name}: "
-                f"min={x.min().item()}, max={x.max().item()}"
-            )
-    def forward(self, hidden_states):
-        """
-        hidden_states: (B, L, D)
-        Returns: same shape as hidden_states
-        """
-        if hidden_states.dim() != 3:
-            raise RuntimeError(
-                f"[MambaVisionMixer] Expected (B, L, D), got {hidden_states.shape}"
-            )
+    @staticmethod
+    def D_init(d_inner, copies=1, device=None, merge=True):
+        # D "skip" parameter
+        D = torch.ones(d_inner, device=device)
+        if copies > 1:
+            D = repeat(D, "n1 -> r n1", r=copies)
+            if merge:
+                D = D.flatten(0, 1)
+        D = nn.Parameter(D)  # Keep in fp32
+        D._no_weight_decay = True
+        return D
+
+    def forward_corev0(self, x: torch.Tensor):
+        self.selective_scan = selective_scan_fn
         
-        B, seqlen, D = hidden_states.shape
-        if D != self.d_model:
-            raise RuntimeError(
-                f"[MambaVisionMixer] d_model mismatch: got {D}, expected {self.d_model}"
-            )
+        B, C, H, W = x.shape
+        L = H * W
+        K = 4
 
-        self._check_tensor("hidden_states", hidden_states)
+        x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
+        xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
 
-        # xz = self.in_proj(hidden_states)
-        # xz = rearrange(xz, "b l d -> b d l")
-        # x, z = xz.chunk(2, dim=1)
-        # A = -torch.exp(self.A_log.float())
-        # x = F.silu(F.conv1d(input=x, weight=self.conv1d_x.weight, bias=self.conv1d_x.bias, padding='same', groups=self.d_inner//2))
-        # z = F.silu(F.conv1d(input=z, weight=self.conv1d_z.weight, bias=self.conv1d_z.bias, padding='same', groups=self.d_inner//2))
-        # x_dbl = self.x_proj(rearrange(x, "b d l -> (b l) d"))
-        # dt, B, C = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=-1)
-        # dt = rearrange(self.dt_proj(dt), "(b l) d -> b d l", l=seqlen)
-        # B = rearrange(B, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
-        # C = rearrange(C, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
-        # y = selective_scan_fn(x, 
-        #                       dt, 
-        #                       A, 
-        #                       B, 
-        #                       C, 
-        #                       self.D.float(), 
-        #                       z=None, 
-        #                       delta_bias=self.dt_proj.bias.float(), 
-        #                       delta_softplus=True, 
-        #                       return_last_state=None)
-        
-        # y = torch.cat([y, z], dim=1)
-        # y = rearrange(y, "b d l -> b l d")
-        # out = self.out_proj(y)
-        # return out
-        try:
-            xz = self.in_proj(hidden_states)          # (B, L, d_inner)
-            self._check_tensor("xz", xz)
+        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs.view(B, K, -1, L), self.x_proj_weight)
+        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
+        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
+        dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
+        # dts = dts + self.dt_projs_bias.view(1, K, -1, 1)
 
-            xz = rearrange(xz, "b l d -> b d l")      # (B, d_inner, L)
-            x, z = xz.chunk(2, dim=1)                # each (B, d_inner/2, L)
-            self._check_tensor("x_before_conv", x)
-            self._check_tensor("z_before_conv", z)
+        xs = xs.float().view(B, -1, L) # (b, k * d, l)
+        dts = dts.contiguous().float().view(B, -1, L) # (b, k * d, l)
+        Bs = Bs.float().view(B, K, -1, L) # (b, k, d_state, l)
+        Cs = Cs.float().view(B, K, -1, L) # (b, k, d_state, l)
+        Ds = self.Ds.float().view(-1) # (k * d)
+        As = -torch.exp(self.A_logs.float()).view(-1, self.d_state)  # (k * d, d_state)
+        dt_projs_bias = self.dt_projs_bias.float().view(-1) # (k * d)
 
-            A = -torch.exp(self.A_log.float())        # (d_inner/2, d_state)
+        out_y = self.selective_scan(
+            xs, dts, 
+            As, Bs, Cs, Ds, z=None,
+            delta_bias=dt_projs_bias,
+            delta_softplus=True,
+            return_last_state=False,
+        ).view(B, K, -1, L)
+        assert out_y.dtype == torch.float
 
-            x = F.silu(
-                F.conv1d(
-                    input=x,
-                    weight=self.conv1d_x.weight,
-                    bias=self.conv1d_x.bias,
-                    padding="same",
-                    groups=self.d_inner // 2,
-                )
-            )
-            z = F.silu(
-                F.conv1d(
-                    input=z,
-                    weight=self.conv1d_z.weight,
-                    bias=self.conv1d_z.bias,
-                    padding="same",
-                    groups=self.d_inner // 2,
-                )
-            )
+        inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
+        wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
 
-            self._check_tensor("x_after_conv", x)
-            self._check_tensor("z_after_conv", z)
+        return out_y[:, 0], inv_y[:, 0], wh_y, invwh_y
 
-            x_dbl = self.x_proj(rearrange(x, "b d l -> (b l) d"))
-            self._check_tensor("x_dbl", x_dbl)
+    # an alternative to forward_corev1
+    def forward_corev1(self, x: torch.Tensor):
+        self.selective_scan = selective_scan_fn_v1
 
-            dt, Bmat, Cmat = torch.split(
-                x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=-1
-            )
+        B, C, H, W = x.shape
+        L = H * W
+        K = 4
 
-            dt = rearrange(self.dt_proj(dt), "(b l) d -> b d l", l=seqlen)
-            Bmat = rearrange(Bmat, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
-            Cmat = rearrange(Cmat, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
+        x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
+        xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
 
-            self._check_tensor("dt", dt)
-            self._check_tensor("Bmat", Bmat)
-            self._check_tensor("Cmat", Cmat)
+        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs.view(B, K, -1, L), self.x_proj_weight)
+        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
+        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
+        dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
+        # dts = dts + self.dt_projs_bias.view(1, K, -1, 1)
 
-            y = selective_scan_fn(
-                x,
-                dt,
-                A,
-                Bmat,
-                Cmat,
-                self.D.float(),
-                z=None,
-                delta_bias=self.dt_proj.bias.float(),
-                delta_softplus=True,
-                return_last_state=None,
-            )
+        xs = xs.float().view(B, -1, L) # (b, k * d, l)
+        dts = dts.contiguous().float().view(B, -1, L) # (b, k * d, l)
+        Bs = Bs.float().view(B, K, -1, L) # (b, k, d_state, l)
+        Cs = Cs.float().view(B, K, -1, L) # (b, k, d_state, l)
+        Ds = self.Ds.float().view(-1) # (k * d)
+        As = -torch.exp(self.A_logs.float()).view(-1, self.d_state)  # (k * d, d_state)
+        dt_projs_bias = self.dt_projs_bias.float().view(-1) # (k * d)
 
-            self._check_tensor("y_after_scan", y)
+        out_y = self.selective_scan(
+            xs, dts, 
+            As, Bs, Cs, Ds,
+            delta_bias=dt_projs_bias,
+            delta_softplus=True,
+        ).view(B, K, -1, L)
+        assert out_y.dtype == torch.float
 
-            y = torch.cat([y, z], dim=1)
-            y = rearrange(y, "b d l -> b l d")
-            out = self.out_proj(y)
-            self._check_tensor("out", out)
-            return out
+        inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
+        wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
 
-        except RuntimeError as e:
-            # Catch low-level CUDA assert and re-raise with context
-            if "device-side assert" in str(e).lower():
-                raise RuntimeError(
-                    "[MambaVisionMixer] CUDA device-side assert inside selective_scan_fn "
-                    f"or conv1d.\n"
-                    f"hidden_states shape: {hidden_states.shape}, "
-                    f"d_model={self.d_model}, d_inner={self.d_inner}, "
-                    f"d_state={self.d_state}, seq_len={seqlen}"
-                ) from e
-            else:
-                raise
+        return out_y[:, 0], inv_y[:, 0], wh_y, invwh_y
 
+    def forward(self, x: torch.Tensor, **kwargs):
+        B, H, W, C = x.shape
 
-class MambaLayer(nn.Module):
+        xz = self.in_proj(x)
+        x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
+
+        x = x.permute(0, 3, 1, 2).contiguous()
+        x = self.act(self.conv2d(x)) # (b, d, h, w)
+        y1, y2, y3, y4 = self.forward_core(x)
+        assert y1.dtype == torch.float32
+        y = y1 + y2 + y3 + y4
+        y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+        y = self.out_norm(y)
+        y = y * F.silu(z)
+        out = self.out_proj(y)
+        if self.dropout is not None:
+            out = self.dropout(out)
+        return out
+
+class VSSMBlock(nn.Module):
+    def __init__(
+        self,
+        hidden_dim: int,
+        drop_path: float = 0.0,
+        norm_layer: Callable[..., nn.Module] = partial(nn.LayerNorm, eps=1e-6),
+        attn_drop_rate: float = 0.0,
+        d_state: int = 16,
+        **ssm_kwargs,
+    ):
+        """
+        Vision State Space Module block.
+
+        Args:
+            hidden_dim: input/output channel dimension (C).
+            drop_path: stochastic depth.
+            norm_layer: norm used after the top branch SSM.
+            attn_drop_rate: dropout inside SS2D.
+            d_state, **ssm_kwargs: forwarded to SS2D.
+        """
+        super().__init__()
+        assert hidden_dim % 2 == 0, "hidden_dim must be divisible by 2"
+        self.hidden_dim = hidden_dim
+        self.half_dim = hidden_dim // 2
+
+        # ---------- TOP BRANCH: Linear -> DWConv -> SiLU -> 2D-SSM -> LayerNorm ----------
+        self.top_linear = nn.Linear(self.half_dim, self.half_dim)
+        self.top_dwconv = nn.Conv2d(
+            in_channels=self.half_dim,
+            out_channels=self.half_dim,
+            kernel_size=3,
+            padding=1,
+            groups=self.half_dim,   # depthwise
+            bias=True,
+        )
+        self.top_act = nn.SiLU()
+        # 2D-SSM (VSSM core)
+        self.top_ssm = SS2D(
+            d_model=self.half_dim,
+            dropout=attn_drop_rate,
+            d_state=d_state,
+            **ssm_kwargs,
+        )
+        self.top_norm = norm_layer(self.half_dim)
+
+        # ---------- BOTTOM BRANCH: Linear -> SiLU ----------
+        self.bottom_linear = nn.Linear(self.half_dim, self.half_dim)
+        self.bottom_act = nn.SiLU()
+
+        # ---------- OUTPUT PROJECTION ----------
+        self.out_linear = nn.Linear(hidden_dim, hidden_dim)
+
+        self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        x: (B, H, W, C)
+        """
+        B, H, W, C = x.shape
+        assert C == self.hidden_dim
+
+        # split channels
+        x_top, x_bottom = x.chunk(2, dim=-1)  # each (B, H, W, C/2)
+
+        # ===== TOP BRANCH =====
+        t = self.top_linear(x_top)                     # (B, H, W, C/2)
+
+        # DWConv expects (B, C, H, W)
+        t_2d = t.permute(0, 3, 1, 2).contiguous()      # (B, C/2, H, W)
+        t_2d = self.top_dwconv(t_2d)
+        t = t_2d.permute(0, 2, 3, 1).contiguous()      # back to (B, H, W, C/2)
+
+        t = self.top_act(t)
+        t = self.top_ssm(t)                            # SS2D keeps (B, H, W, C/2)
+        t = self.top_norm(t)
+
+        # ===== BOTTOM BRANCH =====
+        b = self.bottom_linear(x_bottom)               # (B, H, W, C/2)
+        b = self.bottom_act(b)
+
+        # ===== MERGE & OUTPUT =====
+        y = torch.cat([t, b], dim=-1)                  # (B, H, W, C)
+        y = self.out_linear(y)                         # (B, H, W, C)
+
+        return y
+    
+class TokenVSSM(nn.Module):
     """
-    Tri-oriented Spatial Mamba Block (TSMamba) operating on 3D features.
+    Wraps VSSMBlock so it can operate on token sequences (B, N, C).
 
-    Input / output: x5d = (B, C, D, H, W)
-
-    Internally:
-      - flatten to tokens (B, N, C)
-      - LN -> MDTA -> res
-      - LN -> f-KAN -> res
-      - LN -> VSSM (MambaVisionMixer) -> res
-      - LN -> f-KAN -> res
-      - reshape back to (B, C, D, H, W)
+    Assumes N = H * W and reshapes tokens -> (B, H, W, C) -> VSSM -> back.
     """
-    def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
-                 d_state=8, d_conv=3, expand=1, num_slices=None):
+    def __init__(
+        self,
+        dim: int,
+        drop_path: float = 0.0,
+        attn_drop_rate: float = 0.0,
+        d_state: int = 16,
+        norm_layer=partial(nn.LayerNorm, eps=1e-6),
+        **ssm_kwargs,
+    ):
         super().__init__()
         self.dim = dim
-        self.num_heads = num_heads
-        mlp_dim = int(dim * mlp_ratio)
-
-        # LN + MDTA
-        print("At Transformer ")
-        self.ln1 = nn.LayerNorm(dim)
-        self.attn = TokenMDTA(dim=dim, num_heads=num_heads, bias=True)
-
-        # LN + f-KAN (1)
-        self.ffn1 = FKANMLP(dim, mlp_dim)
-
-        # LN + VSSM (MambaVisionMixer)
-        print("At MambaVisionMixer ")
-        self.ln3 = nn.LayerNorm(dim)
-        self.vssm = MambaVisionMixer(
-            d_model=dim,
+        self.vssm_block = VSSMBlock(
+            hidden_dim=dim,
+            drop_path=drop_path,
+            norm_layer=norm_layer,
+            attn_drop_rate=attn_drop_rate,
             d_state=d_state,
-            d_conv=d_conv,
-            expand=expand,
+            **ssm_kwargs,
         )
 
-        # LN + f-KAN (2)
-        self.ffn2 = FKANMLP(dim, mlp_dim)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        x: (B, N, C)
+        """
+        B, N, C = x.shape
+        H = W = int(math.sqrt(N))
+        assert H * W == N, f"TokenVSSM: N={N} must be a perfect square (got H={H},W={W})"
+        assert C == self.dim, f"TokenVSSM: channel mismatch, C={C}, dim={self.dim}"
 
-    def forward(self, x5d):
-        # x5d: (B, C, D, H, W)
-        B, C = x5d.shape[:2]
-        spatial = x5d.shape[2:]             # (D, H, W)
-        N = spatial[0] * spatial[1] * spatial[2]
+        # (B, N, C) -> (B, H, W, C)
+        x_2d = x.view(B, H, W, C).contiguous()
 
-        # ----- flatten to tokens -----
-        x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
-        # print("[MambaLayer] tokens in:", x.shape)
+        # Apply VSSM
+        y_2d = self.vssm_block(x_2d)   # (B, H, W, C)
 
-        # LN -> MDTA -> residual
-        h = x
-        x_ln = self.ln1(x)
-        x_attn, _ = self.attn(x_ln)
-        x = x_attn + h
-
-        # LN -> f-KAN (1) -> residual
-        h = x
-        x_ffn1 = self.ffn1(x)
-        x = x_ffn1 + h
-
-        # LN -> VSSM -> residual
-        h = x
-        x_ln3 = self.ln3(x)
-        x_vssm = self.vssm(x_ln3)    # (B, N, C)
-        x = x_vssm + h
-
-        # LN -> f-KAN (2) -> residual
-        h = x
-        x_ffn2 = self.ffn2(x)
-        x = x_ffn2 + h
-
-        # ----- back to 5D -----
-        x_out = x.transpose(1, 2).view(B, C, *spatial)
-        # print("[MambaLayer] x_out:", x_out.shape)
-        return x_out
+        # Back to tokens
+        y = y_2d.view(B, N, C).contiguous()
+        return y
 
 class MlpChannel(nn.Module):
     def __init__(self,hidden_size, mlp_dim, ):
@@ -477,201 +732,6 @@ class MlpChannel(nn.Module):
         x = self.act(x)
         x = self.fc2(x)
         return x
-
-# class GSC(nn.Module):
-#     def __init__(self, in_channles) -> None:
-#         super().__init__()
-
-#         self.proj = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
-#         self.norm = nn.InstanceNorm3d(in_channles)
-#         self.nonliner = nn.ReLU()
-
-#         self.proj2 = nn.Conv3d(in_channles, in_channles, 3, 1, 1)
-#         self.norm2 = nn.InstanceNorm3d(in_channles)
-#         self.nonliner2 = nn.ReLU()
-
-#         self.proj3 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
-#         self.norm3 = nn.InstanceNorm3d(in_channles)
-#         self.nonliner3 = nn.ReLU()
-
-#         self.proj4 = nn.Conv3d(in_channles, in_channles, 1, 1, 0)
-#         self.norm4 = nn.InstanceNorm3d(in_channles)
-#         self.nonliner4 = nn.ReLU()
-
-#     def forward(self, x):
-
-#         x_residual = x 
-
-#         x1 = self.proj(x)
-#         x1 = self.norm(x1)
-#         x1 = self.nonliner(x1)
-
-#         x1 = self.proj2(x1)
-#         x1 = self.norm2(x1)
-#         x1 = self.nonliner2(x1)
-
-#         x2 = self.proj3(x)
-#         x2 = self.norm3(x2)
-#         x2 = self.nonliner3(x2)
-
-#         x = x1 + x2
-#         x = self.proj4(x)
-#         x = self.norm4(x)
-#         x = self.nonliner4(x)
-        
-#         return x + x_residual
-
-# class MambaEncoder(nn.Module):
-#     def __init__(self, in_chans=1, depths=[2, 2, 2, 2], dims=[48, 96, 192, 384],
-#                  drop_path_rate=0., layer_scale_init_value=1e-6, out_indices=[0, 1, 2, 3]):
-#         super().__init__()
-
-#         self.downsample_layers = nn.ModuleList() # stem and 3 intermediate downsampling conv layers
-#         # stem = nn.Sequential(
-#         #       nn.Conv3d(in_chans, dims[0], kernel_size=7, stride=2, padding=3),
-#         #       )
-#         stem = nn.Sequential(
-#                     nn.Conv3d(
-#                         in_chans,
-#                         dims[0],
-#                         kernel_size=(1, 7, 7),
-#                         stride=(1, 2, 2),
-#                         padding=(0, 3, 3),
-#                     ),
-#                 )
-
-#         self.downsample_layers.append(stem)
-#         # for i in range(3):
-#         #     downsample_layer = nn.Sequential(
-#         #         # LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-#         #         nn.InstanceNorm3d(dims[i]),
-#         #         nn.Conv3d(dims[i], dims[i+1], kernel_size=2, stride=2),
-#         #     )
-#         #     self.downsample_layers.append(downsample_layer)
-
-#         for i in range(3):
-#             downsample_layer = nn.Sequential(
-#                 nn.InstanceNorm3d(dims[i]),
-#                 nn.Conv3d(
-#                     dims[i],
-#                     dims[i + 1],
-#                     kernel_size=(1, 2, 2),
-#                     stride=(1, 2, 2),
-#                 ),
-#             )
-#             self.downsample_layers.append(downsample_layer)
-
-#         self.stages = nn.ModuleList()
-#         # self.gscs = nn.ModuleList()
-#         num_slices_list = [64, 32, 16, 8]
-#         cur = 0
-#         for i in range(4):
-#             # gsc = GSC(dims[i])
-
-#             # stage = nn.Sequential(
-#             #     *[MambaLayer(dim=dims[i], num_slices=num_slices_list[i]) for j in range(depths[i])]
-#             # )
-#             MDTA
-#             self.stages.append(stage)
-#             # self.gscs.append(gsc)
-#             cur += depths[i]
-
-#         self.out_indices = out_indices
-
-#         self.mlps = nn.ModuleList()
-#         for i_layer in range(4):
-#             layer = nn.InstanceNorm3d(dims[i_layer])
-#             layer_name = f'norm{i_layer}'
-#             self.add_module(layer_name, layer)
-#             self.mlps.append(MlpChannel(dims[i_layer], 2 * dims[i_layer]))
-
-#     def forward_features(self, x):
-#         outs = []
-#         for i in range(4):
-#             x = self.downsample_layers[i](x)
-#             # print(f"[MambaEncoder] after downsample[{i}]:", x.shape)
-#             x = self.gscs[i](x)
-#             # print(f"[MambaEncoder] after GSC[{i}]:", x.shape)
-#             x = self.stages[i](x)
-#             # print(f"[MambaEncoder] after stage[{i}] (TSMamba):", x.shape)
-
-#             if i in self.out_indices:
-#                 norm_layer = getattr(self, f'norm{i}')
-#                 x_out = norm_layer(x)
-#                 x_out = self.mlps[i](x_out)
-#                 # print(f"[MambaEncoder] outs[{i}]:", x_out.shape)
-#                 outs.append(x_out)
-
-#         return tuple(outs)
-
-#     def forward(self, x):
-#         x = self.forward_features(x)
-#         return x
-
-# class TransformerMambaBlock(nn.Module):
-#     def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
-#                  d_state=8, d_conv=3, expand=1):
-#         super().__init__()
-#         self.dim = dim
-#         self.num_heads = num_heads
-#         mlp_dim = int(dim * mlp_ratio)
-
-#         # LN + MDTA
-#         print("At Transformer ")
-#         self.ln1 = nn.LayerNorm(dim)
-#         self.attn = TokenMDTA(dim=dim, num_heads=num_heads, bias=True)
-
-#         # f-KAN (1)
-#         self.ffn1 = FKANMLP(dim, mlp_dim)
-
-#         # LN + VSSM (MambaVisionMixer)
-#         print("At MambaVisionMixer ")
-#         self.ln3 = nn.LayerNorm(dim)
-#         self.vssm = MambaVisionMixer(
-#             d_model=dim,
-#             d_state=d_state,
-#             d_conv=d_conv,
-#             expand=expand,
-#         )
-
-#         # f-KAN (2)
-#         self.ffn2 = FKANMLP(dim, mlp_dim)
-
-    # def forward(self, x5d):
-    #     # x5d: (B, C, D, H, W)
-    #     B, C = x5d.shape[:2]
-    #     D, H, W = x5d.shape[2:]
-    #     N = D * H * W
-
-    #     # ----- flatten to tokens -----
-    #     x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
-
-    #     # LN -> MDTA -> residual
-    #     h = x
-    #     x_ln = self.ln1(x)
-    #     x_attn, _ = self.attn(x_ln)            # (B, N, C)
-    #     x = x_attn + h
-
-    #     # f-KAN (1) -> residual
-    #     h = x
-    #     x_ffn1 = self.ffn1(x)                  # (B, N, C)
-    #     x = x_ffn1 + h
-
-    #     # LN -> VSSM -> residual
-    #     h = x
-    #     x_ln3 = self.ln3(x)
-    #     x_vssm = self.vssm(x_ln3)              # (B, N, C)
-    #     x = x_vssm + h
-
-    #     # f-KAN (2) -> residual
-    #     h = x
-    #     x_ffn2 = self.ffn2(x)                  # (B, N, C)
-    #     x = x_ffn2 + h
-
-    #     # ----- back to 5D -----
-    #     x_out = x.transpose(1, 2).view(B, C, D, H, W)
-    #     return x_out
-
     
 class TransformerMambaBlock(nn.Module):
     def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
@@ -690,14 +750,20 @@ class TransformerMambaBlock(nn.Module):
         self.ffn1 = FKANMLP(dim, mlp_dim)
 
         # --- Mamba part ---
-        print("At MambaVisionMixer ")
+        print("At VSSM ")
         self.ln3 = nn.LayerNorm(dim)      # for VSSM
-        self.vssm = MambaVisionMixer(
-            d_model=dim,
-            d_state=d_state,
-            d_conv=d_conv,
-            expand=expand,
-        )
+        # self.vssm = MambaVisionMixer(
+        #     d_model=dim,
+        #     d_state=d_state,
+        #     d_conv=d_conv,
+        #     expand=expand,
+        # )
+        self.vssm = TokenVSSM(
+                    dim=dim,
+                    d_state=d_state,
+                    drop_path=0.0,          # or pass your drop_path_rate here
+                    attn_drop_rate=0.0,     # or whatever you want
+                    )
 
         self.ln4 = nn.LayerNorm(dim)      # for second f-KAN
         self.ffn2 = FKANMLP(dim, mlp_dim)
@@ -917,24 +983,6 @@ class MambaEncoder(nn.Module):
     def forward(self, x):
         return self.forward_features(x)
 
-
-# class SegMamba(nn.Module):
-#     def __init__(
-#         self,
-#         in_chans=1,
-#         out_chans=13,
-#         depths=[2, 2, 2, 2],
-#         feat_size=[48, 96, 192, 384],
-#         drop_path_rate=0,
-#         layer_scale_init_value=1e-6,
-#         hidden_size: int = 768,
-#         norm_name = "instance",
-#         conv_block: bool = True,
-#         res_block: bool = True,
-#         spatial_dims=3,
-#     ) -> None:
-#         super().__init__()
-
 class SegMamba(nn.Module):
     def __init__(
         self,
@@ -961,7 +1009,7 @@ class SegMamba(nn.Module):
         self.layer_scale_init_value = layer_scale_init_value
 
         # print("Initializing SegMamba")
-        print("Initializing SegMamba with Hybrid Encoder along with GSC with correct residuals")
+        print("Initializing SegMamba with Hybrid Encoder along with GSC + VSSM")
         self.spatial_dims = spatial_dims
         self.vit = MambaEncoder(in_chans, 
                                 depths=depths,

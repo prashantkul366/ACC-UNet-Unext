@@ -88,7 +88,8 @@ batch_size = 4
 # model_name = 'Segmamba_hybrid'
 # model_name = 'Segmamba_hybrid_gsc'
 # model_name = 'Segmamba_hybrid_gsc_CA'
-model_name = 'Segmamba_hybrid_gsc_SWAttn'
+# model_name = 'Segmamba_hybrid_gsc_SWAttn'
+model_name = 'Segmamba_hybrid_gsc_VSS'
 # model_name = 'TransUNet_fJNB'
 # model_name = 'SegViT_fKAN'
 
