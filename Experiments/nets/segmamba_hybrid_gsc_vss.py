@@ -588,6 +588,7 @@ class SS2D(nn.Module):
         if self.dropout is not None:
             out = self.dropout(out)
         return out
+    
 
 class VSSMBlock(nn.Module):
     def __init__(
@@ -602,44 +603,41 @@ class VSSMBlock(nn.Module):
         """
         Vision State Space Module block.
 
-        Args:
-            hidden_dim: input/output channel dimension (C).
-            drop_path: stochastic depth.
-            norm_layer: norm used after the top branch SSM.
-            attn_drop_rate: dropout inside SS2D.
-            d_state, **ssm_kwargs: forwarded to SS2D.
+        Input/output: (B, H, W, C) with C = hidden_dim
+
+        Top branch : Linear -> DWConv -> SiLU -> 2D-SSM -> LayerNorm  
+        Bottom     : Linear -> SiLU  
+        Merge      : concat(top, bottom) -> Linear
         """
         super().__init__()
-        assert hidden_dim % 2 == 0, "hidden_dim must be divisible by 2"
         self.hidden_dim = hidden_dim
-        self.half_dim = hidden_dim // 2
 
-        # ---------- TOP BRANCH: Linear -> DWConv -> SiLU -> 2D-SSM -> LayerNorm ----------
-        self.top_linear = nn.Linear(self.half_dim, self.half_dim)
+        # ---------- TOP BRANCH ----------
+        self.top_linear = nn.Linear(hidden_dim, hidden_dim)
         self.top_dwconv = nn.Conv2d(
-            in_channels=self.half_dim,
-            out_channels=self.half_dim,
+            in_channels=hidden_dim,
+            out_channels=hidden_dim,
             kernel_size=3,
             padding=1,
-            groups=self.half_dim,   # depthwise
+            groups=hidden_dim,   # depthwise
             bias=True,
         )
         self.top_act = nn.SiLU()
-        # 2D-SSM (VSSM core)
         self.top_ssm = SS2D(
-            d_model=self.half_dim,
+            d_model=hidden_dim,
             dropout=attn_drop_rate,
             d_state=d_state,
             **ssm_kwargs,
         )
-        self.top_norm = norm_layer(self.half_dim)
+        self.top_norm = norm_layer(hidden_dim)
 
-        # ---------- BOTTOM BRANCH: Linear -> SiLU ----------
-        self.bottom_linear = nn.Linear(self.half_dim, self.half_dim)
+        # ---------- BOTTOM BRANCH ----------
+        self.bottom_linear = nn.Linear(hidden_dim, hidden_dim)
         self.bottom_act = nn.SiLU()
 
         # ---------- OUTPUT PROJECTION ----------
-        self.out_linear = nn.Linear(hidden_dim, hidden_dim)
+        # concat(top, bottom) => 2 * hidden_dim
+        self.out_linear = nn.Linear(2 * hidden_dim, hidden_dim)
 
         self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
 
@@ -650,31 +648,31 @@ class VSSMBlock(nn.Module):
         B, H, W, C = x.shape
         assert C == self.hidden_dim
 
-        # split channels
-        x_top, x_bottom = x.chunk(2, dim=-1)  # each (B, H, W, C/2)
-
         # ===== TOP BRANCH =====
-        t = self.top_linear(x_top)                     # (B, H, W, C/2)
+        t = self.top_linear(x)                         # (B, H, W, C)
 
         # DWConv expects (B, C, H, W)
-        t_2d = t.permute(0, 3, 1, 2).contiguous()      # (B, C/2, H, W)
+        t_2d = t.permute(0, 3, 1, 2).contiguous()      # (B, C, H, W)
         t_2d = self.top_dwconv(t_2d)
-        t = t_2d.permute(0, 2, 3, 1).contiguous()      # back to (B, H, W, C/2)
+        t = t_2d.permute(0, 2, 3, 1).contiguous()      # back to (B, H, W, C)
 
         t = self.top_act(t)
-        t = self.top_ssm(t)                            # SS2D keeps (B, H, W, C/2)
+        t = self.top_ssm(t)                            # (B, H, W, C)
         t = self.top_norm(t)
 
         # ===== BOTTOM BRANCH =====
-        b = self.bottom_linear(x_bottom)               # (B, H, W, C/2)
+        b = self.bottom_linear(x)                      # (B, H, W, C)
         b = self.bottom_act(b)
 
         # ===== MERGE & OUTPUT =====
-        y = torch.cat([t, b], dim=-1)                  # (B, H, W, C)
+        y = torch.cat([t, b], dim=-1)                  # (B, H, W, 2C)
         y = self.out_linear(y)                         # (B, H, W, C)
 
+        # optional residual (comment out if you don't want it)
+        # y = x + self.drop_path(y)
+
         return y
-    
+
 class TokenVSSM(nn.Module):
     """
     Wraps VSSMBlock so it can operate on token sequences (B, N, C).
