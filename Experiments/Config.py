@@ -67,7 +67,7 @@ learning_rate = 1e-3
 # learning_rate = 0.0001
 # batch_size = 32
 # batch_size = 8
-batch_size = 4
+batch_size = 2
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
