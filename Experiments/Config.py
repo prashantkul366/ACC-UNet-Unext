@@ -44,7 +44,7 @@ resume_checkpoint = False  # or False
 
 
 # task_name = 'ISIC18_UNET'
-task_name = 'ISIC18_mod'
+# task_name = 'ISIC18_mod'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
 # task_name = 'CVC-ClinicDB'
@@ -68,7 +68,7 @@ learning_rate = 1e-3
 # learning_rate = 0.0001
 # batch_size = 32
 # batch_size = 8
-batch_size = 2
+batch_size = 4
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
@@ -82,7 +82,7 @@ batch_size = 2
 # model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
-model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
+# model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
 # model_name = 'UNext_InceptionNext_MLFC_fKAN'
 
 # model_name = 'Segmamba'
@@ -92,6 +92,7 @@ model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
 # model_name = 'Segmamba_hybrid_gsc_SWAttn'
 # model_name = 'Segmamba_hybrid_gsc_VSS'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
+model_name = 'Segmamba_hybrid_gsc_rm_fkan'
 # model_name = 'TransUNet_fJNB'
 # model_name = 'SegViT_fKAN'
 
@@ -123,7 +124,7 @@ model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
 models_224 = {
     'SwinUnet', 'UCTransNet', 'Segmamba', 'Segmamba_hybrid',
     'Segmamba_hybrid_gsc', 'Segmamba_hybrid_gsc_CA', 'Segmamba_hybrid_gsc_SWAttn',
-    'Segmamba_hybrid_gsc_VSS', 'Segmamba_hybrid_gsc_KAN_PE'
+    'Segmamba_hybrid_gsc_VSS', 'Segmamba_hybrid_gsc_KAN_PE', 'Segmamba_hybrid_gsc_rm_fkan'
 }
 
 img_size = 224 if model_name in models_224 else 256
@@ -148,10 +149,10 @@ test_session = "session1"         #
 # test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 # ISIC 18 MOD
-dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod'
-train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod/train'
-val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod/val'
-test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod/test'
+# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod'
+# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod/train'
+# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod/val'
+# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod/test'
 
 # ISIC 17
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/ISIC_2017/Dataset_ISIC_2017_Formatted'
@@ -161,10 +162,10 @@ test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod
 
 
 # BUSI_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 # BUSI_80-20_mod

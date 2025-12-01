@@ -369,7 +369,30 @@ class MlpChannel(nn.Module):
         x = self.fc2(x)
         return x
     
-    
+
+class TokenMLP(nn.Module):
+    """
+    Standard MLP for token features.
+    Input / output: (B, N, C)
+    """
+    def __init__(self, dim, mlp_dim, dropout=0.1):
+        super().__init__()
+        self.fc1 = nn.Linear(dim, mlp_dim)
+        self.act = nn.GELU()
+        self.drop = nn.Dropout(dropout)
+        self.fc2 = nn.Linear(mlp_dim, dim)
+        print("At TokenMLP ")
+
+    def forward(self, x):
+        # x: (B, N, C)
+        x = self.fc1(x)
+        x = self.act(x)
+        x = self.drop(x)
+        x = self.fc2(x)
+        x = self.drop(x)
+        return x
+
+
 class TransformerMambaBlock(nn.Module):
     def __init__(self, dim, num_heads=4, mlp_ratio=4.0,
                  d_state=8, d_conv=3, expand=1):
@@ -397,7 +420,8 @@ class TransformerMambaBlock(nn.Module):
         )
 
         self.ln4 = nn.LayerNorm(dim)      # for second f-KAN
-        self.ffn2 = FKANMLP(dim, mlp_dim)
+        # self.ffn2 = FKANMLP(dim, mlp_dim)
+        self.ffn2 = TokenMLP(dim, mlp_dim)
 
     # OLD DEPRECATED
     # def forward(self, x5d):
