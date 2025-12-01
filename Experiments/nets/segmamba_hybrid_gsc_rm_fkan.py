@@ -665,7 +665,7 @@ class SegMamba(nn.Module):
         self.layer_scale_init_value = layer_scale_init_value
 
         # print("Initializing SegMamba")
-        print("Initializing SegMamba with Hybrid Encoder along with GSC with correct residuals")
+        print("Initializing SegMamba with Hybrid Encoder along with GSC with MDTA fKAN and VSSM MLP initiated" )
         self.spatial_dims = spatial_dims
         self.vit = MambaEncoder(in_chans, 
                                 depths=depths,
