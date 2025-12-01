@@ -89,7 +89,8 @@ batch_size = 4
 # model_name = 'Segmamba_hybrid_gsc'
 # model_name = 'Segmamba_hybrid_gsc_CA'
 # model_name = 'Segmamba_hybrid_gsc_SWAttn'
-model_name = 'Segmamba_hybrid_gsc_VSS'
+# model_name = 'Segmamba_hybrid_gsc_VSS'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 # model_name = 'TransUNet_fJNB'
 # model_name = 'SegViT_fKAN'
 
@@ -121,7 +122,7 @@ model_name = 'Segmamba_hybrid_gsc_VSS'
 models_224 = {
     'SwinUnet', 'UCTransNet', 'Segmamba', 'Segmamba_hybrid',
     'Segmamba_hybrid_gsc', 'Segmamba_hybrid_gsc_CA', 'Segmamba_hybrid_gsc_SWAttn',
-    'Segmamba_hybrid_gsc_VSS'
+    'Segmamba_hybrid_gsc_VSS', 'Segmamba_hybrid_gsc_KAN_PE'
 }
 
 img_size = 224 if model_name in models_224 else 256
