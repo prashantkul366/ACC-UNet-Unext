@@ -54,7 +54,7 @@ resume_checkpoint = False  # or False
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-# task_name = 'BUSI_80-20'
+task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_mod'
 
 # task_name = 'CVC_ClinicDB_80-20'
