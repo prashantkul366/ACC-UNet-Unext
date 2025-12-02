@@ -274,11 +274,56 @@ class GT_BceDiceLoss(nn.Module):
         return bcediceloss + gt_loss
 
 
+# class DSAdapterLoss(nn.Module):
+#     """
+#     Wraps an existing 2-arg loss (pred, target) to support deep supervision tuples:
+#       ( (gt4, gt3, gt2, gt1), pred )
+#     Weighted sum: 0.5*gt1 + 0.4*gt2 + 0.3*gt3 + 0.2*gt4 + 1.0*pred  (example)
+#     """
+#     def __init__(self, base_loss, ds_weights=(0.2, 0.3, 0.4, 0.5), main_weight=1.0):
+#         super().__init__()
+#         self.base = base_loss
+#         self.ds_w = ds_weights
+#         self.main_w = main_weight
+
+#     def forward(self, preds, target):
+#         # If the model returned only the final pred, behave normally.
+#         if not isinstance(preds, (tuple, list)):
+#             return self.base(preds, target)
+
+#         ds_tuple, final_pred = preds  # ((gt4,gt3,gt2,gt1), pred)
+#         gt4, gt3, gt2, gt1 = ds_tuple
+#         loss = 0.0
+        
+#         H, W = target.shape[-2:]
+#         # ensure DS preds are HxW; if not, upsample here:
+#         ds_list = [gt4, gt3, gt2, gt1]
+#         for i in range(4):
+#             if ds_list[i].shape[-2:] != (H, W):
+#                 ds_list[i] = F.interpolate(ds_list[i], size=(H, W), mode='bilinear', align_corners=True)
+
+#         for w, p in zip(self.ds_w, ds_list):
+#             loss = loss + w * self.base(p, target)
+#         loss = loss + self.main_w * self.base(final_pred, target)
+#         return loss
+
+#     def _show_dice(self, inputs, targets):
+#         if isinstance(inputs, (tuple, list)):
+#             _, final_pred = inputs
+#             return self.base._show_dice(final_pred, targets)
+#         return self.base._show_dice(inputs, targets)
+
 class DSAdapterLoss(nn.Module):
     """
-    Wraps an existing 2-arg loss (pred, target) to support deep supervision tuples:
-      ( (gt4, gt3, gt2, gt1), pred )
-    Weighted sum: 0.5*gt1 + 0.4*gt2 + 0.3*gt3 + 0.2*gt4 + 1.0*pred  (example)
+    Wraps an existing 2-arg loss (pred, target) to support deep supervision.
+
+    Supports two formats:
+
+    1) Legacy UCTransNet style:
+       preds = ((gt4, gt3, gt2, gt1), pred_final)
+
+    2) Flat tuple style (what your SegMamba is doing now):
+       preds = (pred_main, ds1, ds2, ds3, ...)   # main first, rest are aux
     """
     def __init__(self, base_loss, ds_weights=(0.2, 0.3, 0.4, 0.5), main_weight=1.0):
         super().__init__()
@@ -291,28 +336,54 @@ class DSAdapterLoss(nn.Module):
         if not isinstance(preds, (tuple, list)):
             return self.base(preds, target)
 
-        ds_tuple, final_pred = preds  # ((gt4,gt3,gt2,gt1), pred)
-        gt4, gt3, gt2, gt1 = ds_tuple
-        loss = 0.0
-        
-        H, W = target.shape[-2:]
-        # ensure DS preds are HxW; if not, upsample here:
-        ds_list = [gt4, gt3, gt2, gt1]
-        for i in range(4):
-            if ds_list[i].shape[-2:] != (H, W):
-                ds_list[i] = F.interpolate(ds_list[i], size=(H, W), mode='bilinear', align_corners=True)
+        # -------- Case 1: legacy ((gt4..gt1), final_pred) --------
+        if len(preds) == 2 and isinstance(preds[0], (tuple, list)):
+            ds_tuple, final_pred = preds
+            ds_list = list(ds_tuple)
 
-        for w, p in zip(self.ds_w, ds_list):
+        # -------- Case 2: flat (main, ds1, ds2, ...) --------
+        else:
+            final_pred = preds[0]
+            ds_list = list(preds[1:])   # all remaining are deep-supervision outputs
+
+        loss = 0.0
+
+        # handle both 2D [B,1,H,W] and 3D [B,1,D,H,W] targets
+        spatial_dims = target.shape[2:]
+
+        # ensure DS preds are same spatial size; if not, upsample here:
+        resized = []
+        for p in ds_list:
+            if p.shape[2:] != spatial_dims:
+                # 2D: bilinear, 3D: trilinear
+                if p.dim() == 4:
+                    p = F.interpolate(p, size=spatial_dims, mode='bilinear', align_corners=True)
+                elif p.dim() == 5:
+                    p = F.interpolate(p, size=spatial_dims, mode='trilinear', align_corners=False)
+            resized.append(p)
+
+        # weighted sum of DS losses
+        for w, p in zip(self.ds_w, resized):
             loss = loss + w * self.base(p, target)
+
+        # main head loss
         loss = loss + self.main_w * self.base(final_pred, target)
         return loss
 
     def _show_dice(self, inputs, targets):
+        """
+        For logging: always compute dice on the MAIN prediction.
+        """
         if isinstance(inputs, (tuple, list)):
-            _, final_pred = inputs
+            # legacy
+            if len(inputs) == 2 and isinstance(inputs[0], (tuple, list)):
+                _, final_pred = inputs
+            # flat (main, ds1, ds2, ...)
+            else:
+                final_pred = inputs[0]
             return self.base._show_dice(final_pred, targets)
-        return self.base._show_dice(inputs, targets)
 
+        return self.base._show_dice(inputs, targets)
 
 class HausdorffDTLoss(nn.Module):
     """Binary Hausdorff loss based on distance transform"""
