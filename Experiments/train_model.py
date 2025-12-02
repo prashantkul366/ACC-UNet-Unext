@@ -66,7 +66,8 @@ from nets.archs.archs_InceptionNext_MLFC_fKAN import UNext_InceptionNext_MLFC_fK
 # from nets.segmamba_hybrid_gsc_KAN_PE import SegMamba as Segmamba_hybrid_gsc_KAN_PE
 # from nets.segmamba_hybrid_gsc_rm_fkan import SegMamba as Segmamba_hybrid_gsc_rm_fkan
 # from nets.segmamba_hybrid_gsc_KAN_PE_rm_fkan import SegMamba as Segmamba_hybrid_gsc_KAN_PE_rm_fkan
-from nets.segmamba_hybrid_gsc_ds import SegMamba as Segmamba_hybrid_gsc_ds
+# from nets.segmamba_hybrid_gsc_ds import SegMamba as Segmamba_hybrid_gsc_ds
+from nets.segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds
 # from nets.TransUnet_fKAN import TransUNet_KAN_fJNB
 # from nets.TransUNet_Vit_fKAN import TransUNet as TransUNet_KAN_fJNB
 # from nets.seg_fViT import SegViT_fKAN
@@ -333,8 +334,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     #         feat_size=[48, 96, 192, 384], spatial_dims=3,)
     #     lr = 1e-4
 
-    elif model_type == 'Segmamba_hybrid_gsc_ds':
-        model = Segmamba_hybrid_gsc_ds(
+    elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds':
+        model = Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds(
             in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
         lr = 1e-4
