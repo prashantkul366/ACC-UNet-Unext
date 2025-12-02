@@ -77,6 +77,8 @@ from nets.archs.UNext_CMRF_BSRB_GS_wavelet import UNext_CMRF_BSRB_GS_Wavelet
 from nets.archs.UNext_CMRF_BSRB_GS import UNext_CMRF_BSRB_GS
 
 from nets.archs.UNext_CMRF_GS_wavelet_rkan import UNext_CMRF_GS_Wavelet_rKAN
+
+from nets.segmamba_hybrid_gsc_rm_fkan import SegMamba as Segmamba_hybrid_gsc_rm_fkan
 ######################################################
 
 class AverageMeter(object):
@@ -627,7 +629,12 @@ if __name__ == '__main__':
     elif model_type.split('_')[0] == 'MultiResUnet1':          
         model = MultiResUnet(n_channels=config.n_channels,n_classes=config.n_labels,nfilt=int(model_type.split('_')[1]), alpha=float(model_type.split('_')[2]))
     
-    
+    elif model_type == 'Segmamba_hybrid_gsc_rm_fkan':
+        model = Segmamba_hybrid_gsc_rm_fkan(
+            in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
+            feat_size=[48, 96, 192, 384], spatial_dims=3,)
+        lr = 1e-4
+
     else: raise TypeError('Please enter a valid name for the model type')
 
     model = model.cuda()
