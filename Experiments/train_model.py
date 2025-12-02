@@ -65,7 +65,8 @@ from nets.archs.archs_InceptionNext_MLFC_fKAN import UNext_InceptionNext_MLFC_fK
 # from nets.segmamba_hybrid_gsc_vss import SegMamba as Segmamba_hybrid_gsc_VSS
 # from nets.segmamba_hybrid_gsc_KAN_PE import SegMamba as Segmamba_hybrid_gsc_KAN_PE
 # from nets.segmamba_hybrid_gsc_rm_fkan import SegMamba as Segmamba_hybrid_gsc_rm_fkan
-from nets.segmamba_hybrid_gsc_KAN_PE_rm_fkan import SegMamba as Segmamba_hybrid_gsc_KAN_PE_rm_fkan
+# from nets.segmamba_hybrid_gsc_KAN_PE_rm_fkan import SegMamba as Segmamba_hybrid_gsc_KAN_PE_rm_fkan
+from nets.segmamba_hybrid_gsc_ds import SegMamba as Segmamba_hybrid_gsc_ds
 # from nets.TransUnet_fKAN import TransUNet_KAN_fJNB
 # from nets.TransUNet_Vit_fKAN import TransUNet as TransUNet_KAN_fJNB
 # from nets.seg_fViT import SegViT_fKAN
@@ -326,8 +327,14 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     #         feat_size=[48, 96, 192, 384], spatial_dims=3,)
     #     lr = 1e-4
 
-    elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan':
-        model = Segmamba_hybrid_gsc_KAN_PE_rm_fkan(
+    # elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan':
+    #     model = Segmamba_hybrid_gsc_KAN_PE_rm_fkan(
+    #         in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
+    #         feat_size=[48, 96, 192, 384], spatial_dims=3,)
+    #     lr = 1e-4
+
+    elif model_type == 'Segmamba_hybrid_gsc_ds':
+        model = Segmamba_hybrid_gsc_ds(
             in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
         lr = 1e-4
@@ -403,6 +410,19 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
     if model_type == 'Segmamba' or model_type == 'SegViT_fKAN':
         criterion = BinaryDiceBCE(dice_weight=0.5, BCE_weight=0.5)
+    elif model_type == 'Segmamba_hybrid_gsc_ds':
+        # Deep supervision wrapper:
+        # assume SegMamba returns: (main, ds1, ds2, ds3)
+        base_loss = WeightedDiceBCE(
+            dice_weight=0.5,
+            BCE_weight=0.5,
+            n_labels=config.n_labels
+        )
+        criterion = DSAdapterLoss(
+            base_loss=base_loss,
+            ds_weights=(0.5, 0.3, 0.2),  # weights for ds1, ds2, ds3
+            main_weight=1.0              # weight for main output
+        )
     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
          
     # if model_type == 'UNeXt':

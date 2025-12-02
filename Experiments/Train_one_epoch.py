@@ -76,7 +76,11 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # ====================================================
 
         preds = model(images)
-        final_preds = preds[1] if isinstance(preds, (tuple, list)) else preds
+        # final_preds = preds[1] if isinstance(preds, (tuple, list)) else preds
+        if isinstance(preds, (tuple, list)):
+            final_preds = preds[0]   # main output
+        else:
+            final_preds = preds
 
         # print("preds:", preds.shape, preds.min().item(), preds.max().item(), preds.dtype)
         # print("masks:", masks.shape, masks.min().item(), masks.max().item(), masks.dtype)
