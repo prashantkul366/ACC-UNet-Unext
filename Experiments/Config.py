@@ -125,7 +125,8 @@ model_name = 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan'
 models_224 = {
     'SwinUnet', 'UCTransNet', 'Segmamba', 'Segmamba_hybrid',
     'Segmamba_hybrid_gsc', 'Segmamba_hybrid_gsc_CA', 'Segmamba_hybrid_gsc_SWAttn',
-    'Segmamba_hybrid_gsc_VSS', 'Segmamba_hybrid_gsc_KAN_PE', 'Segmamba_hybrid_gsc_rm_fkan'
+    'Segmamba_hybrid_gsc_VSS', 'Segmamba_hybrid_gsc_KAN_PE', 'Segmamba_hybrid_gsc_rm_fkan',
+    'Segmamba_hybrid_gsc_KAN_PE_rm_fkan'
 }
 
 img_size = 224 if model_name in models_224 else 256
