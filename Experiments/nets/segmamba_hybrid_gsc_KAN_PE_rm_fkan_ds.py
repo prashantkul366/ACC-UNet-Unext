@@ -887,6 +887,7 @@ class SegMamba(nn.Module):
         # ============ DEEP SUPERVISION HEADS ============
         if self.deep_supervision:
             # after decoder5 -> dec3: channels = feat_size[3]
+            print("Using deep supervision heads")
             self.ds_head3 = UnetOutBlock(
                 spatial_dims=spatial_dims,
                 in_channels=self.feat_size[3],
