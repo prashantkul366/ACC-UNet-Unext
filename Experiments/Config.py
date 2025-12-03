@@ -92,7 +92,8 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_SWAttn'
 # model_name = 'Segmamba_hybrid_gsc_VSS'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'segmamba_hybrid_gsc_KAN_PE_EffKan'
 # model_name = 'Segmamba_hybrid_gsc_rm_fkan'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds'
@@ -130,7 +131,7 @@ models_224 = {
     'Segmamba_hybrid_gsc', 'Segmamba_hybrid_gsc_CA', 'Segmamba_hybrid_gsc_SWAttn',
     'Segmamba_hybrid_gsc_VSS', 'Segmamba_hybrid_gsc_KAN_PE', 'Segmamba_hybrid_gsc_rm_fkan',
     'Segmamba_hybrid_gsc_KAN_PE_rm_fkan', 'Segmamba_hybrid_gsc_ds', 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds',
-    'Segmamba_hybrid_gsc_KAN_PE_ds'
+    'Segmamba_hybrid_gsc_KAN_PE_ds', 'segmamba_hybrid_gsc_KAN_PE_EffKan'
 }
 
 img_size = 224 if model_name in models_224 else 256
