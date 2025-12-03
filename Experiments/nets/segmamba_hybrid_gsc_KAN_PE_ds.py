@@ -521,54 +521,54 @@ class TransformerMambaBlock(nn.Module):
         B, C = x5d.shape[:2]
         D, H, W = x5d.shape[2:]
         N = D * H * W
-        print(f"[TMB] x5d in:         {x5d.shape}")
+        # print(f"[TMB] x5d in:         {x5d.shape}")
 
         # ===== flatten to tokens =====
         x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
         x_in = x                                # original input tokens
-        print(f"[TMB] tokens x_in:    {x_in.shape}")   # (B, N, C)
+        # print(f"[TMB] tokens x_in:    {x_in.shape}")   # (B, N, C)
 
         # ================= TRANSFORMER PART =================
         # 1) LN -> MDTA -> add residual (orig input)
         t = self.ln1(x_in)
-        print(f"[TMB] after ln1:      {t.shape}")
+        # print(f"[TMB] after ln1:      {t.shape}")
         t, _ = self.attn(t)                     # (B, N, C)
-        print(f"[TMB] after attn:     {t.shape}")
+        # print(f"[TMB] after attn:     {t.shape}")
         t = x_in + t                            # attn_residual
-        print(f"[TMB] after attn res: {t.shape}")
+        # print(f"[TMB] after attn res: {t.shape}")
 
         # 2) LN -> f-KAN -> add residual (orig input)
         u = self.ln2(t)
-        print(f"[TMB] after ln2:      {u.shape}")
+        # print(f"[TMB] after ln2:      {u.shape}")
         u = self.ffn1(u)                        # (B, N, C)
-        print(f"[TMB] after fKAN1:    {u.shape}")
+        # print(f"[TMB] after fKAN1:    {u.shape}")
         u = u + t                            # f-KAN residual
-        print(f"[TMB] after fKAN1 res:{u.shape}")
+        # print(f"[TMB] after fKAN1 res:{u.shape}")
         x_tr = x_in + u                         # transformer output
-        print(f"[TMB] x_tr:           {x_tr.shape}")
+        # print(f"[TMB] x_tr:           {x_tr.shape}")
 
         # ================== MAMBA PART =====================
         # 3) LN -> VSSM -> add residual (transformer output)
         m = self.ln3(x_tr)
-        print(f"[TMB] after ln3:      {m.shape}")
+        # print(f"[TMB] after ln3:      {m.shape}")
         m = self.vssm(m)                        # (B, N, C)
-        print(f"[TMB] after VSSM:     {m.shape}")
+        # print(f"[TMB] after VSSM:     {m.shape}")
         m = x_tr + m                            # mamba_residual
-        print(f"[TMB] after VSSM res: {m.shape}")
+        # print(f"[TMB] after VSSM res: {m.shape}")
 
         # 4) LN -> f-KAN -> add residual (transformer output)
         n = self.ln4(m)
-        print(f"[TMB] after ln4:      {n.shape}")
+        # print(f"[TMB] after ln4:      {n.shape}")
         n = self.ffn2(n)                        # (B, N, C)
-        print(f"[TMB] after fKAN2:    {n.shape}")
+        # print(f"[TMB] after fKAN2:    {n.shape}")
         n = n + m                            # f-KAN residual
-        print(f"[TMB] after fKAN2 res:{n.shape}")
+        # print(f"[TMB] after fKAN2 res:{n.shape}")
         x_out_tokens = x_tr + n                 # final output tokens
-        print(f"[TMB] x_out_tokens:   {x_out_tokens.shape}")
+        # print(f"[TMB] x_out_tokens:   {x_out_tokens.shape}")
 
         # ===== back to 5D =====
         x_out = x_out_tokens.transpose(1, 2).view(B, C, D, H, W)
-        print(f"[TMB] x_out 5D:       {x_out.shape}")
+        # print(f"[TMB] x_out 5D:       {x_out.shape}")
         return x_out
 
 class GSC(nn.Module):
@@ -593,7 +593,7 @@ class GSC(nn.Module):
 
     def forward(self, x):
 
-        print(f"[GSC] in:   {x.shape}")
+        # print(f"[GSC] in:   {x.shape}")
         x_residual = x 
 
         x1 = self.proj(x)
@@ -613,7 +613,7 @@ class GSC(nn.Module):
         x = self.norm4(x)
         x = self.nonliner4(x)
         
-        print(f"[GSC] out:  {x.shape}")
+        # print(f"[GSC] out:  {x.shape}")
         return x + x_residual
     
 class MambaEncoder(nn.Module):
@@ -697,23 +697,23 @@ class MambaEncoder(nn.Module):
         After stage 3: (B, dims[3], D, H/16, W/16)
         """
         outs = []
-        print(f"[MambaEncoder] input:       {x.shape}")
+        # print(f"[MambaEncoder] input:       {x.shape}")
 
         for i in range(4):
             # 3D downsampling (unchanged)
             x = self.downsample_layers[i](x)
-            print(f"[MambaEncoder] after downsample[{i}]: {x.shape}")
+            # print(f"[MambaEncoder] after downsample[{i}]: {x.shape}")
 
             x = self.gscs[i](x)
-            print(f"[MambaEncoder] after GSC[{i}]:        {x.shape}")
+            # print(f"[MambaEncoder] after GSC[{i}]:        {x.shape}")
 
             # Token pipeline block(s) on flattened tokens
             x = self.stages[i](x)
-            print(f"[MambaEncoder] after stage[{i}]:      {x.shape}")
+            # print(f"[MambaEncoder] after stage[{i}]:      {x.shape}")
 
             if i in self.out_indices:
                 outs.append(x)
-                print(f"[MambaEncoder] -> outs[{len(outs)-1}] shape: {x.shape}")
+                # print(f"[MambaEncoder] -> outs[{len(outs)-1}] shape: {x.shape}")
 
         return tuple(outs)
 
@@ -947,7 +947,7 @@ class SegMamba(nn.Module):
         """
         squeeze_depth = False
 
-        print(f"[SegMamba] x_in raw:        {x_in.shape}")
+        # print(f"[SegMamba] x_in raw:        {x_in.shape}")
 
         # ---- Input checks ----
         if x_in.dim() not in (4, 5):
@@ -958,7 +958,7 @@ class SegMamba(nn.Module):
         if x_in.dim() == 4:
             x_in = x_in.unsqueeze(2)   # [B, C, 1, H, W]
             squeeze_depth = True
-            print(f"[SegMamba] x_in unsqueezed: {x_in.shape}")
+            # print(f"[SegMamba] x_in unsqueezed: {x_in.shape}")
 
         if x_in.size(1) != self.in_chans:
             raise RuntimeError(
@@ -971,63 +971,63 @@ class SegMamba(nn.Module):
         # --- Encoder path with Mamba features ---
         outs = self.vit(x_in)        # tuple of 4 feature maps
         for i, o in enumerate(outs):
-            print(f"[SegMamba] vit outs[{i}]:  {o.shape}")
+            # print(f"[SegMamba] vit outs[{i}]:  {o.shape}")
             if o is None:
                 raise RuntimeError(f"[SegMamba] vit outs[{i}] is None")
             self._check_numerics(f"vit outs[{i}]", o)
 
         enc1 = self.encoder1(x_in)
-        print(f"[SegMamba] enc1:           {enc1.shape}")
+        # print(f"[SegMamba] enc1:           {enc1.shape}")
         self._check_numerics("enc1", enc1)
 
         x2 = outs[0]
         enc2 = self.encoder2(x2)
-        print(f"[SegMamba] enc2:           {enc2.shape}")
+        # print(f"[SegMamba] enc2:           {enc2.shape}")
         self._check_numerics("enc2", enc2)
 
         x3 = outs[1]
         enc3 = self.encoder3(x3)
-        print(f"[SegMamba] enc:           {enc3.shape}")
+        # print(f"[SegMamba] enc:           {enc3.shape}")
         self._check_numerics("enc3", enc3)
 
         x4 = outs[2]
         enc4 = self.encoder4(x4)
-        print(f"[SegMamba] enc4:           {enc4.shape}")
+        # print(f"[SegMamba] enc4:           {enc4.shape}")
         self._check_numerics("enc4", enc4)
 
         enc_hidden = self.encoder5(outs[3])
-        print(f"[SegMamba] enc_hidden:     {enc_hidden.shape}")
+        # print(f"[SegMamba] enc_hidden:     {enc_hidden.shape}")
         self._check_numerics("enc_hidden", enc_hidden)
 
         # --- Decoder path ---
         dec3 = self.decoder5(enc_hidden, enc4)
-        print(f"[SegMamba] dec3:           {dec3.shape}")
+        # print(f"[SegMamba] dec3:           {dec3.shape}")
         self._check_numerics("dec3", dec3)
 
         dec2 = self.decoder4(dec3, enc3)
-        print(f"[SegMamba] dec2:           {dec2.shape}")
+        # print(f"[SegMamba] dec2:           {dec2.shape}")
         self._check_numerics("dec2", dec2)
 
         dec1 = self.decoder3(dec2, enc2)
-        print(f"[SegMamba] dec1:           {dec1.shape}")
+        # print(f"[SegMamba] dec1:           {dec1.shape}")
         self._check_numerics("dec1", dec1)
 
         dec0 = self.decoder2(dec1, enc1)
-        print(f"[SegMamba] dec0:           {dec0.shape}")
+        # print(f"[SegMamba] dec0:           {dec0.shape}")
         self._check_numerics("dec0", dec0)
 
         out = self.decoder1(dec0)
-        print(f"[SegMamba] decoder1_out:   {out.shape}")
+        # print(f"[SegMamba] decoder1_out:   {out.shape}")
         self._check_numerics("decoder1_out", out)
 
          # === KAN refinement step ===
         out = self.final_refine(out)
-        print(f"[SegMamba] final_refine_out: {out.shape}")
+        # print(f"[SegMamba] final_refine_out: {out.shape}")
         self._check_numerics("final_refine", out)
 
         # ===== main prediction =====
         out_main = self.out(out)                  # [B, out_chans, D, H, W]
-        print(f"[SegMamba] out_main logits:   {out_main.shape}")
+        # print(f"[SegMamba] out_main logits:   {out_main.shape}")
         self._check_numerics("out_logits_5d", out_main)
         
         # ===== deep supervision predictions =====
@@ -1038,9 +1038,9 @@ class SegMamba(nn.Module):
             ds2 = self.ds_head2(dec2)            # [B, out_chans, D, H/4,  W/4]
             ds1 = self.ds_head1(dec1)            # [B, out_chans, D, H/2,  W/2]
 
-            print(f"[SegMamba] ds3 raw:        {ds3.shape}")
-            print(f"[SegMamba] ds2 raw:        {ds2.shape}")
-            print(f"[SegMamba] ds1 raw:        {ds1.shape}")
+            # print(f"[SegMamba] ds3 raw:        {ds3.shape}")
+            # print(f"[SegMamba] ds2 raw:        {ds2.shape}")
+            # print(f"[SegMamba] ds1 raw:        {ds1.shape}")
 
             self._check_numerics("ds3_raw", ds3)
             self._check_numerics("ds2_raw", ds2)
@@ -1048,7 +1048,7 @@ class SegMamba(nn.Module):
 
             # upsample all to match main output resolution
             target_size = out_main.shape[2:]     # (D, H, W)
-            print(f"[SegMamba] target_size for upsample: {target_size}")
+            # print(f"[SegMamba] target_size for upsample: {target_size}")
             ds3_up = F.interpolate(
                 ds3, size=target_size,
                 mode="trilinear",
@@ -1065,9 +1065,9 @@ class SegMamba(nn.Module):
                 align_corners=False,
             )
 
-            print(f"[SegMamba] ds3_up:         {ds3_up.shape}")
-            print(f"[SegMamba] ds2_up:         {ds2_up.shape}")
-            print(f"[SegMamba] ds1_up:         {ds1_up.shape}")
+            # print(f"[SegMamba] ds3_up:         {ds3_up.shape}")
+            # print(f"[SegMamba] ds2_up:         {ds2_up.shape}")
+            # print(f"[SegMamba] ds1_up:         {ds1_up.shape}")
 
             self._check_numerics("ds3_up", ds3_up)
             self._check_numerics("ds2_up", ds2_up)
@@ -1076,16 +1076,16 @@ class SegMamba(nn.Module):
         # ===== squeeze fake depth dim (for 2D use) =====
         if squeeze_depth:
             out_main = out_main.squeeze(2)       # [B, out_chans, H, W]
-            print(f"[SegMamba] out_main 2D:     {out_main.shape}")
+            # print(f"[SegMamba] out_main 2D:     {out_main.shape}")
             self._check_numerics("out_logits_4d", out_main)
 
             if self.deep_supervision:
                 ds3_up = ds3_up.squeeze(2)
                 ds2_up = ds2_up.squeeze(2)
                 ds1_up = ds1_up.squeeze(2)
-                print(f"[SegMamba] ds3_up 2D:     {ds3_up.shape}")
-                print(f"[SegMamba] ds2_up 2D:     {ds2_up.shape}")
-                print(f"[SegMamba] ds1_up 2D:     {ds1_up.shape}")
+                # print(f"[SegMamba] ds3_up 2D:     {ds3_up.shape}")
+                # print(f"[SegMamba] ds2_up 2D:     {ds2_up.shape}")
+                # print(f"[SegMamba] ds1_up 2D:     {ds1_up.shape}")
 
         # ===== return =====
         if self.deep_supervision:
