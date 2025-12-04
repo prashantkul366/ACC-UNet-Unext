@@ -540,9 +540,9 @@ class TransformerMambaBlock(nn.Module):
         # print(f"[TMB] after attn res: {t.shape}")
 
         # 2) LN -> f-KAN -> add residual (orig input)
-        u = self.ln2(t)
+        u = self.ln4(t)
         # print(f"[TMB] after ln2:      {u.shape}")
-        u = self.ffn1(u)                        # (B, N, C)
+        u = self.ffn2(u)                        # (B, N, C)
         # print(f"[TMB] after fKAN1:    {u.shape}")
         u = u + t                            # f-KAN residual
         # print(f"[TMB] after fKAN1 res:{u.shape}")
@@ -561,9 +561,9 @@ class TransformerMambaBlock(nn.Module):
         # print(f"[TMB] after VSSM res: {m.shape}")
 
         # 4) LN -> f-KAN -> add residual (transformer output)
-        n = self.ln4(m)
+        n = self.ln2(m)
         # print(f"[TMB] after ln4:      {n.shape}")
-        n = self.ffn2(n)                        # (B, N, C)
+        n = self.ffn1(n)                        # (B, N, C)
         # print(f"[TMB] after fKAN2:    {n.shape}")
         n = n + m                            # f-KAN residual
         # print(f"[TMB] after fKAN2 res:{n.shape}")
