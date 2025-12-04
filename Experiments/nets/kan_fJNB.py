@@ -50,7 +50,7 @@ class KANLinear(torch.nn.Module):
         self.enable_standalone_scale_spline = enable_standalone_scale_spline
 
         # self.base_activation = base_activation()
-        print("Using fJNB as base activation in KANLinear")
+        # print("Using fJNB as base activation in KANLinear")
         self.base_activation = fJNB(degree=3)
         self.grid_eps = grid_eps
 
