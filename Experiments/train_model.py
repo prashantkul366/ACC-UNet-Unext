@@ -431,7 +431,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
     if model_type == 'Segmamba' or model_type == 'SegViT_fKAN':
         criterion = BinaryDiceBCE(dice_weight=0.5, BCE_weight=0.5)
-    elif model_type == 'Segmamba_hybrid_gsc_ds' or model_type == 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds' or model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds':
+    elif model_type == 'Segmamba_hybrid_gsc_ds' or model_type == 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds' or model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds' or model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_flip':
         # Deep supervision wrapper:
         # assume SegMamba returns: (main, ds1, ds2, ds3)
         base_loss = WeightedDiceBCE(
