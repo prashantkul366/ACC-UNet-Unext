@@ -92,8 +92,9 @@ def run_compare():
     # output_folder = '/content/drive/MyDrive/.../gradcam_compare'
 
     # ---------------- Hardcoded paths ----------------
-    model1_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/BUSI_80-20/UNext_CMRF_GS_Wavelet/session1/model/best_model-UNext_CMRF_GS_Wavelet.pth.tar'
-    model2_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/BUSI_80-20/UNext_CMRF_GS_Wavelet/session1/model/best_model-UNext_CMRF_GS_Wavelet_rKAN.pth.tar'
+    model1_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/BUSI_80-20/UNext_CMRF_GS_Wavelet/session1/models/best_model-UNext_CMRF_GS_Wavelet.pth.tar'
+    model2_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/BUSI_80-20/UNext_CMRF_GS_Wavelet/session1/models/best_model-UNext_CMRF_GS_Wavelet_rKAN.pth.tar'
+
     input_folder = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test/images'
     output_folder = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/gradcam'
     # -------------------------------------------------
