@@ -138,7 +138,7 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-test_session = "session1"         #
+test_session = "session2"         #
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -264,7 +264,7 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_8
 
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
