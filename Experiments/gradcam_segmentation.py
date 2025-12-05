@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 # ---------------------------------------------------
-# 1) IMPORT YOUR MODEL CLASSES HERE
+# IMPORT YOUR MODEL CLASSES
 # ---------------------------------------------------
 from nets.archs.UNext_CMRF_GS_wavelet import UNext_CMRF_GS_Wavelet
 from nets.archs.UNext_CMRF_GS_wavelet_rkan import UNext_CMRF_GS_Wavelet_rKAN
@@ -13,7 +13,7 @@ from nets.archs.UNext_CMRF_GS_wavelet_rkan import UNext_CMRF_GS_Wavelet_rKAN
 
 
 # -------------------------------
-# Grad-CAM for segmentation
+# SEGMENTATION GRAD-CAM
 # -------------------------------
 class SegGradCAM:
     def __init__(self, model, target_layer):
@@ -85,24 +85,24 @@ def load_checkpoint_model(model_path, model_class):
 # -------------------------------
 def run_compare():
 
-    # model1_path = '/content/drive/MyDrive/.../best_model-UNext_CMRF_GS_Wavelet.pth.tar'
-    # model2_path = '/content/drive/MyDrive/.../best_model-UNext_CMRF_GS_Wavelet_rKAN.pth.tar'
-
-    # input_folder = '/content/drive/MyDrive/.../test/images'
-    # output_folder = '/content/drive/MyDrive/.../gradcam_compare'
-
     # ---------------- Hardcoded paths ----------------
     model1_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/BUSI_80-20/UNext_CMRF_GS_Wavelet/session1/models/best_model-UNext_CMRF_GS_Wavelet.pth.tar'
     model2_path = '/content/drive/MyDrive/Prashant/ACC-UNet-Unext/BUSI_80-20/UNext_CMRF_GS_Wavelet/session1/models/best_model-UNext_CMRF_GS_Wavelet_rKAN.pth.tar'
 
     input_folder = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test/images'
-    output_folder = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/gradcam'
+    output_root = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/gradcam'
     # -------------------------------------------------
-   
 
-    os.makedirs(output_folder, exist_ok=True)
+    # Create folders
+    model1_folder = os.path.join(output_root, "UNext_CMRF_GS_Wavelet")
+    model2_folder = os.path.join(output_root, "UNext_CMRF_GS_Wavelet_rKAN")
+    compare_folder = os.path.join(output_root, "comparison")
 
-    # ------------ Load models properly -----------------
+    os.makedirs(model1_folder, exist_ok=True)
+    os.makedirs(model2_folder, exist_ok=True)
+    os.makedirs(compare_folder, exist_ok=True)
+
+    # ------------ Load models -----------------
     model1 = load_checkpoint_model(model1_path, UNext_CMRF_GS_Wavelet)
     model2 = load_checkpoint_model(model2_path, UNext_CMRF_GS_Wavelet_rKAN)
 
@@ -113,6 +113,7 @@ def run_compare():
     cam1 = SegGradCAM(model1, target_layer_1)
     cam2 = SegGradCAM(model2, target_layer_2)
 
+    # ---------------- Process All Images -----------------
     for filename in os.listdir(input_folder):
 
         if not filename.lower().endswith((".png", ".jpg", ".jpeg")):
@@ -122,22 +123,30 @@ def run_compare():
         print(f"\nProcessing → {img_path}")
 
         orig_img, tensor = load_image_for_model(img_path)
+        H, W = orig_img.shape[:2]
 
-        # CAM generation
+        # CAM
         cam_img1 = cam1.generate_cam(tensor)
         cam_img2 = cam2.generate_cam(tensor)
 
-        H, W = orig_img.shape[:2]
-
+        # Resize to original resolution
         cam1_res = cv2.resize(cam_img1, (W, H))
         cam2_res = cv2.resize(cam_img2, (W, H))
 
         overlay1 = overlay_heatmap(cam1_res, orig_img)
         overlay2 = overlay_heatmap(cam2_res, orig_img)
 
-        combined = np.concatenate([overlay1, overlay2], axis=1)
+        # Save individual model gradcams
+        # cv2.imwrite(os.path.join(model1_folder, f"{filename}_gradcam.png"),
+        #             cv2.cvtColor(overlay1, cv2.COLOR_RGB2BGR))
 
-        save_path = os.path.join(output_folder, f"{filename}_compare.png")
+        # cv2.imwrite(os.path.join(model2_folder, f"{filename}_gradcam.png"),
+        #             cv2.cvtColor(overlay2, cv2.COLOR_RGB2BGR))
+
+        # Make a combined comparison output
+        combined = np.concatenate([orig_img, overlay1, overlay2], axis=1)
+        save_path = os.path.join(compare_folder, f"{filename}_compare.png")
+
         cv2.imwrite(save_path, cv2.cvtColor(combined, cv2.COLOR_RGB2BGR))
         print(f"Saved → {save_path}")
 
