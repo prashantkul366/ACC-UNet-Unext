@@ -106,6 +106,7 @@ def run_compare():
             continue
 
         img_path = os.path.join(input_folder, filename)
+        print(f"Processing → {img_path}")
         orig_img, tensor = load_image_for_model(img_path)
 
         tensor1 = tensor.to(device1)
@@ -128,6 +129,7 @@ def run_compare():
         comparison = np.concatenate([overlay1, overlay2], axis=1)
 
         out_path = os.path.join(output_folder, f"{filename}_compare.png")
+        print(f"Saving → {out_path}")
         cv2.imwrite(out_path, cv2.cvtColor(comparison, cv2.COLOR_RGB2BGR))
 
         print(f"Saved → {out_path}")
