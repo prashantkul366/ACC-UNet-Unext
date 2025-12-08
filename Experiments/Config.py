@@ -43,7 +43,7 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-# task_name = 'ISIC18_UNET'
+task_name = 'ISIC18_UNET'
 # task_name = 'ISIC18_mod'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
@@ -54,7 +54,7 @@ resume_checkpoint = False  # or False
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-task_name = 'BUSI_80-20'
+# task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_mod'
 
 # task_name = 'CVC_ClinicDB_80-20'
@@ -68,7 +68,7 @@ learning_rate = 1e-3
 # learning_rate = 0.0001
 # batch_size = 32
 # batch_size = 8
-batch_size = 2
+batch_size = 8
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
@@ -85,7 +85,7 @@ batch_size = 2
 # model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
 # model_name = 'UNext_InceptionNext_MLFC_fKAN'
 
-# model_name = 'Segmamba'
+model_name = 'Segmamba'
 # model_name = 'Segmamba_hybrid'
 # model_name = 'Segmamba_hybrid_gsc'
 # model_name = 'Segmamba_hybrid_gsc_CA'
@@ -93,7 +93,7 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_VSS'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
 # model_name = 'segmamba_hybrid_gsc_KAN_PE_EffKan'
 # model_name = 'Segmamba_hybrid_gsc_rm_fkan'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan'
@@ -138,7 +138,7 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-test_session = "session2"         #
+test_session = "session1"         #
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -151,10 +151,10 @@ test_session = "session2"         #
 # logger_path        = save_path + session_name + ".log"
 # visualize_path     = save_path + 'visualize_val/'
 
-# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 # ISIC 18 MOD
 # dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod'
@@ -170,10 +170,10 @@ test_session = "session2"         #
 
 
 # BUSI_80-20
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 # BUSI_80-20_mod
@@ -264,7 +264,7 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_8
 
 
 
-session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
