@@ -85,14 +85,18 @@ batch_size = 8
 # model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
 # model_name = 'UNext_InceptionNext_MLFC_fKAN'
 
-model_name = 'Segmamba'
+# model_name = 'Segmamba'
 # model_name = 'Segmamba_hybrid'
 # model_name = 'Segmamba_hybrid_gsc'
 # model_name = 'Segmamba_hybrid_gsc_CA'
 # model_name = 'Segmamba_hybrid_gsc_SWAttn'
 # model_name = 'Segmamba_hybrid_gsc_VSS'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+
+
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+
+
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
 # model_name = 'segmamba_hybrid_gsc_KAN_PE_EffKan'
 # model_name = 'Segmamba_hybrid_gsc_rm_fkan'
