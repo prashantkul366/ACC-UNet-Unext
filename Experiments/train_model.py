@@ -414,11 +414,17 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     # print(f"GFLOPs: {model_gflops:.2f} G")
 
     checkpoint_path = os.path.join(config.model_path, f'best_model-{model_type}.pth.tar')
+    # checkpoint_path = os.path.join(config.model_path, f'best_model-{model_type}.pth.tar')
+    print("Checkpoint path:", checkpoint_path)
+    print("Exists:", os.path.isfile(checkpoint_path))
+
     start_epoch = 0
     max_dice = 0.0
     best_epoch = 1
 
     if resume and os.path.isfile(checkpoint_path):
+        max_dice = 0.9113
+        best_epoch = checkpoint['epoch'] + 1
         logger.info(f" Resuming training from checkpoint: {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['state_dict'])
@@ -538,12 +544,22 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
                 logger.info('\t Saving best model, mean dice increased from: {:.4f} to {:.4f}'.format(max_dice,val_dice))
                 max_dice = val_dice
                 best_epoch = epoch + 1
-                save_checkpoint({'epoch': epoch,
-                                 'best_model': True,
-                                 'model': model_type,
-                                 'state_dict': model.state_dict(),
-                                 'val_loss': val_loss,
-                                 'optimizer': optimizer.state_dict()}, config.model_path)#+f'_{epoch}')
+                # save_checkpoint({'epoch': epoch,
+                #                  'best_model': True,
+                #                  'model': model_type,
+                #                  'state_dict': model.state_dict(),
+                #                  'val_loss': val_loss,
+                #                  'optimizer': optimizer.state_dict()}, config.model_path)#+f'_{epoch}')
+                save_checkpoint({
+                                    'epoch': epoch,
+                                    'best_model': True,
+                                    'model': model_type,
+                                    'state_dict': model.state_dict(),
+                                    'val_loss': val_loss,
+                                    'val_dice': val_dice,          # NEW
+                                    'optimizer': optimizer.state_dict()
+                                }, config.model_path)
+
                 
                 # model.save(config.model_path+f'/best_model-{model_type}.pth')
         else:
@@ -585,7 +601,7 @@ if __name__ == '__main__':
 
     print("Logger Configured!!")
     # model = main_loop(model_type=config.model_name, tensorboard=True)
-    model = main_loop(model_type=config.model_name, tensorboard=True, resume=False)
+    model = main_loop(model_type=config.model_name, tensorboard=True, resume=True)
 
     
     fp = open('log.log','a')
