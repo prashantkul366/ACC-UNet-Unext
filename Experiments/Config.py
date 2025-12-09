@@ -43,7 +43,7 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-task_name = 'ISIC18_UNET'
+# task_name = 'ISIC18_UNET'
 # task_name = 'ISIC18_mod'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
@@ -57,7 +57,9 @@ task_name = 'ISIC18_UNET'
 # task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_mod'
 
-# task_name = 'CVC_ClinicDB_80-20'
+task_name = 'CVC_ClinicDB_80-20'
+
+
 # task_name = 'Glas_80-20'
 # task_name = 'TNBC_80-20'
 # task_name = 'STARE'
@@ -85,7 +87,7 @@ batch_size = 2
 # model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
 # model_name = 'UNext_InceptionNext_MLFC_fKAN'
 
-model_name = 'Segmamba'
+# model_name = 'Segmamba'
 
 
 # model_name = 'Segmamba_hybrid'
@@ -96,7 +98,7 @@ model_name = 'Segmamba'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 
 
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
@@ -157,10 +159,10 @@ test_session = "session1"         #
 # logger_path        = save_path + session_name + ".log"
 # visualize_path     = save_path + 'visualize_val/'
 
-dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 # ISIC 18 MOD
 # dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic_mod'
@@ -251,10 +253,10 @@ test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/te
 
 
 # CVC_ClinicDB_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
 
 # STARE
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/STARE_10_10'

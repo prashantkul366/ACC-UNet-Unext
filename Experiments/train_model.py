@@ -57,7 +57,7 @@ from nets.archs.UNext_CMRF_GS_wavelet_rkan import UNext_CMRF_GS_Wavelet_rKAN
 from nets.archs.archs_InceptionNext_MLFC_fKAN import UNext_InceptionNext_MLFC_fKAN
 
 ######################################################
-from nets.segmamba import SegMamba
+# from nets.segmamba import SegMamba
 # from nets.segmamba_hybrid import SegMamba as SegMamba_hybrid
 # from nets.segmamba_hybrid_gsc import SegMamba as SegMamba_hybrid_gsc
 # from nets.segmamba_hybrid_gsc_CA import SegMamba as Segmamba_hybrid_gsc_CA
