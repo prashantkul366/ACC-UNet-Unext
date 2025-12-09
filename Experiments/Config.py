@@ -85,7 +85,9 @@ batch_size = 2
 # model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
 # model_name = 'UNext_InceptionNext_MLFC_fKAN'
 
-# model_name = 'Segmamba'
+model_name = 'Segmamba'
+
+
 # model_name = 'Segmamba_hybrid'
 # model_name = 'Segmamba_hybrid_gsc'
 # model_name = 'Segmamba_hybrid_gsc_CA'
@@ -94,7 +96,7 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 
 
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
