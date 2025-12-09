@@ -424,13 +424,13 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
     if resume and os.path.isfile(checkpoint_path):
         max_dice = 0.9113
-        best_epoch = checkpoint['epoch'] + 1
         logger.info(f" Resuming training from checkpoint: {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         start_epoch = checkpoint['epoch'] + 1
-        max_dice = checkpoint.get('val_loss', 0.0)
+        best_epoch = checkpoint['epoch'] + 1
+        # max_dice = checkpoint.get('val_loss', 0.0)
         best_epoch = start_epoch
 
         logger.info(f" Model type: {model_type}")
