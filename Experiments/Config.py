@@ -54,10 +54,10 @@ resume_checkpoint = False  # or False
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-# task_name = 'BUSI_80-20'
+task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_mod'
 
-task_name = 'CVC_ClinicDB_80-20'
+# task_name = 'CVC_ClinicDB_80-20'
 
 
 # task_name = 'Glas_80-20'
@@ -98,7 +98,7 @@ batch_size = 8
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 
 
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
@@ -117,7 +117,7 @@ batch_size = 8
 # model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
 # model_name = 'UNext_CMRF_enc_CSSE'
 # model_name = 'UNext_CMRF_PP'
-model_name = 'TransUNet'  # TransUNet model
+# model_name = 'TransUNet'  # TransUNet model
 # model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
 # model_name = 'UNext_CMRF_GAB_wavelet'  # CMRF encoder + GAB fusion + wavelet
 # model_name = 'UNext_CMRF_GAB_wavelet_OD'  # CMRF encoder + GAB fusion + wavelet + ODConv
@@ -194,10 +194,10 @@ test_session = "session1"         #
 
 
 # BUSI_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 # BUSI_80-20_mod
@@ -279,10 +279,10 @@ test_session = "session1"         #
 
 
 # CVC_ClinicDB_80-20
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
 
 
 
