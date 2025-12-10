@@ -508,7 +508,11 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
                 (img_uint8.shape[1], img_uint8.shape[0]),
                 interpolation=cv2.INTER_LINEAR,
             )
+
+            img_uint8 = cv2.rotate(img_uint8, cv2.ROTATE_90_CLOCKWISE)
+            img_uint8 = cv2.flip(img_uint8, 1) 
             overlay = cv2.addWeighted(img_uint8, 0.6, heatmap_resized, 0.4, 0)
+
 
             overlay_file = os.path.join(cam_dir, f"{fname}_cam_overlay_{model_type}.png")
             print("Saving Grad-CAM overlay to:", overlay_file)
