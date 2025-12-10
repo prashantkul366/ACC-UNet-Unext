@@ -1088,12 +1088,13 @@ class SegMamba(nn.Module):
                 # print(f"[SegMamba] ds1_up 2D:     {ds1_up.shape}")
 
         # ===== return =====
-        if self.deep_supervision:
-            # main output first, aux outputs after
-            return out_main, ds1_up, ds2_up, ds3_up
-        else:
-            return out_main
+        # if self.deep_supervision:
+        #     # main output first, aux outputs after
+        #     return out_main, ds1_up, ds2_up, ds3_up
+        # else:
+        #     return out_main
         
+        return out_main
 
         # # === KAN refinement step ===
         # out = self.final_refine(out)
