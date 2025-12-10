@@ -363,15 +363,15 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
     # predict_save = np.flipud(predict_save)
     ################################################################################
 
-    if(True):
-        pickle.dump({
-            'input':input_img,
-            'output':(output>=0.5)*1.0,            
-            'ground_truth':labs,
-            'dice':dice_pred_tmp,
-            'iou':iou_tmp
-        },
-        open(vis_save_path+'.p','wb'))
+    # if(True):
+    #     pickle.dump({
+    #         'input':input_img,
+    #         'output':(output>=0.5)*1.0,            
+    #         'ground_truth':labs,
+    #         'dice':dice_pred_tmp,
+    #         'iou':iou_tmp
+    #     },
+    #     open(vis_save_path+'.p','wb'))
 
     # pred_vis_path = os.path.join(vis_save_path, 'predicted_masks')
     # os.makedirs(pred_vis_path, exist_ok=True)
