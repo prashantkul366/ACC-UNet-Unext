@@ -337,10 +337,18 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
 
     # predict_save = np.reshape(predict_save, (config.img_size, config.img_size))
     
-    dice_pred_tmp, iou_tmp = show_image_with_dice(predict_save, labs, save_path=vis_save_path+'_predict'+model_type+'.jpg')
     input_img_np = input_img[0].transpose(0, -1).cpu().detach().numpy()  # [H,W,C]
-    output_map = prob[0, 0].cpu().detach().numpy() 
-    gt = labs[0] if labs.ndim == 3 else labs  # be safe
+    output_map = prob[0, 0].cpu().detach().numpy()   
+
+    if torch.is_tensor(labs):
+        gt = labs[0].cpu().numpy() if labs.ndim == 3 else labs.cpu().numpy()
+    else:
+        gt = labs
+
+    dice_pred_tmp, iou_tmp = show_image_with_dice(predict_save, gt, save_path=vis_save_path+'_predict'+model_type+'.jpg')
+    # input_img_np = input_img[0].transpose(0, -1).cpu().detach().numpy()  # [H,W,C]
+    # output_map = prob[0, 0].cpu().detach().numpy() 
+    # gt = labs[0] if labs.ndim == 3 else labs  # be safe
     # labs = labs[0]                                                       # [H,W]
     # output_map = prob[0, 0, :, :].cpu().detach().numpy()                 # [H,W] prob
 
@@ -416,7 +424,7 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
     mask_file = os.path.join(mask_dir, f"{fname}.png")
     # print(f"pred file path {mask_file}")
     # mask_file = os.path.join(mask_dir, f"{vis_path}.png")
-    pred_mask = (output >= 0.5).astype(np.uint8) * 255  # binary mask → 0/255
+    pred_mask = (output_map >= 0.5).astype(np.uint8) * 255  # binary mask → 0/255
     cv2.imwrite(mask_file, pred_mask)  # save exact resolution (no scaling)
 
 
@@ -434,12 +442,12 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
     plt.figure(figsize=(12, 4))
 
     plt.subplot(1, 3, 1)
-    plt.imshow(input_img)
+    plt.imshow(input_img_np)
     plt.axis("off")
     plt.title("Input")
 
     plt.subplot(1, 3, 2)
-    plt.imshow(labs, cmap="gray", interpolation='nearest')
+    plt.imshow(gt, cmap="gray", interpolation='nearest')
     plt.axis("off")
     plt.title("Ground Truth")
 
@@ -705,6 +713,7 @@ if __name__ == '__main__':
     os.makedirs(cam_dir, exist_ok=True)
 
     checkpoint = torch.load(model_path, map_location='cuda')
+    print("=> loading model from {}".format(model_path))
     state_dict = checkpoint['state_dict']
 
     clean_state_dict = {
