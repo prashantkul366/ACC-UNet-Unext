@@ -338,14 +338,21 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
     # predict_save = np.reshape(predict_save, (config.img_size, config.img_size))
     
     input_img_np = input_img[0].transpose(0, -1).cpu().detach().numpy()  # [H,W,C]
-    output_map = prob[0, 0].cpu().detach().numpy()   
+    output_map = prob[0, 0].cpu().detach().numpy()                       # [H,W]
 
+    # convert labs to 2D numpy ground truth
     if torch.is_tensor(labs):
-        gt = labs[0].cpu().numpy() if labs.ndim == 3 else labs.cpu().numpy()
+        labs_np = labs.cpu().numpy()
     else:
-        gt = labs
+        labs_np = np.array(labs)
 
-    dice_pred_tmp, iou_tmp = show_image_with_dice(predict_save, gt, save_path=vis_save_path+'_predict'+model_type+'.jpg')
+    gt = np.squeeze(labs_np)  # -> [H,W]
+
+    dice_pred_tmp, iou_tmp = show_image_with_dice(
+        predict_save,
+        gt,
+        save_path=vis_save_path + '_predict' + model_type + '.jpg'
+    )
     # input_img_np = input_img[0].transpose(0, -1).cpu().detach().numpy()  # [H,W,C]
     # output_map = prob[0, 0].cpu().detach().numpy() 
     # gt = labs[0] if labs.ndim == 3 else labs  # be safe
@@ -437,43 +444,43 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
     # cv2.imwrite(os.path.join(mask_dir, f"{fname}_overlay_{model_type}.png"), overlay)
 
     # --- 2) Save side-by-side figure (high-res + no interpolation) ---
-    side_file = os.path.join(side_dir, f"{fname}_side_{model_type}.png")
+    # side_file = os.path.join(side_dir, f"{fname}_side_{model_type}.png")
 
-    plt.figure(figsize=(12, 4))
+    # plt.figure(figsize=(12, 4))
 
-    plt.subplot(1, 3, 1)
-    plt.imshow(input_img_np)
-    plt.axis("off")
-    plt.title("Input")
+    # plt.subplot(1, 3, 1)
+    # plt.imshow(input_img_np)
+    # plt.axis("off")
+    # plt.title("Input")
 
-    plt.subplot(1, 3, 2)
-    plt.imshow(gt, cmap="gray", interpolation='nearest')
-    plt.axis("off")
-    plt.title("Ground Truth")
+    # plt.subplot(1, 3, 2)
+    # plt.imshow(gt, cmap="gray", interpolation='nearest')
+    # plt.axis("off")
+    # plt.title("Ground Truth")
 
-    plt.subplot(1, 3, 3)
-    plt.imshow(pred_mask, cmap="gray", interpolation='nearest')
-    plt.axis("off")
-    plt.title("Prediction")
+    # plt.subplot(1, 3, 3)
+    # plt.imshow(pred_mask, cmap="gray", interpolation='nearest')
+    # plt.axis("off")
+    # plt.title("Prediction")
 
-    plt.tight_layout()
-    plt.savefig(side_file, dpi=600, bbox_inches="tight", pad_inches=0)
-    plt.close()
+    # plt.tight_layout()
+    # plt.savefig(side_file, dpi=600, bbox_inches="tight", pad_inches=0)
+    # plt.close()
 
 
-    if(False):
+    # if(False):
         
-        plt.figure(figsize=(10,3.3))
-        plt.subplot(1,3,1)
-        plt.imshow(input_img)
-        plt.subplot(1,3,2)
-        plt.imshow(labs,cmap='gray')
-        plt.subplot(1,3,3)
-        plt.imshow((output>=0.5)*1.0,cmap='gray')    
-        plt.suptitle(f'Dice score : {np.round(dice_pred_tmp,3)}\nIoU : {np.round(iou_tmp,3)}')
-        plt.tight_layout()
-        plt.savefig(vis_save_path)
-        plt.close()
+        # plt.figure(figsize=(10,3.3))
+        # plt.subplot(1,3,1)
+        # plt.imshow(input_img)
+        # plt.subplot(1,3,2)
+        # plt.imshow(labs,cmap='gray')
+        # plt.subplot(1,3,3)
+        # plt.imshow((output>=0.5)*1.0,cmap='gray')    
+        # plt.suptitle(f'Dice score : {np.round(dice_pred_tmp,3)}\nIoU : {np.round(iou_tmp,3)}')
+        # plt.tight_layout()
+        # plt.savefig(vis_save_path)
+        # plt.close()
 
     # ---------- NEW: Grad-CAM overlay (2D) ----------
     if gradcam is not None:
