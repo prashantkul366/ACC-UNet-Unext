@@ -30,7 +30,7 @@ class TransUNet(nn.Module):
 
         # pick a backbone: 'ViT-B_16' (pure ViT) or 'R50-ViT-B_16' (ResNet50+ViT)
         cfg = CONFIGS[backbone]
-
+        print("Transunet Initiated")
         # decide img_size (must be divisible by patch size, typically 16)
         if img_size is None:
             img_size = _GLOBAL_IMG_SIZE

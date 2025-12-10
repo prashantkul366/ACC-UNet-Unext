@@ -70,7 +70,7 @@ learning_rate = 1e-3
 # learning_rate = 0.0001
 # batch_size = 32
 # batch_size = 8
-batch_size = 2
+batch_size = 8
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
@@ -98,7 +98,7 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 
 
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
@@ -117,7 +117,7 @@ model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 # model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
 # model_name = 'UNext_CMRF_enc_CSSE'
 # model_name = 'UNext_CMRF_PP'
-# model_name = 'TransUNet'  # TransUNet model
+model_name = 'TransUNet'  # TransUNet model
 # model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
 # model_name = 'UNext_CMRF_GAB_wavelet'  # CMRF encoder + GAB fusion + wavelet
 # model_name = 'UNext_CMRF_GAB_wavelet_OD'  # CMRF encoder + GAB fusion + wavelet + ODConv
