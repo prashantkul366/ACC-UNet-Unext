@@ -339,15 +339,17 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pr
     
     dice_pred_tmp, iou_tmp = show_image_with_dice(predict_save, labs, save_path=vis_save_path+'_predict'+model_type+'.jpg')
     input_img_np = input_img[0].transpose(0, -1).cpu().detach().numpy()  # [H,W,C]
-    labs = labs[0]                                                       # [H,W]
-    output_map = prob[0, 0, :, :].cpu().detach().numpy()                 # [H,W] prob
+    output_map = prob[0, 0].cpu().detach().numpy() 
+    gt = labs[0] if labs.ndim == 3 else labs  # be safe
+    # labs = labs[0]                                                       # [H,W]
+    # output_map = prob[0, 0, :, :].cpu().detach().numpy()                 # [H,W] prob
 
     # input_img.to('cpu')
 
 
-    input_img = input_img[0].transpose(0,-1).cpu().detach().numpy()
-    labs = labs[0]
-    output = output[0,0,:,:].cpu().detach().numpy()
+    # input_img = input_img[0].transpose(0,-1).cpu().detach().numpy()
+    # labs = labs[0]
+    # output = output[0,0,:,:].cpu().detach().numpy()
 
     ################################################################################
     # apply horizontal + vertical flip to labels and outputs
