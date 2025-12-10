@@ -423,7 +423,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     best_epoch = 1
 
     if resume and os.path.isfile(checkpoint_path):
-        max_dice = 0.9113
+        # max_dice = 0.9113
         logger.info(f" Resuming training from checkpoint: {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['state_dict'])
@@ -431,6 +431,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         start_epoch = checkpoint['epoch'] + 1
         best_epoch = checkpoint['epoch'] + 1
         # max_dice = checkpoint.get('val_loss', 0.0)
+        max_dice = checkpoint.get('val_dice', 0.0)
         best_epoch = start_epoch
 
         logger.info(f" Model type: {model_type}")
@@ -438,6 +439,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         logger.info(f" Last best dice score: {max_dice:.4f}")
         logger.info(f" Optimizer state and model weights loaded successfully")
         logger.info(f" Continuing training on GPU: {torch.cuda.get_device_name(torch.cuda.current_device())}")
+        print("Resumed start_epoch:", start_epoch, "max_dice:", max_dice, "best_epoch:", best_epoch)
 
 
 
