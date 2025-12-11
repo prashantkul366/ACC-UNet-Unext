@@ -80,7 +80,8 @@ from nets.archs.UNext_CMRF_GS_wavelet_rkan import UNext_CMRF_GS_Wavelet_rKAN
 
 # from nets.segmamba_hybrid_gsc_rm_fkan import SegMamba as Segmamba_hybrid_gsc_rm_fkan
 # from nets.segmamba import SegMamba
-from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
+# from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
+from nets.segmamba_hybrid_gsc_MLP_PE_ds import SegMamba as Segmamba_hybrid_gsc_MLP_PE_ds
 ######################################################
 
 class AverageMeter(object):
@@ -850,8 +851,14 @@ if __name__ == '__main__':
     #         feat_size=[48, 96, 192, 384], spatial_dims=3,)
     #     lr = 1e-4
 
-    elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds':
-        model = Segmamba_hybrid_gsc_KAN_PE_ds(
+    # elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds':
+    #     model = Segmamba_hybrid_gsc_KAN_PE_ds(
+    #         in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
+    #         feat_size=[48, 96, 192, 384], spatial_dims=3,)
+    #     lr = 1e-4
+
+    elif model_type == 'Segmamba_hybrid_gsc_MLP_PE_ds':
+        model = Segmamba_hybrid_gsc_MLP_PE_ds(
             in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
         lr = 1e-4
