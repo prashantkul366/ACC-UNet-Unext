@@ -43,7 +43,7 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-task_name = 'ISIC18_UNET'
+# task_name = 'ISIC18_UNET'
 # task_name = 'ISIC18_mod'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
@@ -54,7 +54,7 @@ task_name = 'ISIC18_UNET'
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-# task_name = 'BUSI_80-20'
+task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_mod'
 
 # task_name = 'CVC_ClinicDB_80-20'
@@ -70,7 +70,7 @@ learning_rate = 1e-3
 # learning_rate = 0.0001
 # batch_size = 32
 # batch_size = 8
-batch_size = 8
+batch_size = 4
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
@@ -98,7 +98,8 @@ batch_size = 8
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 
 
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
@@ -140,7 +141,8 @@ models_224 = {
     'Segmamba_hybrid_gsc', 'Segmamba_hybrid_gsc_CA', 'Segmamba_hybrid_gsc_SWAttn',
     'Segmamba_hybrid_gsc_VSS', 'Segmamba_hybrid_gsc_KAN_PE', 'Segmamba_hybrid_gsc_rm_fkan',
     'Segmamba_hybrid_gsc_KAN_PE_rm_fkan', 'Segmamba_hybrid_gsc_ds', 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds',
-    'Segmamba_hybrid_gsc_KAN_PE_ds', 'segmamba_hybrid_gsc_KAN_PE_EffKan', 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
+    'Segmamba_hybrid_gsc_KAN_PE_ds', 'segmamba_hybrid_gsc_KAN_PE_EffKan', 'Segmamba_hybrid_gsc_KAN_PE_ds_flip',
+    'Segmamba_hybrid_gsc_MLP_PE_ds'
 }
 
 img_size = 224 if model_name in models_224 else 256
@@ -162,10 +164,10 @@ test_session = "session1"         #
 
 
 
-dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 
 
@@ -194,10 +196,10 @@ test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/te
 
 
 # BUSI_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 # BUSI_80-20_mod
