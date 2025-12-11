@@ -916,7 +916,7 @@ if __name__ == '__main__':
         # Use underlying module if DataParallel
         use_model_for_cam = model.module if isinstance(model, nn.DataParallel) else model
 
-        if model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds':
+        if model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds' or model_type == 'Segmamba_hybrid_gsc_MLP_PE_ds':
             # Good candidate layer: decoder1 (high-res features before final head)
             target_layer = use_model_for_cam.decoder1
             print("Using Grad-CAM target layer: decoder1")
