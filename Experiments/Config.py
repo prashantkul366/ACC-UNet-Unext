@@ -54,10 +54,10 @@ resume_checkpoint = False  # or False
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-# task_name = 'BUSI_80-20'
+task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_mod'
 
-task_name = 'CVC_ClinicDB_80-20'
+# task_name = 'CVC_ClinicDB_80-20'
 
 
 # task_name = 'Glas_80-20'
@@ -87,7 +87,7 @@ batch_size = 4
 # model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
 # model_name = 'UNext_InceptionNext_MLFC_fKAN'
 
-model_name = 'Segmamba'
+# model_name = 'Segmamba'
 
 
 # model_name = 'Segmamba_hybrid'
@@ -98,7 +98,7 @@ model_name = 'Segmamba'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 
 
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
 
