@@ -79,8 +79,8 @@ from nets.archs.UNext_CMRF_BSRB_GS import UNext_CMRF_BSRB_GS
 from nets.archs.UNext_CMRF_GS_wavelet_rkan import UNext_CMRF_GS_Wavelet_rKAN
 
 # from nets.segmamba_hybrid_gsc_rm_fkan import SegMamba as Segmamba_hybrid_gsc_rm_fkan
-# from nets.segmamba import SegMamba
-from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
+from nets.segmamba import SegMamba
+# from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
 ######################################################
 
 class AverageMeter(object):
