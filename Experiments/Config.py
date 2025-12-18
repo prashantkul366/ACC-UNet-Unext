@@ -87,7 +87,7 @@ batch_size = 4
 # model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
 # model_name = 'UNext_InceptionNext_MLFC_fKAN'
 
-model_name = 'Segmamba'
+# model_name = 'Segmamba'
 
 
 # model_name = 'Segmamba_hybrid'
@@ -118,7 +118,7 @@ model_name = 'Segmamba'
 # model_name = 'UNext_CMRF_enc_dec_MLFC'  # CMRF encoder + decoder + MLFC fusion
 # model_name = 'UNext_CMRF_enc_CSSE'
 # model_name = 'UNext_CMRF_PP'
-# model_name = 'TransUNet'  # TransUNet model
+model_name = 'TransUNet'  # TransUNet model
 # model_name = 'UNext_CMRF_GAB'  # CMRF encoder + GAB fusion
 # model_name = 'UNext_CMRF_GAB_wavelet'  # CMRF encoder + GAB fusion + wavelet
 # model_name = 'UNext_CMRF_GAB_wavelet_OD'  # CMRF encoder + GAB fusion + wavelet + ODConv
