@@ -205,17 +205,17 @@ test_session = "session43"
 
 
 # BUSI_80-20_ Seed 43
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed43'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed43/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed43/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed43/test'
 
 
 # BUSI_80-20_ Seed 44
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed44'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed44/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed44/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed44/test'
 
 
 # BUSI_80-20_mod
