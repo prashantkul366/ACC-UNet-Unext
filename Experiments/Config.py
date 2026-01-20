@@ -78,8 +78,8 @@ batch_size = 4
 # model_name = 'UCTransNet'
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
-model_name = 'MultiResUnet1_32_1.67'
-
+# model_name = 'MultiResUnet1_32_1.67'
+model_name = 'U-KAN'
 
 # model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
@@ -129,7 +129,7 @@ model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'UNext_CMRF_GS_Wavelet_hd'  
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
-# model_name = 'U-KAN'
+
 
 # if model_name == 'SwinUnet' or model_name == 'UCTransNet' or model_name == 'Segmamba' or model_name == 'Segmamba_hybrid'or model_name == 'Segmamba_hybrid_gsc' or model_name == 'Segmamba_hybrid_gsc_CA':
 #     img_size = 224
