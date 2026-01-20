@@ -78,10 +78,10 @@ batch_size = 4
 # model_name = 'UCTransNet'
 # model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
-# model_name = 'MultiResUnet1_32_1.67'
+model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'U-KAN'
 
-model_name = 'UNeXt'
+# model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 # model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
