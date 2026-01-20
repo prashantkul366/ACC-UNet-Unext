@@ -76,12 +76,12 @@ batch_size = 4
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
-# model_name = 'UNet_base'
+model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'U-KAN'
 
-model_name = 'UNeXt'
+# model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 # model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
@@ -149,8 +149,8 @@ img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
 # test_session = "session1"         
-test_session = "session43"
-# test_session = "session44"          # session name used in training phase
+# test_session = "session43"
+test_session = "session44"          # session name used in training phase
 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -205,17 +205,17 @@ test_session = "session43"
 
 
 # BUSI_80-20_ Seed 43
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_43'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_43/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_43/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_43/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_43'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_43/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_43/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_43/test'
 
 
 # BUSI_80-20_ Seed 44
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_44'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_44/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_44/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_44/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_44'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_44/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_44/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_seed_44/test'
 
 
 # BUSI_80-20_mod
@@ -322,8 +322,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_8
 
 
 # session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
-session_name       = 'session43'  #time.strftime('%m.%d_%Hh%M')
-# session_name       = 'session44'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session43'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session44'  #time.strftime('%m.%d_%Hh%M')
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
 tensorboard_folder = save_path + 'tensorboard_logs/'
