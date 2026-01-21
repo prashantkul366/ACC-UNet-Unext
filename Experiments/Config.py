@@ -152,8 +152,8 @@ img_size = 224 if model_name in models_224 else 256
 # test_session = "session43"
 # test_session = "session44"          # session name used in training phase
 
-test_session = "session100" 
-# test_session = "session101" 
+# test_session = "session100" 
+test_session = "session101" 
 # test_session = "session102" 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
@@ -230,16 +230,16 @@ test_session = "session100"
 
 
 # BUSI_80-20_Fold 1 
-dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1'
-train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1/train'
-val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1/val'
-test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1'
+# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1/val'
+# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1/test'
 
 # BUSI_80-20_Fold 2
-# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2'
-# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/val'
-# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/test'
+dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2'
+train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/train'
+val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/val'
+test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/test'
 
 # BUSI_80-20_Fold 3
 # dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3'
@@ -350,8 +350,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1/
 # session_name       = 'session43'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session44'  #time.strftime('%m.%d_%Hh%M')
 
-session_name       = 'session100'  #time.strftime('%m.%d_%Hh%M')
-# session_name       = 'session101'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session100'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session101'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session102'  #time.strftime('%m.%d_%Hh%M')
 
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
