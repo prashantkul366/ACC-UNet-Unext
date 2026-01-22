@@ -73,7 +73,7 @@ learning_rate = 1e-3
 batch_size = 4
 
 # model_name = 'ACC_UNet'
-model_name = 'SwinUnet'
+# model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
 # model_name = 'UNet_base'
@@ -81,7 +81,7 @@ model_name = 'SwinUnet'
 # model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'U-KAN'
 
-# model_name = 'UNeXt'
+model_name = 'UNeXt'
 # model_name = 'UNext_CMRF_GS_Wavelet'  # CMRF encoder + Global Semnantic + SIM augmentation + wavelet 
 
 # model_name = 'UNext_CMRF_GS_Wavelet_rKAN'
@@ -153,8 +153,8 @@ img_size = 224 if model_name in models_224 else 256
 # test_session = "session44"          # session name used in training phase
 
 # test_session = "session100" 
-# test_session = "session101" 
-test_session = "session102" 
+test_session = "session101" 
+# test_session = "session102" 
 
 # train_dataset = './datasets/'+ task_name+ '/Train_Folder/'
 # val_dataset = './datasets/'+ task_name+ '/Val_Folder/'
@@ -236,16 +236,16 @@ test_session = "session102"
 # test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_1/test'
 
 # BUSI_80-20_Fold 2
-# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2'
-# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/val'
-# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/test'
+dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2'
+train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/train'
+val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/val'
+test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_2/test'
 
 # BUSI_80-20_Fold 3
-dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3'
-train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3/train'
-val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3/val'
-test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3'
+# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3/val'
+# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3/test'
 
 
 
@@ -351,8 +351,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/FOLDS/fold_3/
 # session_name       = 'session44'  #time.strftime('%m.%d_%Hh%M')
 
 # session_name       = 'session100'  #time.strftime('%m.%d_%Hh%M')
-# session_name       = 'session101'  #time.strftime('%m.%d_%Hh%M')
-session_name       = 'session102'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session101'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session102'  #time.strftime('%m.%d_%Hh%M')
 
 save_path          = task_name +'/'+ model_name +'/' + session_name + '/'
 model_path         = save_path + 'models/'
