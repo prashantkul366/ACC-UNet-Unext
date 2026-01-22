@@ -397,7 +397,8 @@ if __name__ == '__main__':
 
 # dwe
     elif config.task_name =="BUSI_80-20":
-        test_num = 130
+        # test_num = 130
+        test_num = 98
         model_type = config.model_name
         model_path = "./BUSI_80-20/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
