@@ -519,6 +519,7 @@ if __name__ == '__main__':
 
 
     checkpoint = torch.load(model_path, map_location='cuda')
+    print("=> loading model from {}".format(model_path))
     state_dict = checkpoint['state_dict']
 
     clean_state_dict = {
