@@ -161,21 +161,21 @@ img_size = 224 if model_name in models_224 else 256
 
 
 
-test_session = "SPLIT_75_10_15_seed_42" 
-# test_session = "SPLIT_75_10_15_seed_43" 
+# test_session = "SPLIT_75_10_15_seed_42" 
+test_session = "SPLIT_75_10_15_seed_43" 
 # test_session = "SPLIT_75_10_15_seed_44" 
 
 # BUSI_75-10-15_Seed 42
-dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_42/'
-train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_42/train'
-val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_42/val'
-test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_42/'
+# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_42/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_42/val'
+# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/test'
 
 # BUSI_75-10-15_Seed 43
-# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_43/'
-# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_43/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_43/val'
-# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/test'
+dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_43/'
+train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_43/train'
+val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_43/val'
+test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/test'
 
 # BUSI_75-10-15_Seed 44
 # dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_44/'
@@ -183,8 +183,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_1
 # val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_44/val'
 # test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/test'
 
-session_name       = 'SPLIT_75_10_15_seed_42'  #time.strftime('%m.%d_%Hh%M')
-# session_name       = 'SPLIT_75_10_15_seed_43'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'SPLIT_75_10_15_seed_42'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'SPLIT_75_10_15_seed_43'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'SPLIT_75_10_15_seed_44'  #time.strftime('%m.%d_%Hh%M')
 # 
 
