@@ -607,7 +607,9 @@ class TransformerMambaBlock(nn.Module):
 
         D, H, W = x5d.shape[2:]
         self.vssm.last_spatial_shape = (D, H, W)
-        print("[VSSM] spatial =", self.last_spatial_shape)
+        # print("[VSSM] spatial =", self.last_spatial_shape)
+        print("[VSSM] spatial =", self.vssm.last_spatial_shape)
+
         # print(f"[TMB] after ln3:      {m.shape}")
         m = self.vssm(m)                        # (B, N, C)
         # print(f"[TMB] after VSSM:     {m.shape}")
