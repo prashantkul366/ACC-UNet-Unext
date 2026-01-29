@@ -604,6 +604,10 @@ class TransformerMambaBlock(nn.Module):
         # ================== MAMBA PART =====================
         # 3) LN -> VSSM -> add residual (transformer output)
         m = self.ln3(x_tr)
+
+        D, H, W = x5d.shape[2:]
+        self.vssm.last_spatial_shape = (D, H, W)
+        print("[VSSM] spatial =", self.last_spatial_shape)
         # print(f"[TMB] after ln3:      {m.shape}")
         m = self.vssm(m)                        # (B, N, C)
         # print(f"[TMB] after VSSM:     {m.shape}")
