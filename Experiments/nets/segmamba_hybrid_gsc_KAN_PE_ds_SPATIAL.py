@@ -239,8 +239,9 @@ class MambaVisionMixer(nn.Module):
             **factory_kwargs,
         )
 
-        self.spatial_fusion = SpatialStateFusion(self.d_inner // 2)
         print("[MambaVisionMixer] Using SPATIAL STATE FUSION")
+        self.spatial_fusion = SpatialStateFusion(self.d_inner // 2)
+        
 
     def _check_tensor(self, name, x):
         if x is None:

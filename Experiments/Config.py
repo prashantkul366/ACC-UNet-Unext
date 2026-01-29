@@ -72,7 +72,7 @@ learning_rate = 1e-3
 # batch_size = 8
 batch_size = 4
 
-model_name = 'ACC_UNet'
+# model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
@@ -99,6 +99,7 @@ model_name = 'ACC_UNet'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
 
@@ -142,13 +143,13 @@ models_224 = {
     'Segmamba_hybrid_gsc_VSS', 'Segmamba_hybrid_gsc_KAN_PE', 'Segmamba_hybrid_gsc_rm_fkan',
     'Segmamba_hybrid_gsc_KAN_PE_rm_fkan', 'Segmamba_hybrid_gsc_ds', 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds',
     'Segmamba_hybrid_gsc_KAN_PE_ds', 'segmamba_hybrid_gsc_KAN_PE_EffKan', 'Segmamba_hybrid_gsc_KAN_PE_ds_flip',
-    'Segmamba_hybrid_gsc_MLP_PE_ds'
+    'Segmamba_hybrid_gsc_MLP_PE_ds', 'segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
 }
 
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-# test_session = "session1"         
+test_session = "session1"         
 # test_session = "session43"
 # test_session = "session44"          # session name used in training phase
 
@@ -163,7 +164,7 @@ img_size = 224 if model_name in models_224 else 256
 
 # test_session = "SPLIT_75_10_15_seed_42" 
 # test_session = "SPLIT_75_10_15_seed_43" 
-test_session = "SPLIT_75_10_15_seed_44" 
+# test_session = "SPLIT_75_10_15_seed_44" 
 
 # BUSI_75-10-15_Seed 42
 # dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_42/'
@@ -178,14 +179,14 @@ test_session = "SPLIT_75_10_15_seed_44"
 # test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/test'
 
 # BUSI_75-10-15_Seed 44
-dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_44/'
-train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_44/train'
-val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_44/val'
-test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_44/'
+# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_44/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/split_seed_44/val'
+# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_BUSI_80_20/SPLIT_75_10_15/test'
 
 # session_name       = 'SPLIT_75_10_15_seed_42'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'SPLIT_75_10_15_seed_43'  #time.strftime('%m.%d_%Hh%M')
-session_name       = 'SPLIT_75_10_15_seed_44'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'SPLIT_75_10_15_seed_44'  #time.strftime('%m.%d_%Hh%M')
 # 
 
 
@@ -240,10 +241,10 @@ session_name       = 'SPLIT_75_10_15_seed_44'  #time.strftime('%m.%d_%Hh%M')
 
 
 # BUSI_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 # BUSI_80-20_ Seed 43
@@ -386,7 +387,7 @@ session_name       = 'SPLIT_75_10_15_seed_44'  #time.strftime('%m.%d_%Hh%M')
 
 
 
-# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session43'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session44'  #time.strftime('%m.%d_%Hh%M')
 
