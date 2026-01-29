@@ -99,7 +99,7 @@ batch_size = 2
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
-model_name = 'segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
 

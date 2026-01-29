@@ -367,17 +367,28 @@ class MambaVisionMixer(nn.Module):
             # y: (B, C, L)
             B, C, L = y.shape
 
-            # ---- reshape to 2D spatial grid ----
-            H = W = int(math.sqrt(L))
-            assert H * W == L, "Token count must form a square"
+            # >>> GET TRUE SPATIAL SHAPE <<<
+            if not hasattr(self, "last_spatial_shape"):
+                raise RuntimeError(
+                    "[MambaVisionMixer] last_spatial_shape not set. "
+                    "Set it before calling vssm()."
+                )
 
-            y2d = y.view(B, C, H, W)
+            D, H, W = self.last_spatial_shape
+            assert D * H * W == L, "Spatial shape mismatch with token length"
 
-            # ---- STRUCTURE-AWARE STATE FUSION ----
-            y2d = self.spatial_fusion(y2d)
+            # ---- reshape to 3D ----
+            y3d = y.view(B, C, D, H, W)
 
-            # ---- back to sequence ----
-            y = y2d.view(B, C, L)
+            # ---- APPLY SPATIAL FUSION PER SLICE ----
+            y_fused = []
+            for d in range(D):
+                y_fused.append(self.spatial_fusion(y3d[:, :, d]))  # (B, C, H, W)
+
+            y3d = torch.stack(y_fused, dim=2)  # (B, C, D, H, W)
+
+            # ---- back to tokens ----
+            y = y3d.view(B, C, L)
 
             # ---- original gating + projection ----
             y = torch.cat([y, z], dim=1)
@@ -466,6 +477,7 @@ class MambaLayer(nn.Module):
         # LN -> VSSM -> residual
         h = x
         x_ln3 = self.ln3(x)
+        self.vssm.last_spatial_shape = spatial
         x_vssm = self.vssm(x_ln3)    # (B, N, C)
         x = x_vssm + h
 
