@@ -569,7 +569,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         if val_dice > max_dice:
                 #if epoch+1 > 5:
                 logger.info('\t Saving best model, mean dice increased from: {:.4f} to {:.4f}'.format(max_dice,val_dice))
-                print(f"saving best model at path: {config.model_path}")
+                # print(f"saving best model at path: {config.model_path}")
                 max_dice = val_dice
                 best_epoch = epoch + 1
                 # save_checkpoint({'epoch': epoch,

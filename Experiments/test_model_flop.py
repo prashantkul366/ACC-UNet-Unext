@@ -86,7 +86,7 @@ import cv2
 
 # from nets.segmamba_hybrid_gsc_rm_fkan import SegMamba as Segmamba_hybrid_gsc_rm_fkan
 # from nets.segmamba import SegMamba
-# from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
+from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
 ######################################################
 
 class AverageMeter(object):
@@ -396,6 +396,12 @@ if __name__ == '__main__':
         model_path = "./BUSI/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
 # dwe
+    elif config.task_name =="MoNuSeg":
+        # test_num = 130
+        test_num = 14
+        model_type = config.model_name
+        model_path = "./MoNuSeg/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
+
     elif config.task_name =="BUSI_80-20":
         # test_num = 130
         test_num = 98
