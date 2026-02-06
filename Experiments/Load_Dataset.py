@@ -129,8 +129,40 @@ class ImageToImage2D(Dataset):
         self.image_size = image_size        
         # self.input_path = os.path.join(dataset_path, 'img')
         # self.output_path = os.path.join(dataset_path, 'labelcol')
-        self.input_path = os.path.join(dataset_path, 'images')
-        self.output_path = os.path.join(dataset_path, 'masks')
+        # self.input_path = os.path.join(dataset_path, 'images')
+        # self.output_path = os.path.join(dataset_path, 'masks')
+        
+        # Option 1: MoNuSeg style folders
+        option1_img = os.path.join(dataset_path, "img")
+        option1_mask = os.path.join(dataset_path, "labelcol")
+
+        # Option 2: Generic style folders
+        option2_img = os.path.join(dataset_path, "images")
+        option2_mask = os.path.join(dataset_path, "masks")
+
+
+        if os.path.isdir(option1_img) and os.path.isdir(option1_mask):
+            # Case 1: img + labelcol
+            self.input_path = option1_img
+            self.output_path = option1_mask
+            print("✅ Using folders: img/ and labelcol/")
+
+        elif os.path.isdir(option2_img) and os.path.isdir(option2_mask):
+            # Case 2: images + masks
+            self.input_path = option2_img
+            self.output_path = option2_mask
+            print("✅ Using folders: images/ and masks/")
+
+        else:
+            # Case 3: Not found
+            raise FileNotFoundError(
+                f"❌ Dataset folder structure not recognized!\n\n"
+                f"Expected either:\n"
+                f"  1) img/ and labelcol/\n"
+                f"  2) images/ and masks/\n\n"
+                f"But found only:\n"
+                f"  {os.listdir(dataset_path)}"
+            )
         # self.images_list = os.listdir(self.input_path)
         self.images_list = [
                             f for f in os.listdir(self.input_path)
