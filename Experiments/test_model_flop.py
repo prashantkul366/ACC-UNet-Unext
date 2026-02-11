@@ -156,13 +156,17 @@ def get_final_prob(model_out, n_classes=1):
 # def vis_and_save_heatmap(model, input_img, img_RGB, labs,
 #                          vis_save_path, dice_pred, dice_ens,
 #                          pred_img_path):
-def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pred, dice_ens,
+def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_path, dice_pred, dice_ens,
                          mask_dir, side_dir):
 
     model.eval()
 
     start_time = time.time()
-    output = model(input_img.cuda())
+    # output = model(input_img.cuda())
+    if text_batch is not None:
+        output = model(input_img.cuda(), text_batch)
+    else:
+        output = model(input_img.cuda())
 
     #  keep final head only
     # if isinstance(output, (tuple, list)):
@@ -319,6 +323,46 @@ def vis_and_save_heatmap(model, input_img, img_RGB, labs,vis_save_path, dice_pre
     return dice_pred_tmp, iou_tmp, output
 
 
+
+import pandas as pd 
+
+def read_text(folder_path):
+    """
+    Reads MoNuSeg text file from inside the dataset folder.
+
+    Example folder:
+        Train_Folder/
+            img/
+            labelcol/
+            Train_text.xlsx
+    """
+
+    # Find any .xlsx file automatically
+    excel_files = [f for f in os.listdir(folder_path) if f.endswith(".xlsx")]
+
+    if len(excel_files) == 0:
+        print("⚠️ No text Excel file found in:", folder_path)
+        return None
+
+    excel_path = os.path.join(folder_path, excel_files[0])
+    print("✅ Loading text from:", excel_path)
+
+    df = pd.read_excel(excel_path)
+
+    # Assume first column = filename, second = sentence
+    df.columns = ["filename", "text"]
+
+    text_dict = {}
+    for _, row in df.iterrows():
+        fname = str(row["filename"]).strip()
+        sentence = str(row["text"]).strip()
+
+        if not fname.endswith(".png"):
+            fname += ".png"
+
+        text_dict[fname] = sentence
+
+    return text_dict
 
 
 
@@ -687,9 +731,27 @@ if __name__ == '__main__':
     macs, params = profile(model, inputs=(dummy_input,), verbose=False)
     model_params = params / 1e6
     model_gflops = macs / 1e9
+
+    USE_TEXT = ("text" in model_type.lower()) and (config.task_name == "MoNuSeg")
+    print("USE_TEXT:", USE_TEXT)
+    if USE_TEXT:
+        test_text_path = os.path.join(config.test_dataset, "Test_text.xlsx")
+        print("✅ Loading test text from:", test_text_path)
+
+        test_text = read_text(test_text_path)   # dict: filename → sentence
+    else:
+        test_text = None
+
     tf_test = ValGenerator(output_size=[config.img_size, config.img_size])
-    test_dataset = ImageToImage2D(config.test_dataset, tf_test,image_size=config.img_size)
-    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
+    # test_dataset = ImageToImage2D(config.test_dataset, tf_test,image_size=config.img_size)
+    test_dataset = ImageToImage2D(
+                    config.test_dataset,
+                    config.task_name,
+                    test_text,
+                    tf_test,
+                    image_size=config.img_size
+                )
+    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0)
 
     dice_pred = 0.0
     iou_pred = 0.0
@@ -703,9 +765,18 @@ if __name__ == '__main__':
     gpu_time_meter = AverageMeter()
     f1_meter = AverageMeter()
 
+    USE_TEXT = ("text" in model_type.lower()) and (config.task_name == "MoNuSeg")
+    print("USE_TEXT:", USE_TEXT)
+
     with tqdm(total=test_num, desc='Test visualize', unit='img', ncols=70, leave=True) as pbar:
         for i, (sampled_batch, names) in enumerate(test_loader, 1):
             test_data, test_label = sampled_batch['image'], sampled_batch['label']
+            if USE_TEXT:
+                test_text_batch = sampled_batch['text']   # list[str]
+            else:
+                test_text_batch = None
+
+
             arr=test_data.numpy()
             # arr = arr.astype(np.float32())
             arr = arr.astype(np.float32)
@@ -753,14 +824,28 @@ if __name__ == '__main__':
 
             original_filename = os.path.splitext(names[0])[0]  # e.g. "ISIC_0036347"
 
+            # dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
+            #     model, input_img, None, lab,
+            #     vis_path + original_filename,    # ✅ use real filename here
+            #     dice_pred=dice_pred,
+            #     dice_ens=dice_ens,
+            #     mask_dir=mask_dir,
+            #     side_dir=side_dir
+            # )
+
             dice_pred_t, iou_pred_t, output = vis_and_save_heatmap(
-                model, input_img, None, lab,
-                vis_path + original_filename,    # ✅ use real filename here
+                model,
+                input_img,
+                test_text_batch,
+                None,
+                lab,
+                vis_path + original_filename,
                 dice_pred=dice_pred,
                 dice_ens=dice_ens,
                 mask_dir=mask_dir,
                 side_dir=side_dir
             )
+
 
             dice_pred+=dice_pred_t
             iou_pred+=iou_pred_t
