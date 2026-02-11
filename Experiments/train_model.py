@@ -188,8 +188,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     use_text = False
     if config.task_name == "MoNuSeg" and model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_text":
         print("✅ Using MoNuSeg text triplets")
-        train_text = read_text(config.train_dataset + "Train_text.xlsx")
-        val_text   = read_text(config.val_dataset + "Val_text.xlsx")
+        train_text = read_text(config.train_dataset + "/Train_text.xlsx")
+        val_text   = read_text(config.val_dataset + "/Val_text.xlsx")
 
         print(f"Train text path: {config.train_dataset + 'Train_text.xlsx'}")
         print(f"Val text path: {config.val_dataset + 'Val_text.xlsx'}")
