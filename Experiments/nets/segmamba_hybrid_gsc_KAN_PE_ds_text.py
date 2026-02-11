@@ -822,6 +822,7 @@ class SegMamba(nn.Module):
 
         # print("Initializing SegMamba")
         print("Initializing SegMamba with Hybrid Encoder - GSC + MDTA + MambaVisionMixer + KAN-Refine with Deep Supervision")
+        print("With Text Infusion via Skip-FiLM at encoder skip connections")
         self.spatial_dims = spatial_dims
         # ---- TEXT ENCODER ----
         self.text_encoder = ClinicalTextEncoder()
