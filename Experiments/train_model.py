@@ -187,9 +187,11 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     # Load train and val data
     use_text = False
     if config.task_name == "MoNuSeg" and model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_text":
-        print("✅ Using MoNuSeg text triplets")
-        train_text = read_text(config.train_dataset + "/Train_text.xlsx")
-        val_text   = read_text(config.val_dataset + "/Val_text.xlsx")
+        print(" Using MoNuSeg text triplets")
+        # train_text = read_text(config.train_dataset + "/Train_text.xlsx")
+        train_text = read_text(config.train_dataset)
+        # val_text   = read_text(config.val_dataset + "/Val_text.xlsx")
+        val_text   = read_text(config.val_dataset)
 
         print(f"Train text path: {config.train_dataset + 'Train_text.xlsx'}")
         print(f"Val text path: {config.val_dataset + 'Val_text.xlsx'}")
@@ -199,6 +201,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     else:
         train_text = None
         val_text = None
+        use_text = False
 
     train_tf= transforms.Compose([RandomGenerator(output_size=[config.img_size, config.img_size])])
     val_tf = ValGenerator(output_size=[config.img_size, config.img_size])
