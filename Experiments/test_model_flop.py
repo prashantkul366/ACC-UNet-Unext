@@ -326,31 +326,34 @@ def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_pa
 
 
 import pandas as pd 
-
-def read_text(folder_path):
+def read_text(path):
     """
-    Reads MoNuSeg text file from inside the dataset folder.
+    Reads MoNuSeg text descriptions from an Excel file.
 
-    Example folder:
-        Train_Folder/
-            img/
-            labelcol/
-            Train_text.xlsx
+    Works if input is:
+    - folder containing *.xlsx
+    - direct path to an .xlsx file
     """
 
-    # Find any .xlsx file automatically
-    excel_files = [f for f in os.listdir(folder_path) if f.endswith(".xlsx")]
+    # Case 1: user passed file directly
+    if path.endswith(".xlsx"):
+        excel_path = path
 
-    if len(excel_files) == 0:
-        print("⚠️ No text Excel file found in:", folder_path)
-        return None
+    # Case 2: user passed folder → find Excel inside
+    else:
+        excel_files = [f for f in os.listdir(path) if f.endswith(".xlsx")]
 
-    excel_path = os.path.join(folder_path, excel_files[0])
+        if len(excel_files) == 0:
+            print("⚠️ No Excel file found in:", path)
+            return None
+
+        excel_path = os.path.join(path, excel_files[0])
+
     print("✅ Loading text from:", excel_path)
 
     df = pd.read_excel(excel_path)
 
-    # Assume first column = filename, second = sentence
+    # Force correct column names
     df.columns = ["filename", "text"]
 
     text_dict = {}
@@ -358,6 +361,7 @@ def read_text(folder_path):
         fname = str(row["filename"]).strip()
         sentence = str(row["text"]).strip()
 
+        # Ensure extension
         if not fname.endswith(".png"):
             fname += ".png"
 
