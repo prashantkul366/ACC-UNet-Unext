@@ -37,6 +37,7 @@ class RandomGenerator(object):
 
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
+        text = sample.get("text", None)
         image, label = F.to_pil_image(image), F.to_pil_image(label)
         x, y = image.size
         if random.random() > 0.5:
@@ -54,6 +55,13 @@ class RandomGenerator(object):
         # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################
         sample = {'image': image, 'label': label}
+        if text is not None:
+            sample["text"] = text
+        # sample = {
+        #                 "image": image,
+        #                 "label": label,
+        #                 "text": text 
+        #             }
         return sample
 
 class ValGenerator(object):
@@ -62,6 +70,7 @@ class ValGenerator(object):
 
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
+        text = sample.get("text", None)
         image, label = F.to_pil_image(image), F.to_pil_image(label)
         x, y = image.size
         if x != self.output_size[0] or y != self.output_size[1]:
@@ -74,6 +83,13 @@ class ValGenerator(object):
         # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################
         sample = {'image': image, 'label': label}
+        # sample = {
+            #     "image": image,
+            #     "label": label,
+            #     "text": text   
+            # }
+        if text is not None:
+            sample["text"] = text    
         return sample
 
 def to_long_tensor(pic):
@@ -123,7 +139,7 @@ class ImageToImage2D(Dataset):
         one_hot_mask: bool, if True, returns the mask in one-hot encoded form.
     """
 
-    def __init__(self, dataset_path: str, joint_transform: Callable = None, one_hot_mask: int = False, image_size: int =224, n_labels: int=1) -> None:
+    def __init__(self, dataset_path: str, joint_transform: Callable = None, row_text: str = None, one_hot_mask: int = False, image_size: int =224, n_labels: int=1) -> None:
         self.dataset_path = dataset_path
         print(f"Dataset path: {dataset_path}")
         self.image_size = image_size        
@@ -170,6 +186,7 @@ class ImageToImage2D(Dataset):
                         ]
         self.one_hot_mask = one_hot_mask
         self.n_labels = n_labels
+        self.row_text = row_text
 
         if joint_transform:
             self.joint_transform = joint_transform
@@ -220,6 +237,13 @@ class ImageToImage2D(Dataset):
         if mask is None:
             raise ValueError(f"⚠️ Mask file exists but could not be read: {mask_path}")
 
+        stem, _ = os.path.splitext(image_filename)
+        mask_filename = stem + ".png"
+
+        if self.row_text is not None:
+            text = self.row_text.get(mask_filename, "")
+        else:
+            text = None
         ##########################################################
         # print("mask",image_filename[: -3] + "png")
         # print(np.max(mask), np.min(mask))
@@ -242,6 +266,13 @@ class ImageToImage2D(Dataset):
         # print("22",mask.shape)
         assert mask.max() <= 1.0 and mask.min() >= 0.0, f"Mask out of range: {mask.min()} - {mask.max()}"
         sample = {'image': image, 'label': mask}
+        if text is not None:
+            sample["text"] = text 
+        # sample = {
+        #             "image": image,
+        #             "label": mask,
+        #             "text": text  
+        #         }
 
         if self.joint_transform:
             sample = self.joint_transform(sample)

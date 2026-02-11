@@ -14,7 +14,7 @@ from torch.optim import lr_scheduler as torch_lr_scheduler
 from Load_Dataset import RandomGenerator,ValGenerator,ImageToImage2D
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+import pandas as pd
 
 from nets.MResUNet1 import MultiResUnet
 from nets.SwinUnet import SwinUnet
@@ -136,6 +136,46 @@ def save_checkpoint(state, save_path):
 def worker_init_fn(worker_id):
     random.seed(config.seed + worker_id)
 
+
+
+def read_text(folder_path):
+    """
+    Reads MoNuSeg text file from inside the dataset folder.
+
+    Example folder:
+        Train_Folder/
+            img/
+            labelcol/
+            Train_text.xlsx
+    """
+
+    # Find any .xlsx file automatically
+    excel_files = [f for f in os.listdir(folder_path) if f.endswith(".xlsx")]
+
+    if len(excel_files) == 0:
+        print("⚠️ No text Excel file found in:", folder_path)
+        return None
+
+    excel_path = os.path.join(folder_path, excel_files[0])
+    print("✅ Loading text from:", excel_path)
+
+    df = pd.read_excel(excel_path)
+
+    # Assume first column = filename, second = sentence
+    df.columns = ["filename", "text"]
+
+    text_dict = {}
+    for _, row in df.iterrows():
+        fname = str(row["filename"]).strip()
+        sentence = str(row["text"]).strip()
+
+        if not fname.endswith(".png"):
+            fname += ".png"
+
+        text_dict[fname] = sentence
+
+    return text_dict
+
 ##################################################################################
 #=================================================================================
 #          Main Loop: load model,
@@ -145,11 +185,36 @@ def worker_init_fn(worker_id):
 def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, resume=False):
 
     # Load train and val data
-    
+    use_text = False
+    if config.task_name == "MoNuSeg" and model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_text":
+        print("✅ Using MoNuSeg text triplets")
+        train_text = read_text(config.train_dataset + "Train_text.xlsx")
+        val_text   = read_text(config.val_dataset + "Val_text.xlsx")
+        use_text = True
+    else:
+        train_text = None
+        val_text = None
+
     train_tf= transforms.Compose([RandomGenerator(output_size=[config.img_size, config.img_size])])
     val_tf = ValGenerator(output_size=[config.img_size, config.img_size])
-    train_dataset = ImageToImage2D(config.train_dataset, train_tf,image_size=config.img_size,)
-    val_dataset = ImageToImage2D(config.val_dataset, val_tf,image_size=config.img_size)
+
+
+    # train_dataset = ImageToImage2D(config.train_dataset, train_tf,image_size=config.img_size,)
+    train_dataset = ImageToImage2D(
+                        config.train_dataset,
+                        joint_transform=train_tf,
+                        row_text=train_text if use_text else None,
+                        image_size=config.img_size
+                    )
+    
+
+    # val_dataset = ImageToImage2D(config.val_dataset, val_tf,image_size=config.img_size)
+    val_dataset = ImageToImage2D(
+                        config.val_dataset,
+                        joint_transform=val_tf,
+                        row_text=val_text if use_text else None,
+                        image_size=config.img_size
+                    )
     train_loader = DataLoader(train_dataset,
                               batch_size=config.batch_size,
                               shuffle=True,
@@ -170,6 +235,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     
     print("length of train dataset: ", len(train_dataset))
     print("length of val dataset: ", len(val_dataset))
+    
     
     logger.info(model_type)
     logger.info('n_filts : ' + str(config.n_filts))

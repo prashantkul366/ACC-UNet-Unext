@@ -62,6 +62,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # Take variable and put them to GPU
         images, masks = sampled_batch['image'], sampled_batch['label']
         images, masks = images.cuda(), masks.cuda()
+        text = sampled_batch.get("text", None)
         if masks.dim() == 3:
             masks = masks.unsqueeze(1)
         
@@ -75,8 +76,27 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         #             Compute loss
         # ====================================================
 
-        preds = model(images)
+        # preds = model(images)
+        # if text is not None:
+        #     preds = model(images, text)   # ✅ MoNuSeg triplet
+        # else:
+        #     preds = model(images) 
         # final_preds = preds[1] if isinstance(preds, (tuple, list)) else preds
+        # if model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_text" and text is not None:
+        #     preds = model(images, text)   
+        # else:
+        #     preds = model(images)   
+        
+        USE_TEXT = (
+            config.task_name == "MoNuSeg"
+            and model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_text"
+        )
+
+        if USE_TEXT:
+            preds = model(images, text)  
+        else:
+            preds = model(images) 
+
         if isinstance(preds, (tuple, list)):
             final_preds = preds[0]   # main output
         else:
