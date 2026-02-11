@@ -735,9 +735,9 @@ if __name__ == '__main__':
     print('Model loaded !')
 
     dummy_input = torch.randn(1, config.n_channels, config.img_size, config.img_size).cuda()
-    macs, params = profile(model, inputs=(dummy_input,), verbose=False)
-    model_params = params / 1e6
-    model_gflops = macs / 1e9
+    # macs, params = profile(model, inputs=(dummy_input,), verbose=False)
+    # model_params = params / 1e6
+    # model_gflops = macs / 1e9
 
     USE_TEXT = ("text" in model_type.lower()) and (config.task_name == "MoNuSeg")
     print("USE_TEXT:", USE_TEXT)
