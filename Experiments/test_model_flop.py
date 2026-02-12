@@ -750,7 +750,7 @@ if __name__ == '__main__':
     # model_params = params / 1e6
     # model_gflops = macs / 1e9
 
-    USE_TEXT = ("text" in model_type.lower()) and (config.task_name == "MoNuSeg")
+    USE_TEXT = (model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn') and (config.task_name == "MoNuSeg")
     print("USE_TEXT:", USE_TEXT)
     if USE_TEXT:
         test_text_path = os.path.join(config.test_dataset, "Test_text.xlsx")
