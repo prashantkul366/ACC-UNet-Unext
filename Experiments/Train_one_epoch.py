@@ -88,9 +88,14 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # else:
         #     preds = model(images)   
         
+        # USE_TEXT = (
+        #     config.task_name == "MoNuSeg"
+        #     and model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_text"
+        # )
+
         USE_TEXT = (
             config.task_name == "MoNuSeg"
-            and model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_text"
+            and model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn"
         )
 
         if USE_TEXT:

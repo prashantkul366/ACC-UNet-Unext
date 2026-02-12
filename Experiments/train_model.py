@@ -567,6 +567,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
                             'Segmamba_hybrid_gsc_MLP_PE_ds',
                             'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
                             'Segmamba_hybrid_gsc_KAN_PE_ds_text'
+                            'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
                         ):
                             
         # Deep supervision wrapper:
