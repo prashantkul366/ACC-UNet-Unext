@@ -97,8 +97,11 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
             config.task_name == "MoNuSeg"
             and model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn"
         )
+        print("TEXT TYPE:", type(text))
+        print("TEXT VALUE:", text)
 
         if USE_TEXT:
+            print("Batch text:", text)
             preds = model(images, text)  
         else:
             preds = model(images) 
