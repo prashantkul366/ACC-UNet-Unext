@@ -103,7 +103,8 @@ batch_size = 2
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
@@ -148,7 +149,7 @@ models_224 = {
     'Segmamba_hybrid_gsc_VSS', 'Segmamba_hybrid_gsc_KAN_PE', 'Segmamba_hybrid_gsc_rm_fkan',
     'Segmamba_hybrid_gsc_KAN_PE_rm_fkan', 'Segmamba_hybrid_gsc_ds', 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds',
     'Segmamba_hybrid_gsc_KAN_PE_ds', 'segmamba_hybrid_gsc_KAN_PE_EffKan', 'Segmamba_hybrid_gsc_KAN_PE_ds_flip',
-    'Segmamba_hybrid_gsc_MLP_PE_ds', 'segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL', 'segmamba_hybrid_gsc_KAN_PE_ds_text'
+    'Segmamba_hybrid_gsc_MLP_PE_ds', 'segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL', 'segmamba_hybrid_gsc_KAN_PE_ds_text', 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
 }
 
 img_size = 224 if model_name in models_224 else 256

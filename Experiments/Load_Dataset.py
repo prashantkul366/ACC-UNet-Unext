@@ -161,13 +161,13 @@ class ImageToImage2D(Dataset):
             # Case 1: img + labelcol
             self.input_path = option1_img
             self.output_path = option1_mask
-            print("✅ Using folders: img/ and labelcol/")
+            print(" Using folders: img/ and labelcol/")
 
         elif os.path.isdir(option2_img) and os.path.isdir(option2_mask):
             # Case 2: images + masks
             self.input_path = option2_img
             self.output_path = option2_mask
-            print("✅ Using folders: images/ and masks/")
+            print(" Using folders: images/ and masks/")
 
         else:
             # Case 3: Not found

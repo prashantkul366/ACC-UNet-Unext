@@ -75,6 +75,7 @@ from nets.ACC_UNet import ACC_UNet
 
 from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_text import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_text
+from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn
 # from nets.segmamba_hybrid_gsc_MLP_PE_ds import SegMamba as Segmamba_hybrid_gsc_MLP_PE_ds
 
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL
@@ -444,6 +445,11 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
         lr = 1e-4  
         
+    elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn':
+        model = segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn(
+            in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
+            feat_size=[48, 96, 192, 384], spatial_dims=3,)
+        lr = 1e-4  
     
     # elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL':
     #     model = Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL(
