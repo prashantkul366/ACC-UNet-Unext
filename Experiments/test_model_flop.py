@@ -344,12 +344,12 @@ def read_text(path):
         excel_files = [f for f in os.listdir(path) if f.endswith(".xlsx")]
 
         if len(excel_files) == 0:
-            print("⚠️ No Excel file found in:", path)
+            print(" No Excel file found in:", path)
             return None
 
         excel_path = os.path.join(path, excel_files[0])
 
-    print("✅ Loading text from:", excel_path)
+    print(" Loading text from:", excel_path)
 
     df = pd.read_excel(excel_path)
 
@@ -747,7 +747,7 @@ if __name__ == '__main__':
     print("USE_TEXT:", USE_TEXT)
     if USE_TEXT:
         test_text_path = os.path.join(config.test_dataset, "Test_text.xlsx")
-        print("✅ Loading test text from:", test_text_path)
+        print(" Loading test text from:", test_text_path)
 
         test_text = read_text(test_text_path)   # dict: filename → sentence
     else:
@@ -755,11 +755,18 @@ if __name__ == '__main__':
 
     tf_test = ValGenerator(output_size=[config.img_size, config.img_size])
     # test_dataset = ImageToImage2D(config.test_dataset, tf_test,image_size=config.img_size)
+    # test_dataset = ImageToImage2D(
+    #                 config.test_dataset,
+    #                 config.task_name,
+    #                 test_text,
+    #                 tf_test,
+    #                 image_size=config.img_size
+    #             )
+
     test_dataset = ImageToImage2D(
-                    config.test_dataset,
-                    config.task_name,
-                    test_text,
-                    tf_test,
+                    dataset_path=config.test_dataset,
+                    joint_transform=tf_test,      
+                    row_text=test_text,        
                     image_size=config.img_size
                 )
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0)
@@ -775,9 +782,6 @@ if __name__ == '__main__':
     recall_meter = AverageMeter()
     gpu_time_meter = AverageMeter()
     f1_meter = AverageMeter()
-
-    USE_TEXT = ("text" in model_type.lower()) and (config.task_name == "MoNuSeg")
-    print("USE_TEXT:", USE_TEXT)
 
     with tqdm(total=test_num, desc='Test visualize', unit='img', ncols=70, leave=True) as pbar:
         for i, (sampled_batch, names) in enumerate(test_loader, 1):
