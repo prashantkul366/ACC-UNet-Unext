@@ -89,6 +89,7 @@ import cv2
 from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_text import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_text
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn
+from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC  
 ######################################################
 
 class AverageMeter(object):
@@ -148,16 +149,26 @@ def get_final_prob(model_out, n_classes=1):
 
     # probabilities
     if n_classes == 1:
-        final = torch.sigmoid(final)       # safe even if already sigmoided
+        final = torch.sigmoid(final)     
     else:
         final = F.softmax(final, dim=1)
     return final
 
+def unwrap_output(model_out):
+    """
+    Always return main prediction tensor [B,1,H,W]
+    Works for:
+    - tensor output
+    - tuple/list deep supervision output
+    """
+    if isinstance(model_out, (tuple, list)):
+        model_out = model_out[0]   # main output first
 
-# def vis_and_save_heatmap(model, input_img, img_RGB, labs, vis_save_path, dice_pred, dice_ens):
-# def vis_and_save_heatmap(model, input_img, img_RGB, labs,
-#                          vis_save_path, dice_pred, dice_ens,
-#                          pred_img_path):
+    if model_out.ndim == 3:
+        model_out = model_out.unsqueeze(1)
+
+    return model_out
+
 def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_path, dice_pred, dice_ens,
                          mask_dir, side_dir):
 
@@ -170,26 +181,10 @@ def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_pa
     else:
         output = model(input_img.cuda())
 
-    #  keep final head only
-    # if isinstance(output, (tuple, list)):
-    #     # ((aux... ), out)  -> take out
-    #     # (aux1, aux2, ..., out) -> take last
-    #     output = output[1] if (len(output) == 2 and isinstance(output[0], (tuple, list))) else output[-1]
-
-    # # ensure [B,C,H,W]
-    # if output.ndim == 3:
-    #     output = output.unsqueeze(1)
-
-    # convert to probabilities
-    # output = torch.sigmoid(output) if output.shape[1] == 1 else F.softmax(output, dim=1)
-
+    output = unwrap_output(output)
+    output = torch.sigmoid(output)
     end_time = time.time()
     gpu_time_meter.update(end_time - start_time, input_img.size(0))
-
-    # pred_class = (output > 0.5).float()
-    # predict_save = pred_class[0, 0].cpu().numpy()   # squeeze channel; already HxW
-    # (Delete the reshape line below; no longer needed)
-
 
     pred_class = torch.where(output>0.5,torch.ones_like(output),torch.zeros_like(output))
     predict_save = pred_class[0].cpu().data.numpy()
@@ -204,18 +199,6 @@ def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_pa
     labs = labs[0]
     output = output[0,0,:,:].cpu().detach().numpy()
 
-    ################################################################################
-    # apply horizontal + vertical flip to labels and outputs
-    # labs = np.fliplr(labs)
-    # labs = np.flipud(labs)
-
-    # output = np.fliplr(output)
-    # output = np.flipud(output)
-
-    # predict_save = np.fliplr(predict_save)
-    # predict_save = np.flipud(predict_save)
-    ################################################################################
-
     if(True):
         pickle.dump({
             'input':input_img,
@@ -226,60 +209,11 @@ def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_pa
         },
         open(vis_save_path+'.p','wb'))
 
-    # pred_vis_path = os.path.join(vis_save_path, 'predicted_masks')
-    # os.makedirs(pred_vis_path, exist_ok=True)
-
-    # plt.savefig(pred_vis_path+'_predict'+model_type+'.png',dpi=300)
-
     fname = os.path.splitext(os.path.basename(vis_save_path))[0]
-
-    # # --- 1) Save predicted mask only ---
-    # mask_file = os.path.join(mask_dir, f"{fname}_mask_{model_type}.png")
-    # plt.figure(figsize=(5,5))
-    # plt.imshow((output >= 0.5) * 1.0, cmap="gray")
-    # plt.axis("off")
-    # plt.tight_layout()
-    # plt.savefig(mask_file, dpi=300, bbox_inches="tight", pad_inches=0)
-    # plt.close()
-
-    # # --- 2) Save side-by-side figure ---
-    # side_file = os.path.join(side_dir, f"{fname}_side_{model_type}.png")
-    # plt.figure(figsize=(12,4))
-
-    # plt.subplot(1,3,1)
-    # plt.imshow(input_img)
-    # plt.axis("off")
-    # plt.title("Input")
-
-    # plt.subplot(1,3,2)
-    # plt.imshow(labs, cmap="gray")
-    # plt.axis("off")
-    # plt.title("Ground Truth")
-
-    # plt.subplot(1,3,3)
-    # plt.imshow((output >= 0.5) * 1.0, cmap="gray")
-    # plt.axis("off")
-    # plt.title("Prediction")
-
-    # plt.tight_layout()
-    # plt.savefig(side_file, dpi=300)
-    # plt.close()
-
-    # --- 1) Save predicted mask only (pixel-perfect) ---
     mask_file = os.path.join(mask_dir, f"{fname}.png")
-    # print(f"pred file path {mask_file}")
-    # mask_file = os.path.join(mask_dir, f"{vis_path}.png")
+
     pred_mask = (output >= 0.5).astype(np.uint8) * 255  # binary mask → 0/255
     cv2.imwrite(mask_file, pred_mask)  # save exact resolution (no scaling)
-
-
-
-    # Optional overlay visualization (nice for inspection)
-    # overlay = cv2.addWeighted(
-    #     (input_img * 255).astype(np.uint8), 0.7,
-    #     cv2.cvtColor(pred_mask, cv2.COLOR_GRAY2BGR), 0.3, 0
-    # )
-    # cv2.imwrite(os.path.join(mask_dir, f"{fname}_overlay_{model_type}.png"), overlay)
 
     # --- 2) Save side-by-side figure (high-res + no interpolation) ---
     side_file = os.path.join(side_dir, f"{fname}_side_{model_type}.png")
@@ -719,6 +653,12 @@ if __name__ == '__main__':
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
         lr = 1e-4
 
+    elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC':
+        model = Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC(
+            in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
+            feat_size=[48, 96, 192, 384], spatial_dims=3,)
+        lr = 1e-4
+
     elif model_type == 'Segmamba':
         model = SegMamba(
             in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
@@ -750,7 +690,14 @@ if __name__ == '__main__':
     # model_params = params / 1e6
     # model_gflops = macs / 1e9
 
-    USE_TEXT = (model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn') and (config.task_name == "MoNuSeg")
+    TEXT_MODELS = {
+        "Segmamba_hybrid_gsc_KAN_PE_ds_text",
+        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn",
+        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC",
+    }
+
+    USE_TEXT = (model_type in TEXT_MODELS) and (config.task_name == "MoNuSeg")
+
     print("USE_TEXT:", USE_TEXT)
     if USE_TEXT:
         test_text_path = os.path.join(config.test_dataset, "Test_text.xlsx")
@@ -793,12 +740,8 @@ if __name__ == '__main__':
     with tqdm(total=test_num, desc='Test visualize', unit='img', ncols=70, leave=True) as pbar:
         for i, (sampled_batch, names) in enumerate(test_loader, 1):
             test_data, test_label = sampled_batch['image'], sampled_batch['label']
-            if USE_TEXT:
-                test_text_batch = sampled_batch['text']   # list[str]
-            else:
-                test_text_batch = None
-
-
+            
+            test_text_batch = sampled_batch.get("text", None)
             arr=test_data.numpy()
             # arr = arr.astype(np.float32())
             arr = arr.astype(np.float32)
