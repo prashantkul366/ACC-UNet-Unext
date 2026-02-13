@@ -104,8 +104,8 @@ batch_size = 2
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
