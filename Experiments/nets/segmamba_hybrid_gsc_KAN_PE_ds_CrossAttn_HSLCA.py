@@ -205,6 +205,122 @@ class TGDCFusion(nn.Module):
 
         return fused
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+ 
+ 
+class HSLCA(nn.Module):
+    """
+    Hierarchical Summary Linear Cross Attention
+    Designed for MIS.
+ 
+    image_tokens: (B, N, C)
+    text_tokens:  (B, L, C)
+    """
+ 
+    def __init__(self, dim, num_heads=4, num_summary_tokens=4, reduction=4):
+        super().__init__()
+ 
+        self.dim = dim
+        self.num_heads = num_heads
+        self.head_dim = dim // num_heads
+        self.K = num_summary_tokens
+ 
+        assert dim % num_heads == 0
+ 
+    #Text summary generator 
+        self.summary_proj = nn.Linear(dim, num_summary_tokens)
+ 
+   
+        #Cross Attention Projections
+        self.q_proj = nn.Linear(dim, dim)
+        self.k_proj = nn.Linear(dim, dim)
+        self.v_proj = nn.Linear(dim, dim)
+ 
+        self.out_proj = nn.Linear(dim, dim)
+ 
+    # GATED FUSION HAI YE, YOU CAN CHNAGE THE nn.linear with KAN
+        # self.gate_mlp = nn.Sequential(
+        #     nn.Linear(dim, dim // reduction),
+        #     nn.ReLU(),
+        #     nn.Linear(dim // reduction, dim),
+        #     nn.Sigmoid()
+        # )
+        hidden_gate = dim // reduction
+        self.gate_kan = KAN(
+            layers_hidden=[dim, hidden_gate, dim],
+            grid_size=5,
+            spline_order=3,
+            scale_noise=0.1,
+            scale_base=1.0,
+            scale_spline=1.0,
+            grid_eps=0.02,
+            grid_range=[-1, 1],
+        )
+
+        self.gate_act = nn.Sigmoid()
+        self.norm = nn.LayerNorm(dim)
+        self.gate_norm = nn.LayerNorm(dim)
+ 
+    def reshape_heads(self, x):
+        B, N, C = x.shape
+        x = x.view(B, N, self.num_heads, self.head_dim)
+        return x.transpose(1, 2)
+ 
+    def merge_heads(self, x):
+        B, H, N, D = x.shape
+        return x.transpose(1, 2).reshape(B, N, H * D)
+ 
+    def phi(self, x):
+        return F.elu(x) + 1  # linear attention trick
+ 
+ 
+    def forward(self, image_tokens, text_tokens):
+ 
+        B, N, C = image_tokens.shape
+        L = text_tokens.shape[1]
+ 
+    #GENERATE TEXT SUMMARY TOKENS 
+        # (B, L, C) → (B, L, K)
+        summary_scores = self.summary_proj(text_tokens)
+ 
+        # soft clustering across token dimension
+        summary_weights = F.softmax(summary_scores, dim=1)
+ 
+        # weighted aggregation
+        # (B, K, C)
+        text_summary = torch.matmul(
+            summary_weights.transpose(1, 2),
+            text_tokens
+        )
+    #LINEAR CROSS ATTENTION HAI YE 
+        Q = self.reshape_heads(self.q_proj(image_tokens))
+        K = self.reshape_heads(self.k_proj(text_summary))
+        V = self.reshape_heads(self.v_proj(text_summary))
+ 
+        Q = self.phi(Q)
+        K = self.phi(K)
+ 
+        KV = torch.matmul(K.transpose(-2, -1), V)
+        attn_out = torch.matmul(Q, KV)
+ 
+        attn_out = self.merge_heads(attn_out)
+        attn_out = self.out_proj(attn_out)
+ 
+    # GATED FUSION HAI YE 
+        # gate_input = attn_out.mean(dim=1)
+        gate_input = self.gate_norm(attn_out.mean(dim=1))
+        # alpha = self.gate_mlp(gate_input).unsqueeze(1)
+        # ---- KAN gating ----
+        alpha = self.gate_kan(gate_input)   # (B, C)
+        alpha = self.gate_act(alpha)        # sigmoid gating
+        alpha = alpha.unsqueeze(1)          # (B, 1, C)
+ 
+        fused = image_tokens + alpha * attn_out
+ 
+        return self.norm(fused)
+    
 class HSLCAFusion(nn.Module):
     """
     Wrap HSLCA so it can fuse text into 3D UNet skip feature maps.
@@ -719,42 +835,6 @@ class TransformerMambaBlock(nn.Module):
         self.ln4 = nn.LayerNorm(dim)      # for second f-KAN
         self.ffn2 = FKANMLP(dim, mlp_dim)
 
-    # OLD DEPRECATED
-    # def forward(self, x5d):
-    #     # x5d: (B, C, D, H, W)
-    #     B, C = x5d.shape[:2]
-    #     D, H, W = x5d.shape[2:]
-    #     N = D * H * W
-
-    #     # ===== flatten to tokens =====
-    #     x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
-    #     x_in = x                                # original input tokens
-
-    #     # ================= TRANSFORMER PART =================
-    #     # 1) LN -> MDTA -> add residual (orig input)
-    #     t = self.ln1(x_in)
-    #     t, _ = self.attn(t)                     # (B, N, C)
-    #     t = x_in + t                            # attn_residual
-
-    #     # 2) LN -> f-KAN -> add residual (orig input)
-    #     u = self.ln2(t)
-    #     u = self.ffn1(u)                        # (B, N, C)
-    #     x_tr = x_in + u                         # transformer output
-
-    #     # ================== MAMBA PART =====================
-    #     # 3) LN -> VSSM -> add residual (transformer output)
-    #     m = self.ln3(x_tr)
-    #     m = self.vssm(m)                        # (B, N, C)
-    #     m = x_tr + m                            # mamba_residual
-
-    #     # 4) LN -> f-KAN -> add residual (transformer output)
-    #     n = self.ln4(m)
-    #     n = self.ffn2(n)                        # (B, N, C)
-    #     x_out_tokens = x_tr + n                 # final output tokens
-
-    #     # ===== back to 5D =====
-    #     x_out = x_out_tokens.transpose(1, 2).view(B, C, D, H, W)
-    #     return x_out
 
     def forward(self, x5d):
         # x5d: (B, C, D, H, W)
