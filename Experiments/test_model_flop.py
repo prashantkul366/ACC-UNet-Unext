@@ -154,20 +154,20 @@ def get_final_prob(model_out, n_classes=1):
         final = F.softmax(final, dim=1)
     return final
 
-def unwrap_output(model_out):
-    """
-    Always return main prediction tensor [B,1,H,W]
-    Works for:
-    - tensor output
-    - tuple/list deep supervision output
-    """
-    if isinstance(model_out, (tuple, list)):
-        model_out = model_out[0]   # main output first
+# def unwrap_output(model_out):
+#     """
+#     Always return main prediction tensor [B,1,H,W]
+#     Works for:
+#     - tensor output
+#     - tuple/list deep supervision output
+#     """
+#     if isinstance(model_out, (tuple, list)):
+#         model_out = model_out[0]   # main output first
 
-    if model_out.ndim == 3:
-        model_out = model_out.unsqueeze(1)
+#     if model_out.ndim == 3:
+#         model_out = model_out.unsqueeze(1)
 
-    return model_out
+#     return model_out
 
 def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_path, dice_pred, dice_ens,
                          mask_dir, side_dir):
@@ -181,8 +181,8 @@ def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_pa
     else:
         output = model(input_img.cuda())
 
-    output = unwrap_output(output)
-    output = torch.sigmoid(output)
+    # output = unwrap_output(output)
+    # output = torch.sigmoid(output)
     end_time = time.time()
     gpu_time_meter.update(end_time - start_time, input_img.size(0))
 
