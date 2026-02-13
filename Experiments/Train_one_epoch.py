@@ -102,11 +102,16 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # print("TEXT TYPE:", type(text))
         # print("TEXT VALUE:", text)
 
-        if USE_TEXT:
-            # print("Batch text:", text)
-            preds = model(images, text)  
+        # if USE_TEXT:
+        #     # print("Batch text:", text)
+        #     preds = model(images, text)  
+        # else:
+        #     preds = model(images) 
+
+        if USE_TEXT and text is not None:
+            preds = model(images, text)
         else:
-            preds = model(images) 
+            preds = model(images)
 
         if isinstance(preds, (tuple, list)):
             final_preds = preds[0]   # main output
