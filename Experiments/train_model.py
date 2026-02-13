@@ -187,8 +187,13 @@ def read_text(folder_path):
 def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, resume=False):
 
     # Load train and val data
+    TEXT_MODELS = [
+        "Segmamba_hybrid_gsc_KAN_PE_ds_text",
+        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn",
+        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC",
+    ]
     use_text = False
-    if config.task_name == "MoNuSeg" and model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn":
+    if config.task_name == "MoNuSeg" and model_type in TEXT_MODELS:
         print(" Using MoNuSeg text triplets")
         # train_text = read_text(config.train_dataset + "/Train_text.xlsx")
         train_text = read_text(config.train_dataset)
@@ -572,8 +577,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
                             'Segmamba_hybrid_gsc_KAN_PE_ds',
                             'Segmamba_hybrid_gsc_KAN_PE_ds_flip',
                             'Segmamba_hybrid_gsc_MLP_PE_ds',
-                            'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
-                            'Segmamba_hybrid_gsc_KAN_PE_ds_text'
+                            'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL',
+                            'Segmamba_hybrid_gsc_KAN_PE_ds_text',
                             'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn',
                             'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
                         ):
