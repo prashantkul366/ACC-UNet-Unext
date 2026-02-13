@@ -82,6 +82,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
             "Segmamba_hybrid_gsc_KAN_PE_ds_text",
             "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn",
             "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC",
+            "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA",
         ]
 
         USE_TEXT = (
