@@ -1253,6 +1253,8 @@ class SegMamba(nn.Module):
                 # print(f"[SegMamba] ds2_up 2D:     {ds2_up.shape}")
                 # print(f"[SegMamba] ds1_up 2D:     {ds1_up.shape}")
 
+        # UNCOMMENT WHEN TRAIN AND TESTING WITH DEEP SUPERVISION
+        
         # ===== return =====
         # if self.deep_supervision:
         #     # main output first, aux outputs after
