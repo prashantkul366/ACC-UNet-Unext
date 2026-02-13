@@ -26,99 +26,73 @@ from mamba_ssm.ops.selective_scan_interface import selective_scan_fn
 from transformers import AutoTokenizer, AutoModel
 
 
-class ClinicalTextEncoder(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.tokenizer = AutoTokenizer.from_pretrained("medicalai/ClinicalBERT")
-        self.encoder = AutoModel.from_pretrained("medicalai/ClinicalBERT")
+# class ClinicalTextEncoder(nn.Module):
+#     def __init__(self):
+#         super().__init__()
+#         self.tokenizer = AutoTokenizer.from_pretrained("medicalai/ClinicalBERT")
+#         self.encoder = AutoModel.from_pretrained("medicalai/ClinicalBERT")
 
-        # freeze text backbone
+#         # freeze text backbone
+#         for p in self.encoder.parameters():
+#             p.requires_grad = False
+
+#     def forward(self, texts):
+#         """
+#         texts: list[str] length = B
+#         returns: (B, 768)
+#         """
+#         tokens = self.tokenizer(
+#             texts,
+#             padding=True,
+#             truncation=True,
+#             max_length=128,
+#             return_tensors="pt"
+#         ).to(next(self.encoder.parameters()).device)
+
+#         out = self.encoder(**tokens)
+#         # return out.last_hidden_state.mean(dim=1)
+#         return out.last_hidden_state   # (B, T, 768)
+
+
+class ClinicalTextEncoder(nn.Module):
+    """
+    Frozen ClinicalBERT encoder.
+    Returns token-level embeddings: (B, T, 768)
+    """
+
+    def __init__(self, model_name="medicalai/ClinicalBERT"):
+        super().__init__()
+
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.encoder = AutoModel.from_pretrained(model_name)
+
+        # Freeze backbone
+        self.encoder.eval()
         for p in self.encoder.parameters():
             p.requires_grad = False
 
+    @torch.no_grad()
     def forward(self, texts):
         """
-        texts: list[str] length = B
-        returns: (B, 768)
+        texts: list[str] length B
+        return: (B, T, 768)
         """
+
+        if texts is None:
+            return None
+
         tokens = self.tokenizer(
             texts,
             padding=True,
             truncation=True,
             max_length=128,
             return_tensors="pt"
-        ).to(next(self.encoder.parameters()).device)
-
-        out = self.encoder(**tokens)
-        # return out.last_hidden_state.mean(dim=1)
-        return out.last_hidden_state   # (B, T, 768)
-
-class SkipFiLM(nn.Module):
-    def __init__(self, skip_channels, text_dim=768):
-        super().__init__()
-        self.gamma = nn.Linear(text_dim, skip_channels)
-        self.beta  = nn.Linear(text_dim, skip_channels)
-
-    def forward(self, x, t):
-        """
-        x: skip feature map [B, C, D, H, W]
-        t: text embedding  [B, 768]
-        """
-        gamma = self.gamma(t).view(t.size(0), -1, 1, 1, 1)
-        beta  = self.beta(t).view(t.size(0), -1, 1, 1, 1)
-
-        return x * (1 + gamma) + beta
-
-class CrossAttentionFusion(nn.Module):
-    def __init__(self, img_dim, text_dim=768, num_heads=4):
-        super().__init__()
-
-        self.norm_img = nn.LayerNorm(img_dim)
-        self.norm_txt = nn.LayerNorm(text_dim)
-
-        self.q_proj = nn.Linear(img_dim, img_dim)
-        self.k_proj = nn.Linear(text_dim, img_dim)
-        self.v_proj = nn.Linear(text_dim, img_dim)
-
-        self.attn = nn.MultiheadAttention(
-            embed_dim=img_dim,
-            num_heads=num_heads,
-            batch_first=True,
         )
 
-        self.out_proj = nn.Linear(img_dim, img_dim)
+        tokens = {k: v.to(self.encoder.device) for k, v in tokens.items()}
+        out = self.encoder(**tokens)
 
-    def forward(self, x5d, text_tokens):
-        """
-        x5d:        (B, C, D, H, W)
-        text_tokens:(B, T, 768)
-        """
-
-        B, C, D, H, W = x5d.shape
-        N = D * H * W
-
-        # ---- flatten image ----
-        x = x5d.view(B, C, N).transpose(1, 2)   # (B, N, C)
-
-        # ---- normalize ----
-        x = self.norm_img(x)
-        text_tokens = self.norm_txt(text_tokens)
-
-        # ---- QKV ----
-        Q = self.q_proj(x)
-        K = self.k_proj(text_tokens)
-        V = self.v_proj(text_tokens)
-
-        # ---- cross attention ----
-        out, _ = self.attn(Q, K, V)
-
-        # ---- residual ----
-        out = x + self.out_proj(out)
-
-        # ---- reshape back ----
-        out = out.transpose(1, 2).view(B, C, D, H, W)
-
-        return out
+        return out.last_hidden_state
 
 class TGDC(nn.Module):
     """
@@ -985,7 +959,7 @@ class SegMamba(nn.Module):
 
         # print("Initializing SegMamba")
         print("Initializing SegMamba with Hybrid Encoder - GSC + MDTA + MambaVisionMixer + KAN-Refine with Deep Supervision")
-        print("With Text Infusion via Cross Attention")
+        print("With Text Infusion via TGDC Cross Attention")
         self.spatial_dims = spatial_dims
         # ---- TEXT ENCODER ----
         self.text_encoder = ClinicalTextEncoder()
@@ -1143,35 +1117,9 @@ class SegMamba(nn.Module):
         x = x.view(new_view)
         x = x.permute(self.proj_axes).contiguous()
         return x
-
-    # def forward(self, x_in):
-    #     outs = self.vit(x_in)
-    #     enc1 = self.encoder1(x_in)
-    #     x2 = outs[0]
-    #     enc2 = self.encoder2(x2)
-    #     x3 = outs[1]
-    #     enc3 = self.encoder3(x3)
-    #     x4 = outs[2]
-    #     enc4 = self.encoder4(x4)
-    #     enc_hidden = self.encoder5(outs[3])
-    #     dec3 = self.decoder5(enc_hidden, enc4)
-    #     dec2 = self.decoder4(dec3, enc3)
-    #     dec1 = self.decoder3(dec2, enc2)
-    #     dec0 = self.decoder2(dec1, enc1)
-    #     out = self.decoder1(dec0)
-                
-    #     return self.out(out)
-
-    def _check_numerics(self, name, x):
-        if not torch.isfinite(x).all():
-            # This will raise before any CUDA kernel does something nasty
-            raise RuntimeError(
-                f"[SegMamba] Non-finite values in {name}: "
-                f"min={x.min().item()}, max={x.max().item()}"
-            )
     
     # def forward(self, x_in):
-    def forward(self, x_in, text):
+    def forward(self, x_in, text=None):
 
         """
         x_in: [B, C, H, W] or [B, C, D, H, W]
@@ -1200,77 +1148,62 @@ class SegMamba(nn.Module):
                 f"expected {self.in_chans}"
             )
 
-        self._check_numerics("x_in", x_in)
-
         # --- Encoder path with Mamba features ---
         outs = self.vit(x_in)        # tuple of 4 feature maps
         for i, o in enumerate(outs):
             # print(f"[SegMamba] vit outs[{i}]:  {o.shape}")
             if o is None:
                 raise RuntimeError(f"[SegMamba] vit outs[{i}] is None")
-            self._check_numerics(f"vit outs[{i}]", o)
 
         enc1 = self.encoder1(x_in)
         # enc1 = self.cross_attn1(enc1, text_tokens)
         enc1 = self.tgdc1(enc1, text_tokens)
         # print(f"[SegMamba] enc1:           {enc1.shape}")
-        self._check_numerics("enc1", enc1)
 
         x2 = outs[0]
         enc2 = self.encoder2(x2)
         # print(f"[SegMamba] enc2:           {enc2.shape}")
         # enc2 = self.cross_attn2(enc2, text_tokens)
         enc2 = self.tgdc2(enc2, text_tokens)
-        self._check_numerics("enc2", enc2)
 
         x3 = outs[1]
         enc3 = self.encoder3(x3)
         # print(f"[SegMamba] enc:           {enc3.shape}")
         # enc3 = self.cross_attn3(enc3, text_tokens)
         enc3 = self.tgdc3(enc3, text_tokens)
-        self._check_numerics("enc3", enc3)
 
         x4 = outs[2]
         enc4 = self.encoder4(x4)
         # print(f"[SegMamba] enc4:           {enc4.shape}")
         # enc4 = self.cross_attn4(enc4, text_tokens)
         enc4 = self.tgdc4(enc4, text_tokens)
-        self._check_numerics("enc4", enc4)
 
         enc_hidden = self.encoder5(outs[3])
         # print(f"[SegMamba] enc_hidden:     {enc_hidden.shape}")
-        self._check_numerics("enc_hidden", enc_hidden)
 
         # --- Decoder path ---
         dec3 = self.decoder5(enc_hidden, enc4)
-        # print(f"[SegMamba] dec3:           {dec3.shape}")
-        self._check_numerics("dec3", dec3)
+        # print(f"[SegMamba] dec3:           {dec3.shape}"
 
         dec2 = self.decoder4(dec3, enc3)
         # print(f"[SegMamba] dec2:           {dec2.shape}")
-        self._check_numerics("dec2", dec2)
 
         dec1 = self.decoder3(dec2, enc2)
         # print(f"[SegMamba] dec1:           {dec1.shape}")
-        self._check_numerics("dec1", dec1)
 
         dec0 = self.decoder2(dec1, enc1)
         # print(f"[SegMamba] dec0:           {dec0.shape}")
-        self._check_numerics("dec0", dec0)
 
         out = self.decoder1(dec0)
         # print(f"[SegMamba] decoder1_out:   {out.shape}")
-        self._check_numerics("decoder1_out", out)
 
          # === KAN refinement step ===
         out = self.final_refine(out)
         # print(f"[SegMamba] final_refine_out: {out.shape}")
-        self._check_numerics("final_refine", out)
 
         # ===== main prediction =====
         out_main = self.out(out)                  # [B, out_chans, D, H, W]
         # print(f"[SegMamba] out_main logits:   {out_main.shape}")
-        self._check_numerics("out_logits_5d", out_main)
         
         # ===== deep supervision predictions =====
         ds1_up = ds2_up = ds3_up = None
@@ -1283,10 +1216,6 @@ class SegMamba(nn.Module):
             # print(f"[SegMamba] ds3 raw:        {ds3.shape}")
             # print(f"[SegMamba] ds2 raw:        {ds2.shape}")
             # print(f"[SegMamba] ds1 raw:        {ds1.shape}")
-
-            self._check_numerics("ds3_raw", ds3)
-            self._check_numerics("ds2_raw", ds2)
-            self._check_numerics("ds1_raw", ds1)
 
             # upsample all to match main output resolution
             target_size = out_main.shape[2:]     # (D, H, W)
@@ -1311,15 +1240,10 @@ class SegMamba(nn.Module):
             # print(f"[SegMamba] ds2_up:         {ds2_up.shape}")
             # print(f"[SegMamba] ds1_up:         {ds1_up.shape}")
 
-            self._check_numerics("ds3_up", ds3_up)
-            self._check_numerics("ds2_up", ds2_up)
-            self._check_numerics("ds1_up", ds1_up)
-
         # ===== squeeze fake depth dim (for 2D use) =====
         if squeeze_depth:
             out_main = out_main.squeeze(2)       # [B, out_chans, H, W]
             # print(f"[SegMamba] out_main 2D:     {out_main.shape}")
-            self._check_numerics("out_logits_4d", out_main)
 
             if self.deep_supervision:
                 ds3_up = ds3_up.squeeze(2)
@@ -1330,136 +1254,12 @@ class SegMamba(nn.Module):
                 # print(f"[SegMamba] ds1_up 2D:     {ds1_up.shape}")
 
         # ===== return =====
-        # if self.deep_supervision:
-        #     # main output first, aux outputs after
-        #     return out_main, ds1_up, ds2_up, ds3_up
-        # else:
-        #     return out_main
+        if self.deep_supervision:
+            # main output first, aux outputs after
+            return out_main, ds1_up, ds2_up, ds3_up
+        else:
+            return out_main
         
-        return out_main
+        # return out_main
 
-        # # === KAN refinement step ===
-        # out = self.final_refine(out)
-        # self._check_numerics("final_refine", out)
-
-        # out = self.out(out)
-        # self._check_numerics("out_logits_5d", out)
-
-        # if squeeze_depth:
-        #     out = out.squeeze(2)  # [B, out_chans, H, W]
-        #     self._check_numerics("out_logits_4d", out)
-
-        # return out
-    
-    # def forward(self, x_in):
-    #     """
-    #     x_in comes from your ACC-UNet pipeline as [B, C, H, W].
-
-    #     We:
-    #     - unsqueeze a fake depth dim -> [B, C, 1, H, W]
-    #     - run the 3D Mamba encoder + UNETR blocks
-    #     - squeeze depth back -> [B, out_chans, H, W]
-    #     """
-    #     squeeze_depth = False
-    #     print("[SegMamba] x_in:", x_in.shape) 
-
-    #     if x_in.dim() == 4:
-    #         # [B, C, H, W] -> [B, C, 1, H, W]
-    #         x_in = x_in.unsqueeze(2)
-    #         squeeze_depth = True
-    #     print("[SegMamba] x_in after unsqueeze:", x_in.shape)
-
-    #     # --- Encoder path with Mamba features as in your original code ---
-    #     outs = self.vit(x_in)        # tuple of 4 feature maps
-    #     for i, f in enumerate(outs):
-    #         print(f"[SegMamba] vit outs[{i}]:", f.shape)
-
-    #     enc1 = self.encoder1(x_in)   # skip at full res
-    #     print("[SegMamba] enc1:", enc1.shape)
-
-    #     x2 = outs[0]
-    #     enc2 = self.encoder2(x2)
-    #     print("[SegMamba] enc2:", enc2.shape)
-
-    #     x3 = outs[1]
-    #     enc3 = self.encoder3(x3)
-    #     print("[SegMamba] enc3:", enc3.shape)
-
-    #     x4 = outs[2]
-    #     enc4 = self.encoder4(x4)
-    #     print("[SegMamba] enc4:", enc4.shape)
-
-    #     enc_hidden = self.encoder5(outs[3])
-    #     print("[SegMamba] enc_hidden:", enc_hidden.shape)
-
-    #     # --- Decoder path ---
-    #     dec3 = self.decoder5(enc_hidden, enc4)
-    #     print("[SegMamba] dec3:", dec3.shape)
-
-    #     dec2 = self.decoder4(dec3, enc3)
-    #     print("[SegMamba] dec2:", dec2.shape)
-
-    #     dec1 = self.decoder3(dec2, enc2)
-    #     print("[SegMamba] dec1:", dec1.shape)
-
-    #     dec0 = self.decoder2(dec1, enc1)
-    #     print("[SegMamba] dec0:", dec0.shape)
-
-    #     out = self.decoder1(dec0)     # [B, C, D, H, W]
-    #     print("[SegMamba] out before final conv:", out.shape)
-
-    #     out = self.out(out)           # [B, out_chans, D, H, W]
-    #     print("[SegMamba] out after final conv:", out.shape)
-
-    #     if squeeze_depth:
-    #         out = out.squeeze(2)      # [B, out_chans, H, W]
-    #         print("[SegMamba] out after squeeze depth:", out.shape)
-
-    #     return out
-    
-
-    # def forward(self, x_in):
-    #     """
-    #     x_in comes from your ACC-UNet pipeline as [B, C, H, W].
-
-    #     We:
-    #     - unsqueeze a fake depth dim -> [B, C, 1, H, W]
-    #     - run the 3D Mamba encoder + UNETR blocks
-    #     - squeeze depth back -> [B, out_chans, H, W]
-    #     """
-    #     squeeze_depth = False
-    #     if x_in.dim() == 4:
-    #         # [B, C, H, W] -> [B, C, 1, H, W]
-    #         x_in = x_in.unsqueeze(2)
-    #         squeeze_depth = True
-
-    #     # --- Encoder path with Mamba features as in your original code ---
-    #     outs = self.vit(x_in)        # tuple of 4 feature maps
-    #     enc1 = self.encoder1(x_in)   # skip at full res
-
-    #     x2 = outs[0]
-    #     enc2 = self.encoder2(x2)
-
-    #     x3 = outs[1]
-    #     enc3 = self.encoder3(x3)
-
-    #     x4 = outs[2]
-    #     enc4 = self.encoder4(x4)
-
-    #     enc_hidden = self.encoder5(outs[3])
-
-    #     # --- Decoder path ---
-    #     dec3 = self.decoder5(enc_hidden, enc4)
-    #     dec2 = self.decoder4(dec3, enc3)
-    #     dec1 = self.decoder3(dec2, enc2)
-    #     dec0 = self.decoder2(dec1, enc1)
-    #     out = self.decoder1(dec0)     # [B, C, D, H, W]
-
-    #     out = self.out(out)           # [B, out_chans, D, H, W]
-
-    #     if squeeze_depth:
-    #         out = out.squeeze(2)      # [B, out_chans, H, W]
-
-    #     return out
-
-    
+  

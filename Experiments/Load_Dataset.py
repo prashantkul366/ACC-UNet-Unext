@@ -54,14 +54,14 @@ class RandomGenerator(object):
         # label = torch.from_numpy(np.array(label, dtype=np.float32))
         # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################
-        sample = {'image': image, 'label': label}
-        if text is not None:
-            sample["text"] = text
-        # sample = {
-        #                 "image": image,
-        #                 "label": label,
-        #                 "text": text 
-        #             }
+        # sample = {'image': image, 'label': label}
+        # if text is not None:
+        #     sample["text"] = text
+        sample = {
+                        "image": image,
+                        "label": label,
+                        "text": text 
+                    }
         return sample
 
 class ValGenerator(object):
@@ -82,14 +82,14 @@ class ValGenerator(object):
         # label = torch.from_numpy(np.array(label, dtype=np.float32))
         # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################
-        sample = {'image': image, 'label': label}
-        # sample = {
-            #     "image": image,
-            #     "label": label,
-            #     "text": text   
-            # }
-        if text is not None:
-            sample["text"] = text    
+        # sample = {'image': image, 'label': label}
+        sample = {
+                "image": image,
+                "label": label,
+                "text": text   
+            }
+        # if text is not None:
+        #     sample["text"] = text    
         return sample
 
 def to_long_tensor(pic):
@@ -139,7 +139,7 @@ class ImageToImage2D(Dataset):
         one_hot_mask: bool, if True, returns the mask in one-hot encoded form.
     """
 
-    def __init__(self, dataset_path: str, joint_transform: Callable = None, row_text: str = None, one_hot_mask: int = False, image_size: int =224, n_labels: int=1) -> None:
+    def __init__(self, dataset_path: str, joint_transform: Callable = None, row_text: dict = None, one_hot_mask: int = False, image_size: int =224, n_labels: int=1) -> None:
         self.dataset_path = dataset_path
         print(f"Dataset path: {dataset_path}")
         self.image_size = image_size        
@@ -148,7 +148,7 @@ class ImageToImage2D(Dataset):
         # self.input_path = os.path.join(dataset_path, 'images')
         # self.output_path = os.path.join(dataset_path, 'masks')
         
-        # Option 1: MoNuSeg style folders
+        # Option 1: Text style folders
         option1_img = os.path.join(dataset_path, "img")
         option1_mask = os.path.join(dataset_path, "labelcol")
 
@@ -172,7 +172,7 @@ class ImageToImage2D(Dataset):
         else:
             # Case 3: Not found
             raise FileNotFoundError(
-                f"❌ Dataset folder structure not recognized!\n\n"
+                f" Dataset folder structure not recognized!\n\n"
                 f"Expected either:\n"
                 f"  1) img/ and labelcol/\n"
                 f"  2) images/ and masks/\n\n"
@@ -251,13 +251,7 @@ class ImageToImage2D(Dataset):
         # print(np.max(mask), np.min(mask))
         if self.n_labels == 1:
             mask[mask<=0] = 0
-            # (mask == 35).astype(int)
             mask[mask>0] = 1
-        #     mask = mask.astype(np.float32)  # 🔧 Ensure float type
-        # if self.n_labels == 1:
-        #     mask = (mask > 0).astype(np.float32)  # binarize + cast to float
-
-            # print("11111",np.max(mask), np.min(mask))
 
         # correct dimensions if needed
         image, mask = correct_dims(image, mask)
@@ -266,8 +260,7 @@ class ImageToImage2D(Dataset):
         # print("22",mask.shape)
         assert mask.max() <= 1.0 and mask.min() >= 0.0, f"Mask out of range: {mask.min()} - {mask.max()}"
         sample = {'image': image, 'label': mask}
-        if text is not None:
-            sample["text"] = text 
+        sample["text"] = text
         # sample = {
         #             "image": image,
         #             "label": mask,
@@ -277,10 +270,6 @@ class ImageToImage2D(Dataset):
         if self.joint_transform:
             sample = self.joint_transform(sample)
 
-        # sample['label'] = torch.clamp(sample['label'].unsqueeze(0).float(), 0.0, 1.0)
-        # sample['image'] = sample['image'].float()
-        # sample = {'image': image, 'label': mask}
-        # print("2222",np.max(mask), np.min(mask))
 
         if self.one_hot_mask:
             assert self.one_hot_mask > 0, 'one_hot_mask must be nonnegative'

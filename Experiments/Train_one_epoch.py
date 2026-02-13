@@ -77,17 +77,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         #             Compute loss
         # ====================================================
 
-        # preds = model(images)
-        # if text is not None:
-        #     preds = model(images, text)   # ✅ MoNuSeg triplet
-        # else:
-        #     preds = model(images) 
-        # final_preds = preds[1] if isinstance(preds, (tuple, list)) else preds
-        # if model_type == "Segmamba_hybrid_gsc_KAN_PE_ds_text" and text is not None:
-        #     preds = model(images, text)   
-        # else:
-        #     preds = model(images)   
-        
+
         TEXT_MODELS = [
             "Segmamba_hybrid_gsc_KAN_PE_ds_text",
             "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn",
@@ -101,14 +91,8 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         
         # print("TEXT TYPE:", type(text))
         # print("TEXT VALUE:", text)
-
-        # if USE_TEXT:
-        #     # print("Batch text:", text)
-        #     preds = model(images, text)  
-        # else:
-        #     preds = model(images) 
-
-        if USE_TEXT and text is not None:
+        
+        if USE_TEXT:
             preds = model(images, text)
         else:
             preds = model(images)
@@ -118,10 +102,13 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         else:
             final_preds = preds
 
-        # print("preds:", preds.shape, preds.min().item(), preds.max().item(), preds.dtype)
-        # print("masks:", masks.shape, masks.min().item(), masks.max().item(), masks.dtype)
+        # out_loss = criterion(preds, masks.float())  # Loss
+        # Deep supervision loss expects tuple outputs
+        if isinstance(preds, (tuple, list)):
+            out_loss = criterion(preds, masks.float())
+        else:
+            out_loss = criterion(final_preds, masks.float())
 
-        out_loss = criterion(preds, masks.float())  # Loss
 
         # print("preds:", preds.shape, preds.min().item(), preds.max().item())
         # print("masks:", masks.shape, masks.min().item(), masks.max().item())
@@ -134,12 +121,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # print(masks.size())
         # print(preds.size())
 
-
-        # train_iou = 0
-        # train_iou = iou_on_batch(masks,preds)
         train_iou = iou_on_batch(masks,final_preds)
-
-        # train_dice = criterion._show_dice(preds, masks.float())
         train_dice = criterion._show_dice(final_preds, masks.float())
 
         batch_time = time.time() - end

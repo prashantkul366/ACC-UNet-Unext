@@ -183,32 +183,24 @@ def read_text(folder_path):
 #          Main Loop: load model,
 #=================================================================================
 ##################################################################################
-# def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
+
 def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, resume=False):
 
-    # Load train and val data
-    TEXT_MODELS = [
+    TEXT_MODELS = {
         "Segmamba_hybrid_gsc_KAN_PE_ds_text",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC",
-    ]
-    use_text = False
-    if config.task_name == "MoNuSeg" and model_type in TEXT_MODELS:
-        print(" Using MoNuSeg text triplets")
-        # train_text = read_text(config.train_dataset + "/Train_text.xlsx")
-        train_text = read_text(config.train_dataset)
-        # val_text   = read_text(config.val_dataset + "/Val_text.xlsx")
-        val_text   = read_text(config.val_dataset)
+    }
 
-        print(f"Train text path: {config.train_dataset + 'Train_text.xlsx'}")
-        print(f"Val text path: {config.val_dataset + 'Val_text.xlsx'}")
-        print("Sample text entry:", next(iter(train_text.items())))
-        print("Sample text entry:", next(iter(val_text.items())))
-        use_text = True
+    use_text = (config.task_name == "MoNuSeg" and model_type in TEXT_MODELS)
+
+    train_text = read_text(config.train_dataset) if use_text else None
+    val_text   = read_text(config.val_dataset)   if use_text else None
+
+    if use_text:
+        print("USE TEXT = TRUE - Text enabled for this model.")
     else:
-        train_text = None
-        val_text = None
-        use_text = False
+        print("Text disabled (image-only training).")
 
     train_tf= transforms.Compose([RandomGenerator(output_size=[config.img_size, config.img_size])])
     val_tf = ValGenerator(output_size=[config.img_size, config.img_size])
@@ -216,20 +208,20 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
     # train_dataset = ImageToImage2D(config.train_dataset, train_tf,image_size=config.img_size,)
     train_dataset = ImageToImage2D(
-                        config.train_dataset,
-                        joint_transform=train_tf,
-                        row_text=train_text if use_text else None,
-                        image_size=config.img_size
-                    )
-    
+                    dataset_path=config.train_dataset,
+                    joint_transform=train_tf,
+                    row_text=train_text,
+                    image_size=config.img_size
+                )
 
+    
     # val_dataset = ImageToImage2D(config.val_dataset, val_tf,image_size=config.img_size)
     val_dataset = ImageToImage2D(
-                        config.val_dataset,
-                        joint_transform=val_tf,
-                        row_text=val_text if use_text else None,
-                        image_size=config.img_size
-                    )
+                    dataset_path=config.val_dataset,
+                    joint_transform=val_tf,
+                    row_text=val_text,
+                    image_size=config.img_size
+                )
     train_loader = DataLoader(train_dataset,
                               batch_size=config.batch_size,
                               shuffle=True,
@@ -290,9 +282,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         # lr = 1e-4  
 
     elif model_type == 'UNext_InceptionNext_MLFC':
-        # model = UNext_InceptionNext_MLFC(n_channels=config.n_channels, n_classes=config.n_labels)
         pass
-        # lr = 1e-4  
+
 
     elif model_type == 'UNext_CMRF':
         model = UNext_CMRF(n_channels=config.n_channels, n_classes=config.n_labels)
@@ -315,52 +306,40 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         model = UNext_CMRF_enc_CSSE(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_dense_skip':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
-        # model = UNext_CMRF_PP_UNetPP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_Dense_Skip(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_GAB':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GAB(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_GAB_wavelet':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GAB_Wavelet(n_channels=config.n_channels, n_classes=config.n_labels)
     
     elif model_type == 'UNext_CMRF_GAB_wavelet_OD':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
+        
         model = UNext_CMRF_GAB_Wavelet_OD(n_channels=config.n_channels, n_classes=config.n_labels)
     
     elif model_type == 'UNext_CMRF_GS':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GS(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_GS_Wavelet':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GS_Wavelet(n_channels=config.n_channels, n_classes=config.n_labels)
     
     elif model_type == 'UNext_CMRF_GS_Wavelet_hd':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GS_Wavelet_hd(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_GS_Wavelet_OD':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GS_Wavelet_OD(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_BS_GS_Wavelet':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_BS_GS_Wavelet(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_GS_Wavelet_rKAN':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_GS_Wavelet_rKAN(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_BSRB_GS_Wavelet':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_BSRB_GS_Wavelet(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'UNext_CMRF_BSRB_GS':
-        # model = UNext_CMRF_PP(n_channels=config.n_channels, n_classes=config.n_labels)
         model = UNext_CMRF_BSRB_GS(n_channels=config.n_channels, n_classes=config.n_labels)
 
     elif model_type == 'TransUNet':
@@ -566,25 +545,25 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     #     print ("Let's use {0} GPUs!".format(torch.cuda.device_count()))
     # model = nn.DataParallel(model, device_ids=[0])
 
-
+    DS_MODELS = {
+        'Segmamba_hybrid_gsc_ds',
+        'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds',
+        'Segmamba_hybrid_gsc_KAN_PE_ds',
+        'Segmamba_hybrid_gsc_KAN_PE_ds_flip',
+        'Segmamba_hybrid_gsc_MLP_PE_ds',
+        'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL',
+        'Segmamba_hybrid_gsc_KAN_PE_ds_text',
+        'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn',
+        'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
+    }
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
     if model_type == 'Segmamba' or model_type == 'SegViT_fKAN':
         criterion = BinaryDiceBCE(dice_weight=0.5, BCE_weight=0.5)
-    # elif model_type == 'Segmamba_hybrid_gsc_ds' or model_type == 'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds' or model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds' or model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_flip':
-    elif model_type in (
-                            'Segmamba_hybrid_gsc_ds',
-                            'Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds',
-                            'Segmamba_hybrid_gsc_KAN_PE_ds',
-                            'Segmamba_hybrid_gsc_KAN_PE_ds_flip',
-                            'Segmamba_hybrid_gsc_MLP_PE_ds',
-                            'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL',
-                            'Segmamba_hybrid_gsc_KAN_PE_ds_text',
-                            'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn',
-                            'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
-                        ):
-                            
+
+    elif model_type in DS_MODELS:           
         # Deep supervision wrapper:
         # assume SegMamba returns: (main, ds1, ds2, ds3)
+        print(" Using Deep Supervision Loss")
         base_loss = WeightedDiceBCE(
             dice_weight=0.5,
             BCE_weight=0.5,
@@ -614,17 +593,6 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     # criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
     # criterion = WeightedDiceBCEHausdorff(dice_weight=0.4,BCE_weight=0.4,hausdorff_weight=0.2, n_labels=config.n_labels)
 
-    # GAB Deep supervision wrapper
-    # criterion = DSAdapterLoss(
-    #     base_loss=WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5, n_labels=config.n_labels),
-    #     ds_weights=(0.2, 0.3, 0.4, 0.5),   # match your preferred scheme
-    #     main_weight=1.0
-    # )
-
-    # if config.cosineLR is True:
-    #     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=1e-4)
-    #     if model_type == 'UNeXt':
-    #         lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
 
     if config.cosineLR is True:
         dummy = True
@@ -648,8 +616,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     else:
         writer = None
 
-    # max_dice = 0.0
-    # best_epoch = 1
+    
     print("Begin Training!!")
     # for epoch in range(config.epochs):  # loop over the dataset multiple times
     for epoch in range(start_epoch, config.epochs):  # resume if needed

@@ -138,12 +138,6 @@ model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
 # model_name = 'UNext_CMRF_GS'  # CMRF encoder + Global Semnantic + SIM augmentation
 # model_name = 'UNext_CMRF_dense_skip'  # CMRF encoder + dense skip connection
 
-
-# if model_name == 'SwinUnet' or model_name == 'UCTransNet' or model_name == 'Segmamba' or model_name == 'Segmamba_hybrid'or model_name == 'Segmamba_hybrid_gsc' or model_name == 'Segmamba_hybrid_gsc_CA':
-#     img_size = 224
-# else :
-#     img_size = 256
-
 models_224 = {
     'SwinUnet', 'UCTransNet', 'Segmamba', 'Segmamba_hybrid',
     'Segmamba_hybrid_gsc', 'Segmamba_hybrid_gsc_CA', 'Segmamba_hybrid_gsc_SWAttn',
@@ -157,7 +151,10 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-test_session = "session1"         
+# test_session = "session1"      
+test_session = "session2" 
+
+
 # test_session = "session43"
 # test_session = "session44"          # session name used in training phase
 
@@ -384,7 +381,10 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/T
 
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
+
+
 # session_name       = 'session43'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session44'  #time.strftime('%m.%d_%Hh%M')
 
