@@ -78,6 +78,7 @@ from nets.segmamba_hybrid_gsc_KAN_PE_ds_text import SegMamba as segmamba_hybrid_
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA
+from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual
 # from nets.segmamba_hybrid_gsc_MLP_PE_ds import SegMamba as Segmamba_hybrid_gsc_MLP_PE_ds
 
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL
@@ -191,7 +192,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         "Segmamba_hybrid_gsc_KAN_PE_ds_text",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC",
-        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA"
+        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA",
+        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual",
     }
 
     use_text = (config.task_name == "MoNuSeg" and model_type in TEXT_MODELS)
@@ -450,6 +452,13 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
         lr = 1e-4 
     
+    elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual':
+        model = segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual(
+            in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
+            feat_size=[48, 96, 192, 384], spatial_dims=3,)
+        lr = 1e-4 
+    
+    
     # elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL':
     #     model = Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL(
     #         in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
@@ -563,7 +572,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         'Segmamba_hybrid_gsc_KAN_PE_ds_text',
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn',
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC',
-        'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA'
+        'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA',
+        'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual',
     }
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
     if model_type == 'Segmamba' or model_type == 'SegViT_fKAN':
