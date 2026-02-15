@@ -191,6 +191,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         "Segmamba_hybrid_gsc_KAN_PE_ds_text",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC",
+        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA"
     }
 
     use_text = (config.task_name == "MoNuSeg" and model_type in TEXT_MODELS)
@@ -206,7 +207,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     train_tf= transforms.Compose([RandomGenerator(output_size=[config.img_size, config.img_size])])
     val_tf = ValGenerator(output_size=[config.img_size, config.img_size])
 
-
+    print(f"USE_TEXT: {use_text}")
     # train_dataset = ImageToImage2D(config.train_dataset, train_tf,image_size=config.img_size,)
     train_dataset = ImageToImage2D(
                     dataset_path=config.train_dataset,
