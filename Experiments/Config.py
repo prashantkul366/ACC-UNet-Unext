@@ -102,11 +102,11 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 
 
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
@@ -154,8 +154,8 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-test_session = "session1"      
-# test_session = "session2" 
+# test_session = "session1"      
+test_session = "session2" 
 
 
 # test_session = "session43"
@@ -384,8 +384,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/T
 
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
-# session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 
 
 # session_name       = 'session43'  #time.strftime('%m.%d_%Hh%M')
