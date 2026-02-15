@@ -915,24 +915,6 @@ class SegMamba(nn.Module):
         x = x.permute(self.proj_axes).contiguous()
         return x
 
-    # def forward(self, x_in):
-    #     outs = self.vit(x_in)
-    #     enc1 = self.encoder1(x_in)
-    #     x2 = outs[0]
-    #     enc2 = self.encoder2(x2)
-    #     x3 = outs[1]
-    #     enc3 = self.encoder3(x3)
-    #     x4 = outs[2]
-    #     enc4 = self.encoder4(x4)
-    #     enc_hidden = self.encoder5(outs[3])
-    #     dec3 = self.decoder5(enc_hidden, enc4)
-    #     dec2 = self.decoder4(dec3, enc3)
-    #     dec1 = self.decoder3(dec2, enc2)
-    #     dec0 = self.decoder2(dec1, enc1)
-    #     out = self.decoder1(dec0)
-                
-    #     return self.out(out)
-
     def _check_numerics(self, name, x):
         if not torch.isfinite(x).all():
             # This will raise before any CUDA kernel does something nasty
@@ -1088,136 +1070,10 @@ class SegMamba(nn.Module):
                 # print(f"[SegMamba] ds1_up 2D:     {ds1_up.shape}")
 
         # ===== return =====
-        # if self.deep_supervision:
-        #     # main output first, aux outputs after
-        #     return out_main, ds1_up, ds2_up, ds3_up
-        # else:
-        #     return out_main
+        if self.deep_supervision:
+            # main output first, aux outputs after
+            return out_main, ds1_up, ds2_up, ds3_up
+        else:
+            return out_main
         
-        return out_main
-
-        # # === KAN refinement step ===
-        # out = self.final_refine(out)
-        # self._check_numerics("final_refine", out)
-
-        # out = self.out(out)
-        # self._check_numerics("out_logits_5d", out)
-
-        # if squeeze_depth:
-        #     out = out.squeeze(2)  # [B, out_chans, H, W]
-        #     self._check_numerics("out_logits_4d", out)
-
-        # return out
-    
-    # def forward(self, x_in):
-    #     """
-    #     x_in comes from your ACC-UNet pipeline as [B, C, H, W].
-
-    #     We:
-    #     - unsqueeze a fake depth dim -> [B, C, 1, H, W]
-    #     - run the 3D Mamba encoder + UNETR blocks
-    #     - squeeze depth back -> [B, out_chans, H, W]
-    #     """
-    #     squeeze_depth = False
-    #     print("[SegMamba] x_in:", x_in.shape) 
-
-    #     if x_in.dim() == 4:
-    #         # [B, C, H, W] -> [B, C, 1, H, W]
-    #         x_in = x_in.unsqueeze(2)
-    #         squeeze_depth = True
-    #     print("[SegMamba] x_in after unsqueeze:", x_in.shape)
-
-    #     # --- Encoder path with Mamba features as in your original code ---
-    #     outs = self.vit(x_in)        # tuple of 4 feature maps
-    #     for i, f in enumerate(outs):
-    #         print(f"[SegMamba] vit outs[{i}]:", f.shape)
-
-    #     enc1 = self.encoder1(x_in)   # skip at full res
-    #     print("[SegMamba] enc1:", enc1.shape)
-
-    #     x2 = outs[0]
-    #     enc2 = self.encoder2(x2)
-    #     print("[SegMamba] enc2:", enc2.shape)
-
-    #     x3 = outs[1]
-    #     enc3 = self.encoder3(x3)
-    #     print("[SegMamba] enc3:", enc3.shape)
-
-    #     x4 = outs[2]
-    #     enc4 = self.encoder4(x4)
-    #     print("[SegMamba] enc4:", enc4.shape)
-
-    #     enc_hidden = self.encoder5(outs[3])
-    #     print("[SegMamba] enc_hidden:", enc_hidden.shape)
-
-    #     # --- Decoder path ---
-    #     dec3 = self.decoder5(enc_hidden, enc4)
-    #     print("[SegMamba] dec3:", dec3.shape)
-
-    #     dec2 = self.decoder4(dec3, enc3)
-    #     print("[SegMamba] dec2:", dec2.shape)
-
-    #     dec1 = self.decoder3(dec2, enc2)
-    #     print("[SegMamba] dec1:", dec1.shape)
-
-    #     dec0 = self.decoder2(dec1, enc1)
-    #     print("[SegMamba] dec0:", dec0.shape)
-
-    #     out = self.decoder1(dec0)     # [B, C, D, H, W]
-    #     print("[SegMamba] out before final conv:", out.shape)
-
-    #     out = self.out(out)           # [B, out_chans, D, H, W]
-    #     print("[SegMamba] out after final conv:", out.shape)
-
-    #     if squeeze_depth:
-    #         out = out.squeeze(2)      # [B, out_chans, H, W]
-    #         print("[SegMamba] out after squeeze depth:", out.shape)
-
-    #     return out
-    
-
-    # def forward(self, x_in):
-    #     """
-    #     x_in comes from your ACC-UNet pipeline as [B, C, H, W].
-
-    #     We:
-    #     - unsqueeze a fake depth dim -> [B, C, 1, H, W]
-    #     - run the 3D Mamba encoder + UNETR blocks
-    #     - squeeze depth back -> [B, out_chans, H, W]
-    #     """
-    #     squeeze_depth = False
-    #     if x_in.dim() == 4:
-    #         # [B, C, H, W] -> [B, C, 1, H, W]
-    #         x_in = x_in.unsqueeze(2)
-    #         squeeze_depth = True
-
-    #     # --- Encoder path with Mamba features as in your original code ---
-    #     outs = self.vit(x_in)        # tuple of 4 feature maps
-    #     enc1 = self.encoder1(x_in)   # skip at full res
-
-    #     x2 = outs[0]
-    #     enc2 = self.encoder2(x2)
-
-    #     x3 = outs[1]
-    #     enc3 = self.encoder3(x3)
-
-    #     x4 = outs[2]
-    #     enc4 = self.encoder4(x4)
-
-    #     enc_hidden = self.encoder5(outs[3])
-
-    #     # --- Decoder path ---
-    #     dec3 = self.decoder5(enc_hidden, enc4)
-    #     dec2 = self.decoder4(dec3, enc3)
-    #     dec1 = self.decoder3(dec2, enc2)
-    #     dec0 = self.decoder2(dec1, enc1)
-    #     out = self.decoder1(dec0)     # [B, C, D, H, W]
-
-    #     out = self.out(out)           # [B, out_chans, D, H, W]
-
-    #     if squeeze_depth:
-    #         out = out.squeeze(2)      # [B, out_chans, H, W]
-
-    #     return out
-
-    
+        # return out_main

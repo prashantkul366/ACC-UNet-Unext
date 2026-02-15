@@ -1624,12 +1624,12 @@ class SegMamba(nn.Module):
         # UNCOMMENT WHEN TRAIN AND TESTING WITH DEEP SUPERVISION
         
         # ===== return =====
-        if self.deep_supervision:
-            # main output first, aux outputs after
-            return out_main, ds1_up, ds2_up, ds3_up
-        else:
-            return out_main
+        # if self.deep_supervision:
+        #     # main output first, aux outputs after
+        #     return out_main, ds1_up, ds2_up, ds3_up
+        # else:
+        #     return out_main
         
-        # return out_main
+        return out_main
 
   
