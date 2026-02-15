@@ -53,15 +53,17 @@ class RandomGenerator(object):
         ###########################################################
         # label = torch.from_numpy(np.array(label, dtype=np.float32))
         # label = (label > 0).float()  # Binarize & ensure float
-        ###########################################################
-        # sample = {'image': image, 'label': label}
+        ###########################################################     
+        sample = {'image': image, 'label': label}
+
+        # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
         # if text is not None:
         #     sample["text"] = text
-        sample = {
-                        "image": image,
-                        "label": label,
-                        "text": text 
-                    }
+        # sample = {
+        #                 "image": image,
+        #                 "label": label,
+        #                 "text": text 
+        #             }
         return sample
 
 class ValGenerator(object):
@@ -82,12 +84,14 @@ class ValGenerator(object):
         # label = torch.from_numpy(np.array(label, dtype=np.float32))
         # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################
-        # sample = {'image': image, 'label': label}
-        sample = {
-                "image": image,
-                "label": label,
-                "text": text   
-            }
+        sample = {'image': image, 'label': label}
+
+        # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
+        # sample = {
+        #         "image": image,
+        #         "label": label,
+        #         "text": text   
+        #     }
         # if text is not None:
         #     sample["text"] = text    
         return sample
@@ -260,7 +264,9 @@ class ImageToImage2D(Dataset):
         # print("22",mask.shape)
         assert mask.max() <= 1.0 and mask.min() >= 0.0, f"Mask out of range: {mask.min()} - {mask.max()}"
         sample = {'image': image, 'label': mask}
-        sample["text"] = text
+        # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
+        # sample["text"] = text
+        
         # sample = {
         #             "image": image,
         #             "label": mask,
