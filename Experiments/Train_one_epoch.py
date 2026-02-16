@@ -86,11 +86,12 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
             'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual',
         ]
 
-        USE_TEXT = (
-            config.task_name == "MoNuSeg"
-            and model_type in TEXT_MODELS
-        )
-        
+        # USE_TEXT = (
+        #     config.task_name == "MoNuSeg"
+        #     and model_type in TEXT_MODELS
+        # )
+        USE_TEXT = (config.task_name in ["MoNuSeg", "BUSI_80-20_text"] and model_type in TEXT_MODELS)
+
         # print("TEXT TYPE:", type(text))
         # print("TEXT VALUE:", text)
         
