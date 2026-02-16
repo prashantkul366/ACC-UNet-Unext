@@ -54,16 +54,16 @@ class RandomGenerator(object):
         # label = torch.from_numpy(np.array(label, dtype=np.float32))
         # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################     
-        sample = {'image': image, 'label': label}
+        # sample = {'image': image, 'label': label}
 
         # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
-        # if text is not None:
-        #     sample["text"] = text
-        # sample = {
-        #                 "image": image,
-        #                 "label": label,
-        #                 "text": text 
-        #             }
+        if text is not None:
+            sample["text"] = text
+        sample = {
+                        "image": image,
+                        "label": label,
+                        "text": text 
+                    }
         return sample
 
 class ValGenerator(object):
@@ -84,16 +84,16 @@ class ValGenerator(object):
         # label = torch.from_numpy(np.array(label, dtype=np.float32))
         # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################
-        sample = {'image': image, 'label': label}
+        # sample = {'image': image, 'label': label}
 
         # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
-        # sample = {
-        #         "image": image,
-        #         "label": label,
-        #         "text": text   
-        #     }
-        # if text is not None:
-        #     sample["text"] = text    
+        sample = {
+                "image": image,
+                "label": label,
+                "text": text   
+            }
+        if text is not None:
+            sample["text"] = text    
         return sample
 
 def to_long_tensor(pic):
@@ -263,15 +263,15 @@ class ImageToImage2D(Dataset):
         # print("11",image.shape)
         # print("22",mask.shape)
         assert mask.max() <= 1.0 and mask.min() >= 0.0, f"Mask out of range: {mask.min()} - {mask.max()}"
-        sample = {'image': image, 'label': mask}
+        # sample = {'image': image, 'label': mask}
         # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
-        # sample["text"] = text
+        sample["text"] = text
         
-        # sample = {
-        #             "image": image,
-        #             "label": mask,
-        #             "text": text  
-        #         }
+        sample = {
+                    "image": image,
+                    "label": mask,
+                    "text": text  
+                }
 
         if self.joint_transform:
             sample = self.joint_transform(sample)
