@@ -265,7 +265,7 @@ class ImageToImage2D(Dataset):
         assert mask.max() <= 1.0 and mask.min() >= 0.0, f"Mask out of range: {mask.min()} - {mask.max()}"
         # sample = {'image': image, 'label': mask}
         # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
-        sample["text"] = text
+        # sample["text"] = text
         
         sample = {
                     "image": image,
