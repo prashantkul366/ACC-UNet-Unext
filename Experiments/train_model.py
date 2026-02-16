@@ -196,7 +196,9 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual",
     }
 
-    use_text = (config.task_name == "MoNuSeg" and model_type in TEXT_MODELS)
+    # use_text = (config.task_name == "MoNuSeg"  and model_type in TEXT_MODELS)
+    use_text = (config.task_name in ["MoNuSeg", "BUSI"] and model_type in TEXT_MODELS)
+
 
     train_text = read_text(config.train_dataset) if use_text else None
     val_text   = read_text(config.val_dataset)   if use_text else None
