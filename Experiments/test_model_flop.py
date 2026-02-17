@@ -92,6 +92,7 @@ from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn import SegMamba as Segmamba_hy
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC  
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual
+from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba
 ######################################################
 
 class AverageMeter(object):
@@ -676,6 +677,12 @@ if __name__ == '__main__':
             in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
         lr = 1e-4 
+
+    elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba':
+        model = Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba(
+            in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
+            feat_size=[48, 96, 192, 384], spatial_dims=3,)
+        lr = 1e-4 
         
 
     elif model_type == 'Segmamba':
@@ -715,6 +722,7 @@ if __name__ == '__main__':
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual",
+        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba"
     }
 
     # USE_TEXT = (model_type in TEXT_MODELS) and (config.task_name == "MoNuSeg")
