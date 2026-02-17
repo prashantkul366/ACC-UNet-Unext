@@ -180,7 +180,12 @@ class StructureAwareSSM(nn.Module):
         self.act = nn.SiLU()
 
         # self.x_proj = nn.Linear(self.d_inner, (self.dt_rank + self.d_state*2), bias=False, **factory_kwargs)
-        self.x_proj = nn.Linear(self.d_inner, dt_rank + d_state + self.d_inner)
+        self.x_proj = nn.Linear(
+            self.d_inner,
+            self.dt_rank + self.d_state + self.d_inner,
+            bias=False,
+            **factory_kwargs
+        )
         self.x_proj_weight = nn.Parameter(self.x_proj.weight)
         del self.x_proj
 
@@ -281,7 +286,12 @@ class StructureAwareSSM(nn.Module):
         xs = x.view(B, -1, L)
         
         x_dbl = torch.matmul(self.x_proj_weight.view(1, -1, C), xs)
-        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=1)
+        # dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=1)
+        dts, Bs, Cs = torch.split(
+            x_dbl,
+            [self.dt_rank, self.d_state, self.d_inner],
+            dim=1
+        )
         dts = torch.matmul(self.dt_projs_weight.view(1, C, -1), dts)
         
         As = -torch.exp(self.A_logs)
