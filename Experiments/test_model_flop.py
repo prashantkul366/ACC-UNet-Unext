@@ -717,8 +717,8 @@ if __name__ == '__main__':
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual",
     }
 
-    USE_TEXT = (model_type in TEXT_MODELS) and (config.task_name == "MoNuSeg")
-
+    # USE_TEXT = (model_type in TEXT_MODELS) and (config.task_name == "MoNuSeg")
+    USE_TEXT = (config.task_name in ["MoNuSeg", "BUSI_80-20_text"] and model_type in TEXT_MODELS)
     print("USE_TEXT:", USE_TEXT)
     if USE_TEXT:
         test_text_path = os.path.join(config.test_dataset, "Test_text.xlsx")
