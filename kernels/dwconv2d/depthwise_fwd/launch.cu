@@ -26,7 +26,8 @@ at::Tensor Dwconv2dLauncherFP32(const at::Tensor input, const at::Tensor weight,
     if (kH==3&&kW==3&&padding_h==1&&padding_w==1) 
     {
         // IntArrayRef kernel_size = {kH, kW};
-        at::NoGradGuard no_grad;
+        // at::NoGradGuard no_grad;
+        torch::NoGradGuard no_grad;
         at::Tensor dst = at::cudnn_convolution(input, weight, {1, 1}, {1, 1}, {1, 1}, C, 1, 1, 1);
         return dst;
     }
