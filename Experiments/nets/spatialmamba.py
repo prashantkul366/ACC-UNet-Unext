@@ -193,7 +193,8 @@ class StructureAwareSSM(nn.Module):
 
         self.selective_scan = selective_scan_fn
 
-        self.state_fusion = StateFusion(self.d_inner)
+        # self.state_fusion = StateFusion(self.d_inner)
+        self.state_fusion = StateFusion(self.d_inner * self.d_state)
 
         self.out_norm = nn.LayerNorm(self.d_inner)
         self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
@@ -296,9 +297,13 @@ class StructureAwareSSM(nn.Module):
             return_last_state=False,
         )
 
-        h = rearrange(h, "b d 1 (h w) -> b (d 1) h w", h=H, w=W)
+        B, D, S, L = h.shape
+        h = rearrange(h, "b d s (h w) -> b (d s) h w", h=H, w=W)
+        # h = rearrange(h, "b d 1 (h w) -> b (d 1) h w", h=H, w=W)
         h = self.state_fusion(h)
-        h = rearrange(h, "b d h w -> b d (h w)")
+        # h = rearrange(h, "b d h w -> b d (h w)")
+        h = rearrange(h, "b (d s) h w -> b d s (h w)", s=self.d_state)
+        h = h.mean(dim=2)
         
         y = h * Cs
         y = y + xs * Ds.view(-1, 1)
