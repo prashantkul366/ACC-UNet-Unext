@@ -903,6 +903,7 @@ class SpatialMambaSliceBlock(nn.Module):
         super().__init__()
 
         self.block = SpatialMambaBlock(hidden_dim=dim)
+        print("Inside Spatial Mamba Block")
 
     def forward(self, x5d):
         B, C, D, H, W = x5d.shape
