@@ -179,7 +179,8 @@ class StructureAwareSSM(nn.Module):
         )
         self.act = nn.SiLU()
 
-        self.x_proj = nn.Linear(self.d_inner, (self.dt_rank + self.d_state*2), bias=False, **factory_kwargs)
+        # self.x_proj = nn.Linear(self.d_inner, (self.dt_rank + self.d_state*2), bias=False, **factory_kwargs)
+        self.x_proj = nn.Linear(self.d_inner, dt_rank + d_state + self.d_inner)
         self.x_proj_weight = nn.Parameter(self.x_proj.weight)
         del self.x_proj
 
