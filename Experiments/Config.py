@@ -25,16 +25,16 @@ n_labels = 1
 epochs = 10000
 # epochs = 400
 
-print_frequency = 200
-save_frequency = 100
-vis_frequency = 100
+# print_frequency = 200
+# save_frequency = 100
+# vis_frequency = 100
 early_stopping_patience = 100
 # early_stopping_patience = 30
 # early_stopping_patience = 400
 
-# print_frequency = 1
-# save_frequency = 5000
-# vis_frequency = 10
+print_frequency = 1
+save_frequency = 5000
+vis_frequency = 10
 
 pretrain = False
 resume_checkpoint = False  # or False
@@ -50,7 +50,7 @@ resume_checkpoint = False  # or False
 # task_name = 'ISIC18_UNET'
 # task_name = 'ISIC18_mod'
 # task_name = 'ISIC17'
-# task_name = 'MoNuSeg'
+task_name = 'MoNuSeg'
 # task_name = 'CVC-ClinicDB'
 # task_name = 'Kvasir-Seg'
 # task_name = 'BUSI'
@@ -59,7 +59,7 @@ resume_checkpoint = False  # or False
 # task_name = 'ColonDB'
 
 # task_name = 'BUSI_80-20'
-task_name = 'BUSI_80-20_text'
+# task_name = 'BUSI_80-20_text'
 # task_name = 'BUSI_80-20_mod'
 
 # task_name = 'CVC_ClinicDB_80-20'
@@ -107,7 +107,8 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
@@ -151,6 +152,7 @@ models_224 = {
     'Segmamba_hybrid_gsc_MLP_PE_ds', 'segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL', 'segmamba_hybrid_gsc_KAN_PE_ds_text',
     'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn', 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC', 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA',
     'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual', 'segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba' , 
+    'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN' ,
 }
 
 img_size = 224 if model_name in models_224 else 256
@@ -249,17 +251,17 @@ test_session = "session1"
 
 
 # MoNuSeg
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/Train_Folder'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/Val_Folder'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/Test_Folder'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/Train_Folder'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/Val_Folder'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/Test_Folder'
 
 
 # BUSI_80-20_Text
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
 
 
 

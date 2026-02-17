@@ -341,6 +341,54 @@ class StructureAwareSSM(nn.Module):
             y = self.dropout(y)
         return y
 
+from .kan_fJNB import KAN
+class KANFFN(nn.Module):
+    """
+    KAN-based Feed Forward Network for Spatial-Mamba.
+    Input/Output: (B, H, W, C)
+    """
+
+    def __init__(self, dim, hidden_dim=None, dropout=0.0):
+        super().__init__()
+
+        hidden_dim = hidden_dim or dim * 4
+
+        self.norm = nn.LayerNorm(dim)
+
+        # KAN operates on flattened tokens
+        self.kan = KAN(
+            layers_hidden=[dim, hidden_dim, dim],
+            grid_size=5,
+            spline_order=3,
+            scale_noise=0.1,
+            scale_base=1.0,
+            scale_spline=1.0,
+            grid_eps=0.02,
+            grid_range=[-1, 1],
+        )
+
+        self.drop = nn.Dropout(dropout)
+
+    def forward(self, x):
+        """
+        x: (B, H, W, C)
+        """
+
+        B, H, W, C = x.shape
+
+        # LayerNorm first
+        x = self.norm(x)
+
+        # Flatten spatial tokens
+        x_flat = x.view(B * H * W, C)
+
+        # KAN MLP
+        y_flat = self.kan(x_flat)
+
+        # Restore shape
+        y = y_flat.view(B, H, W, C)
+
+        return self.drop(y)
 
 class SpatialMambaBlock(nn.Module):
     def __init__(
@@ -368,6 +416,46 @@ class SpatialMambaBlock(nn.Module):
         self.ln_2 = norm_layer(hidden_dim)
         self.mlp = MLP(in_features=hidden_dim, hidden_features=int(hidden_dim*mlp_ratio), act_layer=mlp_act_layer, drop=mlp_drop_rate, channels_first=False)
     
+    def forward(self, x: torch.Tensor):
+
+        x = x + self.cpe1(x.permute(0, 3, 1, 2).contiguous()).permute(0, 2, 3, 1)
+        x = x + self.drop_path(self.self_attention(self.ln_1(x)))
+        x = x + self.cpe2(x.permute(0, 3, 1, 2).contiguous()).permute(0, 2, 3, 1)
+        x = x + self.drop_path(self.mlp(self.ln_2(x)))
+        return x
+
+
+class SpatialMambaBlock_KAN(nn.Module):
+    def __init__(
+        self,
+        hidden_dim: int = 0,
+        drop_path: float = 0,
+        norm_layer: Callable[..., torch.nn.Module] = partial(nn.LayerNorm, eps=1e-6),
+        attn_drop_rate: float = 0,
+        d_state: int = 16,
+        dt_init: str = "random",
+        num_heads: int = 8,
+        mlp_ratio = 4.0,
+        mlp_act_layer=nn.GELU,
+        mlp_drop_rate=0.0,
+        **kwargs,
+    ):
+        super().__init__()
+
+        self.cpe1 = nn.Conv2d(hidden_dim, hidden_dim, 3, padding=1, groups=hidden_dim)
+        self.ln_1 = norm_layer(hidden_dim)
+        self.self_attention = StructureAwareSSM(d_model=hidden_dim, dropout=attn_drop_rate, d_state=d_state, dt_init=dt_init, **kwargs)
+        self.drop_path = DropPath(drop_path)
+
+        self.cpe2 = nn.Conv2d(hidden_dim, hidden_dim, 3, padding=1, groups=hidden_dim)
+        self.ln_2 = norm_layer(hidden_dim)
+        # self.mlp = MLP(in_features=hidden_dim, hidden_features=int(hidden_dim*mlp_ratio), act_layer=mlp_act_layer, drop=mlp_drop_rate, channels_first=False)
+        print("Spatial MAmba with KAN initiated")
+        self.mlp = KANFFN(
+            dim=hidden_dim,
+            hidden_dim=int(hidden_dim * mlp_ratio),
+            dropout=mlp_drop_rate
+        )
     def forward(self, x: torch.Tensor):
 
         x = x + self.cpe1(x.permute(0, 3, 1, 2).contiguous()).permute(0, 2, 3, 1)
