@@ -144,18 +144,61 @@ def worker_init_fn(worker_id):
 
 
 
+# def read_text(folder_path):
+#     """
+#     Reads MoNuSeg text file from inside the dataset folder.
+
+#     Example folder:
+#         Train_Folder/
+#             img/
+#             labelcol/
+#             Train_text.xlsx
+#     """
+
+#     # Find any .xlsx file automatically
+#     excel_files = [f for f in os.listdir(folder_path) if f.endswith(".xlsx")]
+
+#     if len(excel_files) == 0:
+#         print("⚠️ No text Excel file found in:", folder_path)
+#         return None
+
+#     excel_path = os.path.join(folder_path, excel_files[0])
+#     print("✅ Loading text from:", excel_path)
+
+#     df = pd.read_excel(excel_path)
+
+#     # Assume first column = filename, second = sentence
+#     df.columns = ["filename", "text"]
+
+#     text_dict = {}
+#     for _, row in df.iterrows():
+#         fname = str(row["filename"]).strip()
+#         sentence = str(row["text"]).strip()
+
+#         if not fname.endswith(".png"):
+#             fname += ".png"
+
+#         text_dict[fname] = sentence
+
+#     return text_dict
+
+
 def read_text(folder_path):
     """
-    Reads MoNuSeg text file from inside the dataset folder.
+    Reads text annotations from Excel inside dataset folder.
 
-    Example folder:
-        Train_Folder/
-            img/
-            labelcol/
-            Train_text.xlsx
+    Supports both formats:
+
+    Format 1:
+        filename | text
+
+    Format 2:
+        image_name | mask_name | prompt_text
     """
 
-    # Find any .xlsx file automatically
+    # ---------------------------------------------------
+    # Find Excel file automatically
+    # ---------------------------------------------------
     excel_files = [f for f in os.listdir(folder_path) if f.endswith(".xlsx")]
 
     if len(excel_files) == 0:
@@ -167,19 +210,45 @@ def read_text(folder_path):
 
     df = pd.read_excel(excel_path)
 
-    # Assume first column = filename, second = sentence
-    df.columns = ["filename", "text"]
+    print("📌 Excel Columns Found:", list(df.columns))
 
+    # ---------------------------------------------------
+    # Handle different column formats
+    # ---------------------------------------------------
+    if "filename" in df.columns and "text" in df.columns:
+        # Already correct format
+        filename_col = "filename"
+        text_col = "text"
+
+    elif "image_name" in df.columns and "prompt_text" in df.columns:
+        # Your Kvasir format
+        filename_col = "image_name"
+        text_col = "prompt_text"
+
+    else:
+        raise ValueError(
+            f"❌ Excel file does not contain expected columns.\n"
+            f"Found: {list(df.columns)}\n"
+            f"Expected either:\n"
+            f"  ['filename','text'] OR ['image_name','prompt_text']"
+        )
+
+    # ---------------------------------------------------
+    # Build dictionary: image → sentence
+    # ---------------------------------------------------
     text_dict = {}
-    for _, row in df.iterrows():
-        fname = str(row["filename"]).strip()
-        sentence = str(row["text"]).strip()
 
+    for _, row in df.iterrows():
+        fname = str(row[filename_col]).strip()
+        sentence = str(row[text_col]).strip()
+
+        # Auto-fix extension (ACC-UNet expects .png)
         if not fname.endswith(".png"):
-            fname += ".png"
+            fname = fname.replace(".jpg", ".png")
 
         text_dict[fname] = sentence
 
+    print(f"✅ Loaded {len(text_dict)} text annotations successfully!")
     return text_dict
 
 ##################################################################################
