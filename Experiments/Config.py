@@ -59,8 +59,9 @@ resume_checkpoint = False  # or False
 # task_name = 'ColonDB'
 
 # task_name = 'BUSI_80-20'
-task_name = 'BUSI_80-20_text'
+# task_name = 'BUSI_80-20_text'
 # task_name = 'BUSI_80-20_mod'
+task_name = 'Kvasir_80_20_Text'
 
 # task_name = 'CVC_ClinicDB_80-20'
 
@@ -107,8 +108,8 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA'
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
@@ -250,6 +251,9 @@ test_session = "session1"
 
 
 
+
+
+
 # MoNuSeg
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT'
 # train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/Train_Folder'
@@ -258,10 +262,16 @@ test_session = "session1"
 
 
 # BUSI_80-20_Text
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
+
+# Kvasir_80_20_Text
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Kvasir_80_20_TEXT_NEW'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Kvasir_80_20_TEXT_NEW/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Kvasir_80_20_TEXT_NEW/val'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Kvasir_80_20_TEXT_NEW/val'
 
 
 

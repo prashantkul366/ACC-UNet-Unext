@@ -201,7 +201,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     }
 
     # use_text = (config.task_name == "MoNuSeg"  and model_type in TEXT_MODELS)
-    use_text = (config.task_name in ["MoNuSeg", "BUSI_80-20_text"] and model_type in TEXT_MODELS)
+    use_text = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "Kvasir_80_20_Text"] and model_type in TEXT_MODELS)
 
 
     train_text = read_text(config.train_dataset) if use_text else None
@@ -594,7 +594,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba',
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN',
     }
-    
+
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)
     if model_type == 'Segmamba' or model_type == 'SegViT_fKAN':
         criterion = BinaryDiceBCE(dice_weight=0.5, BCE_weight=0.5)

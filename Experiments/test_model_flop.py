@@ -401,6 +401,11 @@ if __name__ == '__main__':
         model_type = config.model_name
         model_path = "./BUSI_80-20/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
+    elif config.task_name =="Kvasir_80_20_Text":
+        test_num = 200
+        model_type = config.model_name
+        model_path = "./Kvasir_80_20_Text/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
+
     elif config.task_name =="BUSI_80-20_text":
         test_num = 130
         model_type = config.model_name
