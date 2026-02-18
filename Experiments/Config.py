@@ -31,7 +31,7 @@ vis_frequency = 100
 early_stopping_patience = 100
 # early_stopping_patience = 30
 # early_stopping_patience = 400
-
+# fafaefae
 # print_frequency = 1
 # save_frequency = 5000
 # vis_frequency = 10
