@@ -25,7 +25,7 @@ from nets.ACC_UNet import ACC_UNet
 
 
 # from nets.SMESwinUnet import SMESwinUnet
-# from nets.UCTransNet import UCTransNet
+from nets.UCTransNet import UCTransNet
 
 ##################### NEW ARCHS ######################
 
