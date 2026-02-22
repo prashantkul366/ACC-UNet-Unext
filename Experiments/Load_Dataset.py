@@ -267,7 +267,7 @@ class ImageToImage2D(Dataset):
         
         # sample = {'image': image, 'label': mask}
         # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
-        sample["text"] = text
+        # sample["text"] = text
         
         sample = {
                     "image": image,
