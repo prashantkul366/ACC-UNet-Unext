@@ -219,10 +219,10 @@ def read_text(folder_path):
     # ---------------------------------------------------
     # Handle different column formats
     # ---------------------------------------------------
-    if "filename" in df.columns and "text" in df.columns:
+    if "filename" in df.columns and "Text" in df.columns:
         # Already correct format
         filename_col = "filename"
-        text_col = "text"
+        text_col = "Text"
 
     elif "image_name" in df.columns and "prompt_text" in df.columns:
         # Your Kvasir format
