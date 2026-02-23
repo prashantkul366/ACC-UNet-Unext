@@ -313,7 +313,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
                               batch_size=config.batch_size,
                               shuffle=True,
                               worker_init_fn=worker_init_fn,
-                              num_workers=0,
+                              num_workers=8,
                               pin_memory=True)
     
     print("Training Data Loaded!!")
@@ -321,7 +321,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
                             batch_size=config.batch_size,
                             shuffle=True,
                             worker_init_fn=worker_init_fn,
-                            num_workers=0,
+                            num_workers=8,
                             pin_memory=True)
 
     print("Val Data Loaded!!")
