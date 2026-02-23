@@ -59,9 +59,9 @@ resume_checkpoint = False  # or False
 # task_name = 'ColonDB'
 
 # task_name = 'BUSI_80-20'
-# task_name = 'BUSI_80-20_text'
+task_name = 'BUSI_80-20_text'
 # task_name = 'BUSI_80-20_mod'
-task_name = 'Kvasir_80_20_Text'
+# task_name = 'Kvasir_80_20_Text'
 
 # task_name = 'CVC_ClinicDB_80-20'
 
@@ -108,12 +108,16 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
+
+#ablation
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
