@@ -1238,7 +1238,7 @@ class SegMamba(nn.Module):
 
         # print("Initializing SegMamba")
         print("Initializing SegMamba with Spatial Mamba (ICLR'25) with Deep Supervision")
-        print("With Text Infusion via Hierarchical Summary Linear Cross Attention ")
+        print("With Text Infusion via Dual Cross Attention ")
         self.spatial_dims = spatial_dims
         # ---- TEXT ENCODER ----
         self.text_encoder = ClinicalTextEncoder()
@@ -1313,12 +1313,17 @@ class SegMamba(nn.Module):
         # self.tgdc3 = TGDCFusion(img_dim=self.feat_size[2])
         # self.tgdc4 = TGDCFusion(img_dim=self.feat_size[3])
 
-        self.hslca1 = HSLCAFusion(img_dim=self.feat_size[0])
-        self.hslca2 = HSLCAFusion(img_dim=self.feat_size[1])
-        self.hslca3 = HSLCAFusion(img_dim=self.feat_size[2])
-        self.hslca4 = HSLCAFusion(img_dim=self.feat_size[3])
-        self.hslca_hidden = HSLCAFusion(img_dim=self.hidden_size)
+        # self.hslca1 = HSLCAFusion(img_dim=self.feat_size[0])
+        # self.hslca2 = HSLCAFusion(img_dim=self.feat_size[1])
+        # self.hslca3 = HSLCAFusion(img_dim=self.feat_size[2])
+        # self.hslca4 = HSLCAFusion(img_dim=self.feat_size[3])
+        # self.hslca_hidden = HSLCAFusion(img_dim=self.hidden_size)
 
+        self.dual_ca1 = DualCrossAttentionFusion(img_dim=self.feat_size[0])
+        self.dual_ca2 = DualCrossAttentionFusion(img_dim=self.feat_size[1])
+        self.dual_ca3 = DualCrossAttentionFusion(img_dim=self.feat_size[2])
+        self.dual_ca4 = DualCrossAttentionFusion(img_dim=self.feat_size[3])
+        # self.dual_ca_hidden = DualCrossAttentionFusion(img_dim=self.hidden_size)
 
         self.decoder5 = UnetrUpBlock(
             spatial_dims=spatial_dims,
@@ -1441,31 +1446,58 @@ class SegMamba(nn.Module):
             if o is None:
                 raise RuntimeError(f"[SegMamba] vit outs[{i}] is None")
 
+        # enc1 = self.encoder1(x_in)
+        # # enc1 = self.cross_attn1(enc1, text_tokens)
+        # enc1 = self.hslca1(enc1, text_tokens)
+        # # print(f"[SegMamba] enc1:           {enc1.shape}")
+
+        # x2 = outs[0]
+        # enc2 = self.encoder2(x2)
+        # # print(f"[SegMamba] enc2:           {enc2.shape}")
+        # # enc2 = self.cross_attn2(enc2, text_tokens)
+        # enc2 = self.hslca2(enc2, text_tokens)
+
+        # x3 = outs[1]
+        # enc3 = self.encoder3(x3)
+        # # print(f"[SegMamba] enc:           {enc3.shape}")
+        # # enc3 = self.cross_attn3(enc3, text_tokens)
+        # enc3 = self.hslca3(enc3, text_tokens)
+
+        # x4 = outs[2]
+        # enc4 = self.encoder4(x4)
+        # # print(f"[SegMamba] enc4:           {enc4.shape}")
+        # # enc4 = self.cross_attn4(enc4, text_tokens)
+        # enc4 = self.hslca4(enc4, text_tokens)
+
+        # enc_hidden = self.encoder5(outs[3])
+        # enc_hidden = self.hslca_hidden(enc_hidden, text_tokens)
+
         enc1 = self.encoder1(x_in)
         # enc1 = self.cross_attn1(enc1, text_tokens)
-        enc1 = self.hslca1(enc1, text_tokens)
+        # enc1 = self.hslca1(enc1, text_tokens)
+        enc1, text_tokens = self.dual_ca1(enc1, text_tokens)
         # print(f"[SegMamba] enc1:           {enc1.shape}")
 
         x2 = outs[0]
         enc2 = self.encoder2(x2)
         # print(f"[SegMamba] enc2:           {enc2.shape}")
         # enc2 = self.cross_attn2(enc2, text_tokens)
-        enc2 = self.hslca2(enc2, text_tokens)
+        enc2, text_tokens = self.dual_ca2(enc2, text_tokens)
 
         x3 = outs[1]
         enc3 = self.encoder3(x3)
         # print(f"[SegMamba] enc:           {enc3.shape}")
         # enc3 = self.cross_attn3(enc3, text_tokens)
-        enc3 = self.hslca3(enc3, text_tokens)
+        enc3, text_tokens = self.dual_ca3(enc3, text_tokens)
 
         x4 = outs[2]
         enc4 = self.encoder4(x4)
         # print(f"[SegMamba] enc4:           {enc4.shape}")
         # enc4 = self.cross_attn4(enc4, text_tokens)
-        enc4 = self.hslca4(enc4, text_tokens)
+        enc4, text_tokens = self.dual_ca4(enc4, text_tokens)
 
         enc_hidden = self.encoder5(outs[3])
-        enc_hidden = self.hslca_hidden(enc_hidden, text_tokens)
+        # enc_hidden, text_tokens = self.dual_ca_hidden(enc_hidden, text_tokens)
 
         # print(f"[SegMamba] enc_hidden:     {enc_hidden.shape}")
 
@@ -1544,12 +1576,12 @@ class SegMamba(nn.Module):
         # UNCOMMENT WHEN TRAIN AND TESTING WITH DEEP SUPERVISION
         
         # ===== return =====
-        # if self.deep_supervision:
-        #     # main output first, aux outputs after
-        #     return out_main, ds1_up, ds2_up, ds3_up
-        # else:
-        #     return out_main
+        if self.deep_supervision:
+            # main output first, aux outputs after
+            return out_main, ds1_up, ds2_up, ds3_up
+        else:
+            return out_main
         
-        return out_main
+        # return out_main
 
   
