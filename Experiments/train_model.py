@@ -277,7 +277,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
 
     # use_text = (config.task_name == "MoNuSeg"  and model_type in TEXT_MODELS)
-    use_text = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "Kvasir_80_20_Text"] and model_type in TEXT_MODELS)
+    use_text = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "BUSI_80-20_text_p4", "BUSI_80-20_text_p2", "Kvasir_80_20_Text"] 
+                and model_type in TEXT_MODELS)
 
 
     train_text = read_text(config.train_dataset) if use_text else None

@@ -449,6 +449,16 @@ if __name__ == '__main__':
         model_type = config.model_name
         model_path = "./BUSI_80-20_text/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
+    elif config.task_name =="BUSI_80-20_text_p2":
+        test_num = 130
+        model_type = config.model_name
+        model_path = "./BUSI_80-20_text_p2/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
+
+    elif config.task_name =="BUSI_80-20_text_p4":
+        test_num = 130
+        model_type = config.model_name
+        model_path = "./BUSI_80-20_text_p4/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
+
     elif config.task_name =="CVC_ClinicDB_80-20":
         test_num = 123
         model_type = config.model_name
@@ -777,7 +787,8 @@ if __name__ == '__main__':
     }
 
     # USE_TEXT = (model_type in TEXT_MODELS) and (config.task_name == "MoNuSeg")
-    USE_TEXT = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "Kvasir_80_20_Text"] and model_type in TEXT_MODELS)
+    USE_TEXT = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "BUSI_80-20_text_p4", "BUSI_80-20_text_p2", "Kvasir_80_20_Text"] 
+                and model_type in TEXT_MODELS)
     print("USE_TEXT:", USE_TEXT)
     if USE_TEXT:
         # test_text_path = os.path.join(config.test_dataset, "Test_text.xlsx")

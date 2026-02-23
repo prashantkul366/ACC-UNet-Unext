@@ -59,7 +59,10 @@ resume_checkpoint = False  # or False
 # task_name = 'ColonDB'
 
 # task_name = 'BUSI_80-20'
-task_name = 'BUSI_80-20_text'
+# task_name = 'BUSI_80-20_text'
+
+# task_name = 'BUSI_80-20_text_p4'
+task_name = 'BUSI_80-20_text_p2'
 # task_name = 'BUSI_80-20_mod'
 # task_name = 'Kvasir_80_20_Text'
 
@@ -108,16 +111,19 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA'
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
+
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL'
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
+# proposed
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
+
 #ablation
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
@@ -266,11 +272,34 @@ test_session = "session1"
 # test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/MoNuSeg_LViT/Test_Folder'
 
 
-# BUSI_80-20_Text
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
+
+
+
+
+# BUSI_80-20_Text - P6
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
+
+# # BUSI_80-20_Text - P4
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4/test'
+
+# BUSI_80-20_Text - P2
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P2'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P2/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P2/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P2/test'
+
+
+
+
+
+
+
 
 # Kvasir_80_20_Text
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Kvasir_80_20_TEXT_NEW'
