@@ -264,50 +264,87 @@ def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_pa
 
 
 
-import pandas as pd 
+# import pandas as pd 
+# def read_text(path):
+#     """
+#     Reads MoNuSeg text descriptions from an Excel file.
+
+#     Works if input is:
+#     - folder containing *.xlsx
+#     - direct path to an .xlsx file
+#     """
+
+#     # Case 1: user passed file directly
+#     if path.endswith(".xlsx"):
+#         excel_path = path
+
+#     # Case 2: user passed folder → find Excel inside
+#     else:
+#         excel_files = [f for f in os.listdir(path) if f.endswith(".xlsx")]
+
+#         if len(excel_files) == 0:
+#             print(" No Excel file found in:", path)
+#             return None
+
+#         excel_path = os.path.join(path, excel_files[0])
+
+#     print(" Loading text from:", excel_path)
+
+#     df = pd.read_excel(excel_path)
+
+#     # Force correct column names
+#     df.columns = ["filename", "text"]
+
+#     text_dict = {}
+#     for _, row in df.iterrows():
+#         fname = str(row["filename"]).strip()
+#         sentence = str(row["text"]).strip()
+
+#         # Ensure extension
+#         if not fname.endswith(".png"):
+#             fname += ".png"
+
+#         text_dict[fname] = sentence
+
+#     return text_dict
+
 def read_text(path):
     """
-    Reads MoNuSeg text descriptions from an Excel file.
-
-    Works if input is:
-    - folder containing *.xlsx
-    - direct path to an .xlsx file
+    Reads text descriptions from Excel file.
+    Works with columns:
+    image_name | mask_name | prompt_text
     """
 
-    # Case 1: user passed file directly
+    # If direct file
     if path.endswith(".xlsx"):
         excel_path = path
-
-    # Case 2: user passed folder → find Excel inside
     else:
         excel_files = [f for f in os.listdir(path) if f.endswith(".xlsx")]
-
         if len(excel_files) == 0:
-            print(" No Excel file found in:", path)
+            print("No Excel file found in:", path)
             return None
-
         excel_path = os.path.join(path, excel_files[0])
 
-    print(" Loading text from:", excel_path)
+    print("Loading text from:", excel_path)
 
     df = pd.read_excel(excel_path)
 
-    # Force correct column names
-    df.columns = ["filename", "text"]
+    # ✅ DO NOT force rename columns
+    # Just use the correct column names from Excel
 
     text_dict = {}
-    for _, row in df.iterrows():
-        fname = str(row["filename"]).strip()
-        sentence = str(row["text"]).strip()
 
-        # Ensure extension
+    for _, row in df.iterrows():
+        fname = str(row["image_name"]).strip()
+        sentence = str(row["prompt_text"]).strip()
+
+        # ensure extension
         if not fname.endswith(".png"):
-            fname += ".png"
+            fname = os.path.splitext(fname)[0] + ".png"
 
         text_dict[fname] = sentence
 
     return text_dict
-
 
 
 if __name__ == '__main__':
