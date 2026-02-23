@@ -219,9 +219,9 @@ def read_text(folder_path):
     # ---------------------------------------------------
     # Handle different column formats
     # ---------------------------------------------------
-    if "filename" in df.columns and "Text" in df.columns:
+    if "Filename" in df.columns and "Text" in df.columns:
         # Already correct format
-        filename_col = "filename"
+        filename_col = "Filename"
         text_col = "Text"
 
     elif "image_name" in df.columns and "prompt_text" in df.columns:
