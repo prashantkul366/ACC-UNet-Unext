@@ -79,15 +79,15 @@ from nets.UCTransNet import UCTransNet
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual
-from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba
+# from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN
 # from nets.segmamba_hybrid_gsc_MLP_PE_ds import SegMamba as Segmamba_hybrid_gsc_MLP_PE_ds
 
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL
 
 
-from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba
-from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba
+# from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba
+# from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba
 
 
 # from nets.segmamba_hybrid_gsc_KAN_PE_EffKan import SegMamba as segmamba_hybrid_gsc_KAN_PE_EffKan
@@ -277,7 +277,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
 
     # use_text = (config.task_name == "MoNuSeg"  and model_type in TEXT_MODELS)
-    use_text = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "BUSI_80-20_text_p4", "BUSI_80-20_text_p2", "Kvasir_80_20_Text"] 
+    use_text = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "BUSI_80-20_text_p4", "BUSI_80-20_text_p2", "Kvasir_80_20_Text", "QaTa_text"] 
                 and model_type in TEXT_MODELS)
 
 

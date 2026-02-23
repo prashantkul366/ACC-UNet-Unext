@@ -94,7 +94,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         #     config.task_name == "MoNuSeg"
         #     and model_type in TEXT_MODELS
         # )
-        USE_TEXT = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "BUSI_80-20_text_p4", "BUSI_80-20_text_p2", "Kvasir_80_20_Text"] 
+        USE_TEXT = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "BUSI_80-20_text_p4", "BUSI_80-20_text_p2", "Kvasir_80_20_Text", "QaTa_text"] 
                     and model_type in TEXT_MODELS)
 
         # print("TEXT TYPE:", type(text))

@@ -62,12 +62,12 @@ resume_checkpoint = False  # or False
 # task_name = 'BUSI_80-20_text'
 
 # task_name = 'BUSI_80-20_text_p4'
-task_name = 'BUSI_80-20_text_p2'
+# task_name = 'BUSI_80-20_text_p2'
 # task_name = 'BUSI_80-20_mod'
 # task_name = 'Kvasir_80_20_Text'
 
 # task_name = 'CVC_ClinicDB_80-20'
-
+task_name = 'QaTa_text'
 
 # task_name = 'Glas_80-20'
 # task_name = 'TNBC_80-20'
@@ -85,7 +85,7 @@ batch_size = 2
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
-# model_name = 'UNet_base'
+model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'U-KAN'
@@ -119,7 +119,7 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
 # proposed
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
 
 #ablation
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba'
@@ -293,6 +293,13 @@ dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_8
 train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P2/train'
 val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P2/test'
 test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P2/test'
+
+# COLAB 1
+# QaTa_Text
+dataset_path = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text'
+train_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/train'
+val_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
+test_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
 
 
 
