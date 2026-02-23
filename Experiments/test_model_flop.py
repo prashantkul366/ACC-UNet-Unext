@@ -180,23 +180,18 @@ def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_pa
 
     start_time = time.time()
     # output = model(input_img.cuda())
-    # if text_batch is not None:
-    #     output = model(input_img.cuda(), text_batch)
-    # else:
-    #     output = model(input_img.cuda())
-
     if text_batch is not None:
-        raw_output = model(input_img.cuda(), text_batch)
+        output = model(input_img.cuda(), text_batch)
     else:
-        raw_output = model(input_img.cuda())
-    output = get_final_prob(raw_output, n_classes=config.n_labels)
+        output = model(input_img.cuda())
+
+    
     # output = unwrap_output(output)
     # output = torch.sigmoid(output)
     end_time = time.time()
     gpu_time_meter.update(end_time - start_time, input_img.size(0))
 
-    # pred_class = torch.where(output>0.5,torch.ones_like(output),torch.zeros_like(output))
-    pred_class = (output > 0.5).float()
+    pred_class = torch.where(output>0.5,torch.ones_like(output),torch.zeros_like(output))
     predict_save = pred_class[0].cpu().data.numpy()
 
     predict_save = np.reshape(predict_save, (config.img_size, config.img_size))
