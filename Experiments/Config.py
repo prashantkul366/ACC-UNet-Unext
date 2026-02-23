@@ -116,8 +116,8 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
 #ablation
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba'
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_flip'
