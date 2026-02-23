@@ -742,7 +742,8 @@ if __name__ == '__main__':
     USE_TEXT = (config.task_name in ["MoNuSeg", "BUSI_80-20_text", "Kvasir_80_20_Text"] and model_type in TEXT_MODELS)
     print("USE_TEXT:", USE_TEXT)
     if USE_TEXT:
-        test_text_path = os.path.join(config.test_dataset, "Test_text.xlsx")
+        # test_text_path = os.path.join(config.test_dataset, "Test_text.xlsx")
+        test_text_path = os.path.join(config.test_dataset, "Val_text.xlsx")
         print(" Loading test text from:", test_text_path)
 
         test_text = read_text(test_text_path)   # dict: filename → sentence
