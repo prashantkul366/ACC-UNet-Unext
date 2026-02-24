@@ -61,13 +61,13 @@ resume_checkpoint = False  # or False
 # task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_text'
 
-task_name = 'BUSI_80-20_text_p4'
+# task_name = 'BUSI_80-20_text_p4'
 # task_name = 'BUSI_80-20_text_p2'
 # task_name = 'BUSI_80-20_mod'
 # task_name = 'Kvasir_80_20_Text'
 
 # task_name = 'CVC_ClinicDB_80-20'
-# task_name = 'QaTa_text'
+task_name = 'QaTa_text'
 
 # task_name = 'Glas_80-20'
 # task_name = 'TNBC_80-20'
@@ -170,8 +170,8 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-test_session = "session1"      
-# test_session = "session2" 
+# test_session = "session1"      
+test_session = "session2" 
 
 
 # test_session = "session43"
@@ -283,10 +283,10 @@ test_session = "session1"
 # test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW/test'
 
 # # BUSI_80-20_Text - P4
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P4/test'
 
 # BUSI_80-20_Text - P2
 # dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20_TEXT_NEW_P2'
@@ -296,10 +296,10 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_8
 
 # COLAB 1
 # QaTa_Text
-# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text'
-# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/val'
-# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
+dataset_path = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text'
+train_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/train'
+val_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/val'
+test_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
 
 
 
@@ -455,8 +455,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_8
 
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
-# session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 
 
 # session_name       = 'session43'  #time.strftime('%m.%d_%Hh%M')
