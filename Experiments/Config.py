@@ -85,7 +85,7 @@ batch_size = 2
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
-# model_name = 'UNet_base'
+model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'U-KAN'
@@ -119,7 +119,7 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
 # proposed
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba'
 
 #ablation
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba'
