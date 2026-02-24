@@ -298,7 +298,7 @@ test_session = "session1"
 # QaTa_Text
 dataset_path = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text'
 train_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/train'
-val_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
+val_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/val'
 test_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
 
 
