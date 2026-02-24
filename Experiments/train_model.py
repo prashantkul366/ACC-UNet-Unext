@@ -229,6 +229,10 @@ def read_text(folder_path):
         filename_col = "image_name"
         text_col = "prompt_text"
 
+    elif "Image" in df.columns and "Description" in df.columns:
+        # Your Kvasir format
+        filename_col = "Image"
+        text_col = "Description"
     else:
         raise ValueError(
             f"❌ Excel file does not contain expected columns.\n"
