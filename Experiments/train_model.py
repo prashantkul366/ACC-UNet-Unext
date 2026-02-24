@@ -80,6 +80,7 @@ from nets.UCTransNet import UCTransNet
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual
 from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba
+from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN
 # from nets.segmamba_hybrid_gsc_MLP_PE_ds import SegMamba as Segmamba_hybrid_gsc_MLP_PE_ds
 
@@ -277,6 +278,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba",
         "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba",
+        "Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text"
     }
 
 
@@ -549,7 +551,14 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         model = Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba(
             in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
             feat_size=[48, 96, 192, 384], spatial_dims=3,)
-        lr = 1e-4 
+        lr = 1e-4
+
+    elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text':
+        model = Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text(
+            in_chans=config.n_channels, out_chans=config.n_labels, depths=[2, 2, 2, 2],
+            feat_size=[48, 96, 192, 384], spatial_dims=3,)
+        lr = 1e-4  
+
 
     elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba':
         model = segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba(
@@ -688,6 +697,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN',
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba',
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba',
+        'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text',
     }
 
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)

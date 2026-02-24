@@ -64,6 +64,7 @@ class RandomGenerator(object):
                         "label": label,
                         "text": text 
                     }
+        
         return sample
 
 class ValGenerator(object):
@@ -93,7 +94,8 @@ class ValGenerator(object):
                 "text": text   
             }
         if text is not None:
-            sample["text"] = text    
+            sample["text"] = text
+
         return sample
 
 def to_long_tensor(pic):
