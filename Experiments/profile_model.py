@@ -28,13 +28,24 @@ dummy_text = [
 # -----------------------------
 # THOP profiling
 # -----------------------------
-macs, params = profile(
-    model,
-    inputs=(dummy_image, dummy_text),
-    verbose=False
-)
+# macs, params = profile(
+#     model,
+#     inputs=(dummy_image, dummy_text),
+#     verbose=False
+# )
+
+def count_trainable_params(model):
+    return sum(
+        p.numel()
+        for n, p in model.named_parameters()
+        if p.requires_grad and "text_encoder" not in n
+    )
+
+params = count_trainable_params(model)
+
+print(f"Vision Params (no text encoder): {params/1e6:.2f} M")
 
 print(f"Encoder params{sum(p.numel() for p in model.text_encoder.parameters()) / 1e6}")
 print(f"Params: {params/1e6:.2f} M")
-print(f"MACs: {macs/1e9:.2f} G")
-print(f"FLOPs: {(macs*2)/1e9:.2f} G")
+# print(f"MACs: {macs/1e9:.2f} G")
+# print(f"FLOPs: {(macs*2)/1e9:.2f} G")
