@@ -83,30 +83,46 @@ from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba import (
 )
 
 # =====================================================
-# 1. Create Model
+# Fake Text Encoder (VERY IMPORTANT)
+# =====================================================
+class FakeTextEncoder(nn.Module):
+    """
+    Replaces ClinicalBERT during FLOPs computation.
+    Produces dummy token embeddings.
+    """
+    def forward(self, texts):
+        B = 1 if texts is None else len(texts)
+
+        # ClinicalBERT output shape
+        # (B, Tokens, 768)
+        return torch.randn(
+            B,
+            16,        # token length (approx)
+            768,
+            device="cuda"
+        )
+
+
+# =====================================================
+# Create Model
 # =====================================================
 model = SegMambaModel(
-    in_chans=1,                 # change if RGB
+    in_chans=1,
     out_chans=1,
-    depths=[2, 2, 2, 2],
-    feat_size=[48, 96, 192, 384],
+    depths=[2,2,2,2],
+    feat_size=[48,96,192,384],
     spatial_dims=3,
 ).cuda()
 
 model.eval()
 
-
-# =====================================================
-# 2. REMOVE TEXT ENCODER FROM PROFILING
-# (Standard practice in VLM papers)
-# =====================================================
-print("\nRemoving ClinicalBERT from FLOPs calculation...")
-model.text_encoder = nn.Identity()
+# Replace heavy ClinicalBERT
+print("\nReplacing ClinicalBERT with Fake Encoder...")
+model.text_encoder = FakeTextEncoder()
 
 
 # =====================================================
-# 3. THOP Wrapper
-# (handles tuple outputs + text input)
+# THOP Wrapper
 # =====================================================
 class THOPWrapper(nn.Module):
     def __init__(self, model):
@@ -114,10 +130,9 @@ class THOPWrapper(nn.Module):
         self.model = model
 
     def forward(self, x):
-        # text=None because encoder removed
-        out = self.model(x, None)
+        dummy_text = ["dummy report"]
+        out = self.model(x, dummy_text)
 
-        # deep supervision returns tuple
         if isinstance(out, tuple):
             return out[0]
 
@@ -129,17 +144,13 @@ wrapped_model.eval()
 
 
 # =====================================================
-# 4. Dummy Input
+# Dummy Image
 # =====================================================
-B = 1
-H = 256
-W = 256
-
-dummy_image = torch.randn(B, 1, H, W).cuda()
+dummy_image = torch.randn(1, 1, 256, 256).cuda()
 
 
 # =====================================================
-# 5. FLOPs + Params
+# Profile
 # =====================================================
 print("\nProfiling model...")
 
@@ -153,11 +164,11 @@ flops = macs * 2
 
 
 # =====================================================
-# 6. Print Results
+# Results
 # =====================================================
-print("\n================ MODEL COMPLEXITY ================")
-print(f"Input Size : 1 x 1 x {H} x {W}")
+print("\n============== MODEL COMPLEXITY ==============")
+print("Input Size : 1×1×256×256")
 print(f"Parameters : {params/1e6:.2f} M")
 print(f"MACs       : {macs/1e9:.2f} G")
 print(f"FLOPs      : {flops/1e9:.2f} G")
-print("==================================================")
+print("==============================================")
