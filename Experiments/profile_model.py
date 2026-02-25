@@ -34,18 +34,41 @@ dummy_text = [
 #     verbose=False
 # )
 
-def count_trainable_params(model):
-    return sum(
-        p.numel()
-        for n, p in model.named_parameters()
-        if p.requires_grad and "text_encoder" not in n
-    )
+# def count_trainable_params(model):
+#     return sum(
+#         p.numel()
+#         for n, p in model.named_parameters()
+#         if p.requires_grad and "text_encoder" not in n
+#     )
 
-params = count_trainable_params(model)
+# params = count_trainable_params(model)
 
-print(f"Vision Params (no text encoder): {params/1e6:.2f} M")
+# print(f"Vision Params (no text encoder): {params/1e6:.2f} M")
 
-print(f"Encoder params{sum(p.numel() for p in model.text_encoder.parameters()) / 1e6}")
-print(f"Params: {params/1e6:.2f} M")
+# print(f"Encoder params{sum(p.numel() for p in model.text_encoder.parameters()) / 1e6}")
+# print(f"Params: {params/1e6:.2f} M")
 # print(f"MACs: {macs/1e9:.2f} G")
 # print(f"FLOPs: {(macs*2)/1e9:.2f} G")
+
+
+# REMOVE TEXT ENCODER FROM FLOPs
+model.text_encoder = torch.nn.Identity()
+
+dummy_img = torch.randn(1, 1, 256, 256).cuda()
+dummy_text = None
+
+def forward_for_thop(x):
+    out = model(x, dummy_text)
+    if isinstance(out, tuple):
+        return out[0]
+    return out
+
+macs, params = profile(
+    forward_for_thop,
+    inputs=(dummy_img,),
+    verbose=False
+)
+
+print("====== FINAL REPORT ======")
+print(f"Params (Vision only): {params/1e6:.2f} M")
+print(f"GFLOPs: {(macs*2)/1e9:.2f} G")
