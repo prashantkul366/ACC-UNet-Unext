@@ -34,6 +34,7 @@ macs, params = profile(
     verbose=False
 )
 
+print(f"Encoder params{sum(p.numel() for p in model.text_encoder.parameters()) / 1e6}")
 print(f"Params: {params/1e6:.2f} M")
 print(f"MACs: {macs/1e9:.2f} G")
 print(f"FLOPs: {(macs*2)/1e9:.2f} G")
