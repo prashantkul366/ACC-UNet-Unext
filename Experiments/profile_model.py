@@ -18,7 +18,8 @@ B = 1
 H = 256
 W = 256
 
-dummy_image = torch.randn(B, 1, H, W).cuda()
+# dummy_image = torch.randn(B, 1, H, W).cuda()
+dummy_image = torch.randn(B, 3, H, W).cuda()
 
 dummy_text = [
     "lung infection with ground glass opacity"
