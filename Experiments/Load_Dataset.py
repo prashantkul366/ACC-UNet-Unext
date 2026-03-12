@@ -186,19 +186,25 @@ class ImageToImage2D(Dataset):
                 f"  {os.listdir(dataset_path)}"
             )
         # self.images_list = os.listdir(self.input_path)
+        # self.images_list = [
+        #                     f for f in os.listdir(self.input_path)
+        #                     if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tif'))
+        #                 ]
         self.images_list = [
-                            f for f in os.listdir(self.input_path)
-                            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tif'))
-                        ]
+                                f for f in os.listdir(self.input_path)
+                                if f.lower().endswith(('.png','.jpg','.jpeg','.bmp','.tif','.npy'))
+                            ]
         self.one_hot_mask = one_hot_mask
         self.n_labels = n_labels
         self.row_text = row_text
 
-        if joint_transform:
-            self.joint_transform = joint_transform
-        else:
-            to_tensor = T.ToTensor()
-            self.joint_transform = lambda x, y: (to_tensor(x), to_tensor(y))
+        # if joint_transform:
+        #     self.joint_transform = joint_transform
+        # else:
+        #     to_tensor = T.ToTensor()
+        #     self.joint_transform = lambda x, y: (to_tensor(x), to_tensor(y))
+
+        self.joint_transform = joint_transform
 
     def __len__(self):
         # return len(os.listdir(self.input_path))
@@ -213,12 +219,25 @@ class ImageToImage2D(Dataset):
         # print(os.path.join(self.input_path, image_filename))
         # print(os.path.join(self.output_path, image_filename[: -3] + "png"))
         # print(os.path.join(self.input_path, image_filename))
-        image = cv2.imread(os.path.join(self.input_path, image_filename))
-        if image is None:
-            raise ValueError(f" Failed to load image: {os.path.join(self.input_path, image_filename)}")
-        # print("img",image_filename)
-        # print("1",image.shape)
-        image = cv2.resize(image,(self.image_size,self.image_size))
+
+
+        # image = cv2.imread(os.path.join(self.input_path, image_filename))
+        # if image is None:
+        #     raise ValueError(f" Failed to load image: {os.path.join(self.input_path, image_filename)}")
+        # # print("img",image_filename)
+        # # print("1",image.shape)
+        # image = cv2.resize(image,(self.image_size,self.image_size))
+
+        img_path = os.path.join(self.input_path, image_filename)
+
+        if image_filename.endswith(".npy"):
+            image = np.load(img_path)          # shape = (4,256,256)
+        else:
+            image = cv2.imread(img_path)
+            image = cv2.resize(image,(self.image_size,self.image_size))
+            image = np.transpose(image,(2,0,1))   # make CHW
+
+
         # print(np.max(image), np.min(image))
         # print("2",image.shape)
         # read mask image
@@ -229,7 +248,8 @@ class ImageToImage2D(Dataset):
         # --- Read corresponding mask safely ---
         stem, _ = os.path.splitext(image_filename)
 
-        possible_exts = [".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"]
+        # possible_exts = [".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"]
+        possible_exts = [".npy",".png",".jpg",".jpeg",".bmp",".tif",".tiff"]
         mask_path = None
         for ext in possible_exts:
             candidate = os.path.join(self.output_path, stem + ext)
@@ -239,35 +259,47 @@ class ImageToImage2D(Dataset):
 
         if mask_path is None:
             raise ValueError(f"❌ No mask found for image: {image_filename} in {self.output_path}")
-        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-        if mask is None:
-            raise ValueError(f"⚠️ Mask file exists but could not be read: {mask_path}")
+        
 
-        stem, _ = os.path.splitext(image_filename)
-        mask_filename = stem + ".png"
+        # mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+        # if mask is None:
+        #     raise ValueError(f"⚠️ Mask file exists but could not be read: {mask_path}")
 
-        if self.row_text is not None:
-            text = self.row_text.get(mask_filename, "")
+        # stem, _ = os.path.splitext(image_filename)
+        # mask_filename = stem + ".png"
+
+        # if self.row_text is not None:
+        #     text = self.row_text.get(mask_filename, "")
+        # else:
+        #     text = None
+        # ##########################################################
+        # # print("mask",image_filename[: -3] + "png")
+        # # print(np.max(mask), np.min(mask))
+        # mask = cv2.resize(mask,(self.image_size,self.image_size))
+        # # print(np.max(mask), np.min(mask))
+
+        if mask_path.endswith(".npy"):
+            mask = np.load(mask_path)
         else:
-            text = None
-        ##########################################################
-        # print("mask",image_filename[: -3] + "png")
-        # print(np.max(mask), np.min(mask))
-        mask = cv2.resize(mask,(self.image_size,self.image_size))
-        # print(np.max(mask), np.min(mask))
+            mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+            mask = cv2.resize(mask,(self.image_size,self.image_size))
+
         if self.n_labels == 1:
             mask[mask<=0] = 0
             mask[mask>0] = 1
 
         # correct dimensions if needed
-        image, mask = correct_dims(image, mask)
+        # image, mask = correct_dims(image, mask)
         # image, mask = F.to_pil_image(image), F.to_pil_image(mask)
         # print("11",image.shape)
         # print("22",mask.shape)
         assert mask.max() <= 1.0 and mask.min() >= 0.0, f"Mask out of range: {mask.min()} - {mask.max()}"
 
-        
+        image = torch.from_numpy(image).float()
+        mask  = torch.from_numpy(mask).long()
+
         sample = {'image': image, 'label': mask}
+
         # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
         
         # sample = {

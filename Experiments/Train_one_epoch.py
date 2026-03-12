@@ -62,10 +62,16 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
 
         # Take variable and put them to GPU
         images, masks = sampled_batch['image'], sampled_batch['label']
-        images, masks = images.cuda(), masks.cuda()
+        # images, masks = images.cuda(), masks.cuda()
+        images = images.cuda().float()
+        masks  = masks.cuda().float()
         text = sampled_batch.get("text", None)
+        # if masks.dim() == 3:
+        #     masks = masks.unsqueeze(1)
         if masks.dim() == 3:
             masks = masks.unsqueeze(1)
+        elif masks.dim() == 4 and masks.shape[1] != 1:
+            masks = masks[:,0:1,:,:]
         
         # print("Mask unique:", torch.unique(masks))
 
@@ -130,8 +136,11 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # print(masks.size())
         # print(preds.size())
 
-        train_iou = iou_on_batch(masks,final_preds)
-        train_dice = criterion._show_dice(final_preds, masks.float())
+        prob_preds = torch.sigmoid(final_preds)
+        train_iou  = iou_on_batch(masks, prob_preds)
+        train_dice = criterion._show_dice(prob_preds, masks.float())
+        # train_iou = iou_on_batch(masks,final_preds)
+        # train_dice = criterion._show_dice(final_preds, masks.float())
 
         batch_time = time.time() - end
         # train_acc = acc_on_batch(masks,preds)
@@ -163,7 +172,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
             train_dice_avg = dice_sum / (i * config.batch_size)
 
         end = time.time()
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
         if i % config.print_frequency == 0:
             print_summary(epoch + 1, i, len(loader), out_loss, loss_name, batch_time,
@@ -181,7 +190,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
             writer.add_scalar(logging_mode + '_dice', train_dice, step)
         '''
         
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
     if lr_scheduler is not None:
         lr_scheduler.step()

@@ -20,7 +20,8 @@ os.environ['PYTHONHASHSEED'] = str(seed)
 
 n_filts = 32            # change this to train larger ACC-UNet model
 cosineLR = True         # whether use cosineLR or not
-n_channels = 3
+# n_channels = 3
+n_channels = 4
 n_labels = 1
 epochs = 10000
 # epochs = 400
@@ -28,7 +29,7 @@ epochs = 10000
 print_frequency = 200
 save_frequency = 100
 vis_frequency = 100
-early_stopping_patience = 100
+early_stopping_patience = 50
 # early_stopping_patience = 30
 # early_stopping_patience = 400
 # fafaefae
@@ -67,7 +68,8 @@ resume_checkpoint = False  # or False
 # task_name = 'Kvasir_80_20_Text'
 
 # task_name = 'CVC_ClinicDB_80-20'
-task_name = 'QaTa_text'
+# task_name = 'QaTa_text'
+task_name = 'Forestry'
 
 # task_name = 'Glas_80-20'
 # task_name = 'TNBC_80-20'
@@ -75,17 +77,19 @@ task_name = 'QaTa_text'
 # task_name = 'DRIVE'
 # task_name = 'BUSI_UNET'
 
-learning_rate = 1e-3
+# learning_rate = 1e-3
+learning_rate = 3e-4
+# batch_size = 8
 # learning_rate = 0.0001
-# batch_size = 32
-batch_size = 8
+batch_size = 32
+# batch_size = 8
 # batch_size = 2
 
 # model_name = 'ACC_UNet'
-model_name = 'SwinUnet'
+# model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
-# model_name = 'UNet_base'
+model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'U-KAN'
@@ -299,16 +303,16 @@ test_session = "session1"
 
 # COLAB 1
 # QaTa_Text
-dataset_path = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text'
-train_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/train'
-val_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/val'
-test_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text'
+# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/val'
+# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
 
-
-
-
-
-
+# Forestry 
+dataset_path = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy'
+train_dataset = dataset_path + '/train'
+val_dataset   = dataset_path + '/val'
+test_dataset  = dataset_path + '/val'
 
 
 # Kvasir_80_20_Text

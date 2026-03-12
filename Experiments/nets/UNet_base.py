@@ -87,10 +87,12 @@ class UNet_base(nn.Module):
         self.up2 = UpBlock(in_channels*4, in_channels, nb_Conv=2)
         self.up1 = UpBlock(in_channels*2, in_channels, nb_Conv=2)
         self.outc = nn.Conv2d(in_channels, self.n_classes, kernel_size=(1,1))
-        if n_classes == 1:
-            self.last_activation = nn.Sigmoid()
-        else:
-            self.last_activation = None
+        # if n_classes == 1:
+        #     self.last_activation = nn.Sigmoid()
+        # else:
+        #     self.last_activation = None
+
+        self.last_activation = None
 
     def forward(self, x):
         # Question here
@@ -104,13 +106,15 @@ class UNet_base(nn.Module):
         x = self.up3(x, x3)
         x = self.up2(x, x2)
         x = self.up1(x, x1)
-        if self.last_activation is not None:
-            logits = self.last_activation(self.outc(x))
-            # print("111")
-        else:
-            logits = self.outc(x)
-            # print("222")
-        # logits = self.outc(x) # if using BCEWithLogitsLoss
-        # print(logits.size())
+        logits = self.outc(x)
         return logits
+        # if self.last_activation is not None:
+        #     logits = self.last_activation(self.outc(x))
+        #     # print("111")
+        # else:
+        #     logits = self.outc(x)
+        #     # print("222")
+        # # logits = self.outc(x) # if using BCEWithLogitsLoss
+        # # print(logits.size())
+        # return logits
 
