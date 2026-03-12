@@ -295,9 +295,11 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     else:
         print("Text disabled (image-only training).")
 
-    train_tf= transforms.Compose([RandomGenerator(output_size=[config.img_size, config.img_size])])
-    val_tf = ValGenerator(output_size=[config.img_size, config.img_size])
+    # train_tf= transforms.Compose([RandomGenerator(output_size=[config.img_size, config.img_size])])
+    # val_tf = ValGenerator(output_size=[config.img_size, config.img_size])
 
+    train_tf = None
+    val_tf   = None
     print(f"USE_TEXT: {use_text}")
     # train_dataset = ImageToImage2D(config.train_dataset, train_tf,image_size=config.img_size,)
     train_dataset = ImageToImage2D(
