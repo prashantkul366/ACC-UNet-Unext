@@ -53,7 +53,8 @@ class LightDDCMNet(nn.Module):
 
         print("Initializing Light DDCM Net with in_channels =", in_channels)
         # ---- input expansion conv ----
-        self.input_conv = nn.Conv2d(in_channels, 3 - in_channels, 3, padding=1)
+        # self.input_conv = nn.Conv2d(in_channels, 3 - in_channels, 3, padding=1)
+        self.input_proj = nn.Conv2d(in_channels, 3, kernel_size=1)
         self.bn0 = nn.BatchNorm2d(3)
         self.prelu0 = nn.PReLU()
 
@@ -82,10 +83,10 @@ class LightDDCMNet(nn.Module):
     def forward(self, x):
 
         # create pseudo 3 channel
-        if x.shape[1] == 1:
-            x2 = self.input_conv(x)
-            x = torch.cat([x, x2], dim=1)
-
+        # if x.shape[1] == 1:
+        #     x2 = self.input_conv(x)
+        #     x = torch.cat([x, x2], dim=1)
+        x = self.input_proj(x)
         x = self.prelu0(self.bn0(x))
 
         # encoder
@@ -101,4 +102,4 @@ class LightDDCMNet(nn.Module):
         x = self.final_conv(x)
         x = F.interpolate(x, scale_factor=2, mode="bilinear", align_corners=False)
 
-        return torch.sigmoid(x)
+        return x
