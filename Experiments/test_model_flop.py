@@ -92,7 +92,7 @@ import cv2
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_TGDC  
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual
-from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba
+# from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN
 ######################################################
 
@@ -220,13 +220,16 @@ def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_pa
     pred_mask = (output >= 0.5).astype(np.uint8) * 255  # binary mask → 0/255
     cv2.imwrite(mask_file, pred_mask)  # save exact resolution (no scaling)
 
+    prob_file = os.path.join(mask_dir, f"{fname}_prob.npy")
+    np.save(prob_file, output)
     # --- 2) Save side-by-side figure (high-res + no interpolation) ---
     side_file = os.path.join(side_dir, f"{fname}_side_{model_type}.png")
 
     plt.figure(figsize=(12, 4))
 
     plt.subplot(1, 3, 1)
-    plt.imshow(input_img)
+    # plt.imshow(input_img)
+    plt.imshow(input_img[:,:,0], cmap="gray")
     plt.axis("off")
     plt.title("Input")
 
@@ -804,7 +807,8 @@ if __name__ == '__main__':
     else:
         test_text = None
 
-    tf_test = ValGenerator(output_size=[config.img_size, config.img_size])
+    # tf_test = ValGenerator(output_size=[config.img_size, config.img_size])
+    tf_test = None
     # test_dataset = ImageToImage2D(config.test_dataset, tf_test,image_size=config.img_size)
     # test_dataset = ImageToImage2D(
     #                 config.test_dataset,
@@ -814,12 +818,18 @@ if __name__ == '__main__':
     #                 image_size=config.img_size
     #             )
 
+    # test_dataset = ImageToImage2D(
+    #                 dataset_path=config.test_dataset,
+    #                 joint_transform=tf_test,      
+    #                 row_text=test_text,        
+    #                 image_size=config.img_size
+    #             )
     test_dataset = ImageToImage2D(
-                    dataset_path=config.test_dataset,
-                    joint_transform=tf_test,      
-                    row_text=test_text,        
-                    image_size=config.img_size
-                )
+                dataset_path=config.test_dataset,
+                joint_transform=tf_test,      
+                row_text=test_text,        
+                image_size=config.img_size
+            )
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0)
 
     dice_pred = 0.0
