@@ -238,5 +238,6 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
 
     else:
         sensitivity = specificity = accuracy = precision = recall = f1 = 0
+        iou_global = 0
 
     return average_loss, train_dice_avg, sensitivity, specificity, accuracy, precision, recall, f1, iou_global
