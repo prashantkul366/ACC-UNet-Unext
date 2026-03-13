@@ -723,6 +723,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         )
     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=0.00001)
          
+    print("Criterion and LR Scheduler set to => ", type(criterion).__name__, " and ", type(lr_scheduler).__name__)
     # if model_type == 'UNeXt':
     #     # criterion = WeightedDiceBCE(dice_weight=1,BCE_weight=1, n_labels=config.n_labels)
     #     criterion = WeightedDiceBCE(dice_weight=1,BCE_weight=0.5, n_labels=config.n_labels)
