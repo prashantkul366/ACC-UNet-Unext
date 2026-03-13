@@ -225,29 +225,67 @@ def vis_and_save_heatmap(model, input_img, text_batch, img_RGB, labs,vis_save_pa
     # --- 2) Save side-by-side figure (high-res + no interpolation) ---
     side_file = os.path.join(side_dir, f"{fname}_side_{model_type}.png")
 
-    plt.figure(figsize=(12, 4))
+    # plt.figure(figsize=(12, 4))
 
-    plt.subplot(1, 3, 1)
-    # plt.imshow(input_img)
-    plt.imshow(input_img[:,:,0], cmap="gray")
+    # plt.subplot(1, 3, 1)
+    # # plt.imshow(input_img)
+    # plt.imshow(input_img[:,:,0], cmap="gray")
+    # plt.axis("off")
+    # plt.title("Input")
+
+    # plt.subplot(1, 3, 2)
+    # plt.imshow(labs, cmap="gray", interpolation='nearest')
+    # plt.axis("off")
+    # plt.title("Ground Truth")
+
+    # plt.subplot(1, 3, 3)
+    # plt.imshow(pred_mask, cmap="gray", interpolation='nearest')
+    # plt.axis("off")
+    # plt.title("Prediction")
+
+    # plt.tight_layout()
+    # plt.savefig(side_file, dpi=600, bbox_inches="tight", pad_inches=0)
+    # plt.close()
+
+    plt.figure(figsize=(18, 6))
+
+    # -------- Hillshade channels --------
+    plt.subplot(2, 3, 1)
+    plt.imshow(input_img[:, :, 0], cmap="gray")
     plt.axis("off")
-    plt.title("Input")
+    plt.title("Hillshade 45°")
 
-    plt.subplot(1, 3, 2)
-    plt.imshow(labs, cmap="gray", interpolation='nearest')
+    plt.subplot(2, 3, 2)
+    plt.imshow(input_img[:, :, 1], cmap="gray")
+    plt.axis("off")
+    plt.title("Hillshade 135°")
+
+    plt.subplot(2, 3, 3)
+    plt.imshow(input_img[:, :, 2], cmap="gray")
+    plt.axis("off")
+    plt.title("Hillshade 225°")
+
+    plt.subplot(2, 3, 4)
+    plt.imshow(input_img[:, :, 3], cmap="gray")
+    plt.axis("off")
+    plt.title("Hillshade 315°")
+
+    # -------- GT --------
+    plt.subplot(2, 3, 5)
+    plt.imshow(labs, cmap="gray", interpolation="nearest")
     plt.axis("off")
     plt.title("Ground Truth")
 
-    plt.subplot(1, 3, 3)
-    plt.imshow(pred_mask, cmap="gray", interpolation='nearest')
+    # -------- Prediction --------
+    plt.subplot(2, 3, 6)
+    plt.imshow(pred_mask, cmap="gray", interpolation="nearest")
     plt.axis("off")
     plt.title("Prediction")
 
     plt.tight_layout()
     plt.savefig(side_file, dpi=600, bbox_inches="tight", pad_inches=0)
     plt.close()
-
-
+    
     if(False):
         
         plt.figure(figsize=(10,3.3))
