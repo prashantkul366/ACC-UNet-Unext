@@ -583,10 +583,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     
     elif model_type == 'LightDDCMNet':
         model = LightDDCMNet(
-            n_channels=config.n_channels,
-            n_classes=config.n_labels,
-            base_filters=36,
-            pretrained=True
+            in_channels=config.n_channels
         )
         # lr = 1e-4 
     # elif model_type == 'Segmamba_hybrid_gsc_KAN_PE_ds_SPATIAL':
