@@ -487,6 +487,10 @@ if __name__ == '__main__':
         model_type = config.model_name
         model_path = "./TNBC_80-20/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
+    elif config.task_name =="Forestry":
+        test_num = 1942
+        model_type = config.model_name
+        model_path = "./Forestry/"+model_type+"/"+test_session+"/models/best_model-"+model_type+".pth.tar"    
 
 
     #################################################################################################################
