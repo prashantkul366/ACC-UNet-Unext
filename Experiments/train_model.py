@@ -26,7 +26,7 @@ from nets.ACC_UNet import ACC_UNet
 
 # from nets.SMESwinUnet import SMESwinUnet
 from nets.UCTransNet import UCTransNet
-
+from nets.Light_DDCM import LightDDCMNet
 ##################### NEW ARCHS ######################
 
 # from nets.archs.archs_InceptionNext_MLFC import UNext_InceptionNext_MLFC
@@ -763,7 +763,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
     else:
         writer = None
 
-    
+    best_metrics = {}
+
     print("Begin Training!!")
     # for epoch in range(config.epochs):  # loop over the dataset multiple times
     for epoch in range(start_epoch, config.epochs):  # resume if needed
@@ -777,34 +778,62 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         logger.info('Validation')
         with torch.no_grad():
             model.eval()
-            val_loss, val_dice = train_one_epoch(val_loader, model, criterion,
+            # val_loss, val_dice = train_one_epoch(val_loader, model, criterion,
+            #                                 optimizer, writer, epoch, lr_scheduler,model_type,logger)
+            val_loss, val_dice, val_sens, val_spec, val_acc, val_prec, val_rec, val_f1, val_iou  = train_one_epoch(val_loader, model, criterion,
                                             optimizer, writer, epoch, lr_scheduler,model_type,logger)
 
         # =============================================================
         #       Save best model
         # =============================================================
+        # if val_dice > max_dice:
+        #         #if epoch+1 > 5:
+        #         logger.info('\t Saving best model, mean dice increased from: {:.4f} to {:.4f}'.format(max_dice,val_dice))
+        #         # print(f"saving best model at path: {config.model_path}")
+        #         max_dice = val_dice
+        #         best_epoch = epoch + 1
+        #         # save_checkpoint({'epoch': epoch,
+        #         #                  'best_model': True,
+        #         #                  'model': model_type,
+        #         #                  'state_dict': model.state_dict(),
+        #         #                  'val_loss': val_loss,
+        #         #                  'optimizer': optimizer.state_dict()}, config.model_path)#+f'_{epoch}')
+        #         save_checkpoint({
+        #                             'epoch': epoch,
+        #                             'best_model': True,
+        #                             'model': model_type,
+        #                             'state_dict': model.state_dict(),
+        #                             'val_loss': val_loss,
+        #                             'val_dice': val_dice,          # NEW
+        #                             'optimizer': optimizer.state_dict()
+        #                         }, config.model_path)
         if val_dice > max_dice:
-                #if epoch+1 > 5:
-                logger.info('\t Saving best model, mean dice increased from: {:.4f} to {:.4f}'.format(max_dice,val_dice))
-                # print(f"saving best model at path: {config.model_path}")
-                max_dice = val_dice
-                best_epoch = epoch + 1
-                # save_checkpoint({'epoch': epoch,
-                #                  'best_model': True,
-                #                  'model': model_type,
-                #                  'state_dict': model.state_dict(),
-                #                  'val_loss': val_loss,
-                #                  'optimizer': optimizer.state_dict()}, config.model_path)#+f'_{epoch}')
-                save_checkpoint({
-                                    'epoch': epoch,
-                                    'best_model': True,
-                                    'model': model_type,
-                                    'state_dict': model.state_dict(),
-                                    'val_loss': val_loss,
-                                    'val_dice': val_dice,          # NEW
-                                    'optimizer': optimizer.state_dict()
-                                }, config.model_path)
 
+            logger.info(f'\n BEST MODEL UPDATED')
+
+            max_dice = val_dice
+            best_epoch = epoch + 1
+
+            best_metrics = {
+                "sens": val_sens,
+                "spec": val_spec,
+                "acc": val_acc,
+                "prec": val_prec,
+                "rec": val_rec,
+                "f1": val_f1,
+                "iou": val_iou
+            }
+
+            logger.info(
+                f'Best Dice : {max_dice:.4f} at epoch {best_epoch}\n'
+                f'Sensitivity : {val_sens:.4f}\n'
+                f'Specificity : {val_spec:.4f}\n'
+                f'Accuracy    : {val_acc:.4f}\n'
+                f'Precision   : {val_prec:.4f}\n'
+                f'Recall      : {val_rec:.4f}\n'
+                f'F1 Score    : {val_f1:.4f}\n'
+                f'IoU         : {val_iou:.4f}\n'
+            )
                 
                 # model.save(config.model_path+f'/best_model-{model_type}.pth')
         else:
@@ -816,6 +845,18 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         if early_stopping_count > config.early_stopping_patience:
             logger.info('\t early_stopping!')
             break
+
+        logger.info("\n=========== FINAL BEST RESULT ===========")
+        logger.info(f"Best Dice  : {max_dice:.4f}")
+        logger.info(f"Best Epoch : {best_epoch}")
+
+        logger.info(f"Sensitivity : {best_metrics['sens']:.4f}")
+        logger.info(f"Specificity : {best_metrics['spec']:.4f}")
+        logger.info(f"Accuracy    : {best_metrics['acc']:.4f}")
+        logger.info(f"Precision   : {best_metrics['prec']:.4f}")
+        logger.info(f"Recall      : {best_metrics['rec']:.4f}")
+        logger.info(f"F1 Score    : {best_metrics['f1']:.4f}")
+        logger.info(f"IoU         : {best_metrics['iou']:.4f}")
 
     return model
 

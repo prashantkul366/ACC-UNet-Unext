@@ -52,6 +52,10 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
     time_sum, loss_sum = 0, 0
     dice_sum, iou_sum, acc_sum = 0.0, 0.0, 0.0
 
+    TP_total = 0
+    TN_total = 0
+    FP_total = 0
+    FN_total = 0
     dices = []
     for i, (sampled_batch, names) in enumerate(loader, 1):
 
@@ -137,6 +141,21 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
         # print(preds.size())
 
         prob_preds = torch.sigmoid(final_preds)
+        # ======= CONFUSION MATRIX (ONLY FOR VAL) =======
+        if not model.training:
+
+            output_bin = (prob_preds > 0.5).float()
+
+            TP = ((output_bin == 1) & (masks == 1)).sum().item()
+            TN = ((output_bin == 0) & (masks == 0)).sum().item()
+            FP = ((output_bin == 1) & (masks == 0)).sum().item()
+            FN = ((output_bin == 0) & (masks == 1)).sum().item()
+
+            TP_total += TP
+            TN_total += TN
+            FP_total += FP
+            FN_total += FN
+
         train_iou  = iou_on_batch(masks, prob_preds)
         train_dice = criterion._show_dice(prob_preds, masks.float())
         # train_iou = iou_on_batch(masks,final_preds)
@@ -205,5 +224,19 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
     # writer.add_scalar(logging_mode + '_acc', train_acc, step)
     writer.add_scalar('epoch_' + logging_mode + '_dice', train_dice_avg, epoch)
 
+    if not model.training:
 
-    return average_loss, train_dice_avg
+        eps = 1e-7
+
+        sensitivity = TP_total / (TP_total + FN_total + eps)
+        specificity = TN_total / (TN_total + FP_total + eps)
+        accuracy    = (TP_total + TN_total) / (TP_total + TN_total + FP_total + FN_total + eps)
+        precision   = TP_total / (TP_total + FP_total + eps)
+        recall      = sensitivity
+        f1          = 2 * precision * recall / (precision + recall + eps)
+        iou_global = TP_total / (TP_total + FP_total + FN_total + eps)
+
+    else:
+        sensitivity = specificity = accuracy = precision = recall = f1 = 0
+
+    return average_loss, train_dice_avg, sensitivity, specificity, accuracy, precision, recall, f1, iou_global
