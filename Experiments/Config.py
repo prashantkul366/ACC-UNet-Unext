@@ -89,7 +89,7 @@ batch_size = 32
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
-model_name = 'UNet_base'
+# model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'U-KAN'
@@ -101,7 +101,7 @@ model_name = 'UNet_base'
 # model_name = 'UNext_InceptionNext_MLFC_fKAN'
 
 # model_name = 'Segmamba'
-# model_name = 'LightDDCMNet'
+model_name = 'LightDDCMNet'
 
 
 # model_name = 'Segmamba_hybrid'
@@ -178,8 +178,8 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-# test_session = "session1"      
-test_session = "session2" 
+test_session = "session1"      
+# test_session = "session2" 
 
 
 # test_session = "session43"
@@ -463,8 +463,8 @@ test_dataset  = dataset_path + '/val'
 
 
 
-# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
-session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 
 
 # session_name       = 'session43'  #time.strftime('%m.%d_%Hh%M')
