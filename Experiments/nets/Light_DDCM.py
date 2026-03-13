@@ -51,6 +51,7 @@ class LightDDCMNet(nn.Module):
     def __init__(self, in_channels=1):
         super().__init__()
 
+        print("Initializing Light DDCM Net with in_channels =", in_channels)
         # ---- input expansion conv ----
         self.input_conv = nn.Conv2d(in_channels, 3 - in_channels, 3, padding=1)
         self.bn0 = nn.BatchNorm2d(3)
