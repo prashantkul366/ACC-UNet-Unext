@@ -244,6 +244,7 @@ class ImageToImage2D(Dataset):
         img_path = os.path.join(self.input_path, image_filename)
         image = np.load(img_path)   # (H, W, 4)
 
+        print("RAW SHAPE:", image.shape)
         # resize if needed
         if image.shape[0] != self.image_size:
             image = zoom(image, (self.image_size / image.shape[0],
