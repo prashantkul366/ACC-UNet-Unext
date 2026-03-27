@@ -808,7 +808,9 @@ class SwinUnet(nn.Module):
             self.num_classes += 1
 
         self.zero_head = zero_head
+
         if in_chans == 4:
+            print("---using input adapter for 4 channels input---")
             self.input_adapter = InputAdapter()
         else:
             self.input_adapter = None

@@ -245,6 +245,9 @@ class ImageToImage2D(Dataset):
         image = np.load(img_path)   # (H, W, 4)
 
         print("RAW SHAPE:", image.shape)
+        # FIX: handle both formats
+        if image.shape[0] <= 10:  # likely (C, H, W)
+            image = np.transpose(image, (1, 2, 0))  # -> (H, W, C)
         # resize if needed
         if image.shape[0] != self.image_size:
             image = zoom(image, (self.image_size / image.shape[0],
