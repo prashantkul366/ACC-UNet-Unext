@@ -244,7 +244,7 @@ class ImageToImage2D(Dataset):
         img_path = os.path.join(self.input_path, image_filename)
         image = np.load(img_path)   # (H, W, 4)
 
-        print("RAW SHAPE:", image.shape)
+        # print("RAW SHAPE:", image.shape)
         # FIX: handle both formats
         if image.shape[0] <= 10:  # likely (C, H, W)
             image = np.transpose(image, (1, 2, 0))  # -> (H, W, C)
