@@ -206,7 +206,8 @@ class ImageToImage2D(Dataset):
         # self.images_list = os.listdir(self.input_path)
         self.images_list = [
                             f for f in os.listdir(self.input_path)
-                            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tif'))
+                            # if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tif'))
+                            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tif', '.npy'))
                         ]
         self.one_hot_mask = one_hot_mask
         self.n_labels = n_labels
