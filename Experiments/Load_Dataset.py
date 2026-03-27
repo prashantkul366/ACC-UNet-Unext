@@ -27,7 +27,7 @@ def random_rot_flip(image, label):
 
 def random_rotate(image, label):
     angle = np.random.randint(-20, 20)
-    image = ndimage.rotate(image, angle, order=0, reshape=False)
+    image = ndimage.rotate(image, angle, order=1, reshape=False)
     label = ndimage.rotate(label, angle, order=0, reshape=False)
     return image, label
 
@@ -38,18 +38,28 @@ class RandomGenerator(object):
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
         text = sample.get("text", None)
-        image, label = F.to_pil_image(image), F.to_pil_image(label)
-        x, y = image.size
+        # image, label = F.to_pil_image(image), F.to_pil_image(label)
+        x, y = image.shape[:2]
+        # x, y = image.size
         if random.random() > 0.5:
             image, label = random_rot_flip(image, label)
         elif random.random() < 0.5:
             image, label = random_rotate(image, label)
 
         if x != self.output_size[0] or y != self.output_size[1]:
-            image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
+            # image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
+            image = zoom(image, (
+                        self.output_size[0] / x,
+                        self.output_size[1] / y,
+                        1
+                    ), order=1)
             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
-        image = F.to_tensor(image)
-        label = to_long_tensor(label)
+        # image = F.to_tensor(image)
+        # image = torch.from_numpy(image).permute(2, 0, 1)  # (4, H, W)
+        image = torch.from_numpy(image).permute(2, 0, 1).float()
+
+        # label = to_long_tensor(label)
+        label = torch.from_numpy(label).unsqueeze(0).float()
         ###########################################################
         # label = torch.from_numpy(np.array(label, dtype=np.float32))
         # label = (label > 0).float()  # Binarize & ensure float
@@ -74,13 +84,21 @@ class ValGenerator(object):
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
         text = sample.get("text", None)
-        image, label = F.to_pil_image(image), F.to_pil_image(label)
-        x, y = image.size
+        # image, label = F.to_pil_image(image), F.to_pil_image(label)
+        x, y = image.shape[:2]
+        # x, y = image.size
         if x != self.output_size[0] or y != self.output_size[1]:
-            image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
+            # image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
+            image = zoom(image, (
+                self.output_size[0] / x,
+                self.output_size[1] / y,
+                1
+            ), order=1)
             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
-        image = F.to_tensor(image)
-        label = to_long_tensor(label)
+        # image = F.to_tensor(image)
+        image = torch.from_numpy(image).permute(2, 0, 1)  # (4, H, W)
+        # label = to_long_tensor(label)
+        label = torch.from_numpy(label).unsqueeze(0).float()
         ###########################################################
         # label = torch.from_numpy(np.array(label, dtype=np.float32))
         # label = (label > 0).float()  # Binarize & ensure float
@@ -213,15 +231,36 @@ class ImageToImage2D(Dataset):
         # print(os.path.join(self.input_path, image_filename))
         # print(os.path.join(self.output_path, image_filename[: -3] + "png"))
         # print(os.path.join(self.input_path, image_filename))
-        image = cv2.imread(os.path.join(self.input_path, image_filename))
-        if image is None:
-            raise ValueError(f" Failed to load image: {os.path.join(self.input_path, image_filename)}")
+        # image = cv2.imread(os.path.join(self.input_path, image_filename))
+        # if image is None:
+            # raise ValueError(f" Failed to load image: {os.path.join(self.input_path, image_filename)}")
         # print("img",image_filename)
         # print("1",image.shape)
-        image = cv2.resize(image,(self.image_size,self.image_size))
+        # image = cv2.resize(image,(self.image_size,self.image_size))
         # print(np.max(image), np.min(image))
         # print("2",image.shape)
         # read mask image
+        img_path = os.path.join(self.input_path, image_filename)
+        image = np.load(img_path)   # (H, W, 4)
+
+        # resize if needed
+        if image.shape[0] != self.image_size:
+            image = zoom(image, (self.image_size / image.shape[0],
+                                self.image_size / image.shape[1],
+                                1), order=1)
+            
+        image = image.astype(np.float32)
+
+        # ----- CHANNEL-WISE NORMALIZATION -----
+        for c in range(image.shape[2]):
+            channel = image[:, :, c]
+            mean = channel.mean()
+            std = channel.std()
+
+            if std < 1e-6:
+                std = 1.0
+
+            image[:, :, c] = (channel - mean) / std
 
         #################
         # mask = cv2.imread(os.path.join(self.output_path, image_filename[: -3] + "png"),0)
@@ -229,7 +268,7 @@ class ImageToImage2D(Dataset):
         # --- Read corresponding mask safely ---
         stem, _ = os.path.splitext(image_filename)
 
-        possible_exts = [".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"]
+        possible_exts = [".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".npy"]  # Add more extensions if needed
         mask_path = None
         for ext in possible_exts:
             candidate = os.path.join(self.output_path, stem + ext)
@@ -239,21 +278,26 @@ class ImageToImage2D(Dataset):
 
         if mask_path is None:
             raise ValueError(f"❌ No mask found for image: {image_filename} in {self.output_path}")
-        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-        if mask is None:
-            raise ValueError(f"⚠️ Mask file exists but could not be read: {mask_path}")
+        # mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+        # if mask is None:
+            # raise ValueError(f"⚠️ Mask file exists but could not be read: {mask_path}")
 
-        stem, _ = os.path.splitext(image_filename)
-        mask_filename = stem + ".png"
+        # stem, _ = os.path.splitext(image_filename)
+        # mask_filename = stem + ".png"
 
-        if self.row_text is not None:
-            text = self.row_text.get(mask_filename, "")
-        else:
-            text = None
+        # if self.row_text is not None:
+            # text = self.row_text.get(mask_filename, "")
+        # else:
+            # text = None
         ##########################################################
         # print("mask",image_filename[: -3] + "png")
         # print(np.max(mask), np.min(mask))
-        mask = cv2.resize(mask,(self.image_size,self.image_size))
+        # mask = cv2.resize(mask,(self.image_size,self.image_size))
+        mask = np.load(mask_path)   # (H, W)
+
+        if mask.shape[0] != self.image_size:
+            mask = zoom(mask, (self.image_size / mask.shape[0],
+                            self.image_size / mask.shape[1]), order=0)
         # print(np.max(mask), np.min(mask))
         if self.n_labels == 1:
             mask[mask<=0] = 0
