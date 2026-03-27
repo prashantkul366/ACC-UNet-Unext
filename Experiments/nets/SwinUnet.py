@@ -780,9 +780,27 @@ class SwinTransformerSys(nn.Module):
         return flops
 
 
+class InputAdapter(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.proj = nn.Sequential(
+            nn.Conv2d(4, 32, 3, padding=1, bias=False),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+
+            nn.Conv2d(32, 16, 3, padding=1, bias=False),
+            nn.BatchNorm2d(16),
+            nn.ReLU(inplace=True),
+
+            nn.Conv2d(16, 3, 1, bias=False)
+        )
+
+    def forward(self, x):
+        return self.proj(x)
+  
 
 class SwinUnet(nn.Module):
-    def __init__(self,  n_labels=1,img_size=224, zero_head=False, vis=False):
+    def __init__(self,  n_labels=1,img_size=224, zero_head=False, vis=False, in_chans=4):
         super(SwinUnet, self).__init__()
         
         self.num_classes = n_labels
@@ -790,12 +808,26 @@ class SwinUnet(nn.Module):
             self.num_classes += 1
 
         self.zero_head = zero_head
+        if in_chans == 4:
+            self.input_adapter = InputAdapter()
+        else:
+            self.input_adapter = None
 
         self.swin_unet = SwinTransformerSys(num_classes=self.num_classes)
 
     def forward(self, x):
         if x.size()[1] == 1:
             x = x.repeat(1,3,1,1)
+        logits = self.swin_unet(x)
+        return logits
+    
+    def forward(self, x):
+        if x.size(1) == 4 and self.input_adapter is not None:
+            x = self.input_adapter(x)
+
+        elif x.size(1) == 1:
+            x = x.repeat(1, 3, 1, 1)
+
         logits = self.swin_unet(x)
         return logits
 

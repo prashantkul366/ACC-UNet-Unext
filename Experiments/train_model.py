@@ -362,7 +362,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         lr = 5e-4
 
     elif model_type == 'SwinUnet':            
-        model = SwinUnet()
+        # model = SwinUnet()
+        # model.load_from()
+        # lr = 5e-4       
+        model = SwinUnet(in_chans=config.n_channels)
         model.load_from()
         lr = 5e-4
 

@@ -20,6 +20,7 @@ os.environ['PYTHONHASHSEED'] = str(seed)
 
 n_filts = 32            # change this to train larger ACC-UNet model
 cosineLR = True         # whether use cosineLR or not
+# n_channels = 3
 n_channels = 3
 n_labels = 1
 epochs = 10000
