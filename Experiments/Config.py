@@ -21,7 +21,7 @@ os.environ['PYTHONHASHSEED'] = str(seed)
 n_filts = 32            # change this to train larger ACC-UNet model
 cosineLR = True         # whether use cosineLR or not
 # n_channels = 3
-n_channels = 3
+n_channels = 4
 n_labels = 1
 epochs = 10000
 # epochs = 400
@@ -68,7 +68,8 @@ resume_checkpoint = False  # or False
 # task_name = 'Kvasir_80_20_Text'
 
 # task_name = 'CVC_ClinicDB_80-20'
-task_name = 'QaTa_text'
+# task_name = 'QaTa_text'
+task_name = 'Forestry'
 
 # task_name = 'Glas_80-20'
 # task_name = 'TNBC_80-20'
@@ -174,7 +175,8 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-test_session = "session1"      
+# test_session = "session1"   
+test_session = "session_adapter"   
 # test_session = "session2" 
 
 
@@ -300,13 +302,18 @@ test_session = "session1"
 
 # COLAB 1
 # QaTa_Text
-dataset_path = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text'
-train_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/train'
-val_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/val'
-test_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text'
+# train_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/val'
+# test_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
 
 # 
-
+# COLAB 1
+# Forestry Hillshade (4-channel npy)
+dataset_path = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy'
+train_dataset = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy/train'
+val_dataset   = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy/val'
+test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy/val'
 
 
 
@@ -459,7 +466,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/Dataset_QaTA_Text/test'
 
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session_adapter'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 
 
