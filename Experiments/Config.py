@@ -179,7 +179,7 @@ img_size = 224 if model_name in models_224 else 256
 # test_session = "session1"   
 # test_session = "session_adapter"
 # test_session = "session_3ch"   
-test_session = "session_small"
+test_session = "session_small_"
 # test_session = "session2" 
 
 
@@ -487,7 +487,7 @@ test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_
 # session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_adapter'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_3ch'  #time.strftime('%m.%d_%Hh%M')
-session_name       = 'session_small'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session_small_'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 
 
