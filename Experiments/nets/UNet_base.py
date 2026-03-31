@@ -92,6 +92,7 @@ class UNet_base(nn.Module):
 
         if use_adapter:
             self.adapter = InputAdapter(in_channels=n_channels, out_channels=3)
+            print("Using input adapter to convert {} channels to 3 channels.".format(n_channels))
             n_channels = 3  # IMPORTANT: UNet now sees 3 channels
 
         # self.n_channels = n_channels
