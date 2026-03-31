@@ -345,6 +345,44 @@ def correct_dims(*images):
 
 
 
+# class ImageToImage2D(Dataset):
+
+#     def __init__(self, dataset_path, image_size=256):
+#         self.image_size = image_size
+#         self.input_path = os.path.join(dataset_path, "images")
+#         self.output_path = os.path.join(dataset_path, "masks")
+
+#         self.images_list = sorted([
+#             f for f in os.listdir(self.input_path)
+#             if f.endswith(".png")
+#         ])
+
+#     def __len__(self):
+#         return len(self.images_list)
+
+#     def __getitem__(self, idx):
+
+#         fname = self.images_list[idx]
+
+#         # ===== IMAGE =====
+#         img = cv2.imread(os.path.join(self.input_path, fname))
+#         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+#         img = cv2.resize(img, (self.image_size, self.image_size))
+
+#         # ===== MASK =====
+#         mask = cv2.imread(os.path.join(self.output_path, fname), 0)
+#         mask = cv2.resize(mask, (self.image_size, self.image_size), interpolation=cv2.INTER_NEAREST)
+
+#         mask = (mask > 0).astype(np.uint8)
+
+#         # ===== TO TENSOR =====
+#         # img = torch.from_numpy(img).permute(2,0,1).float() / 255.0
+#         img = torch.from_numpy(img).permute(2,0,1).float()
+#         img = (img - img.mean()) / (img.std() + 1e-8)
+#         mask = torch.from_numpy(mask).long()
+
+#         return {'image': img, 'label': mask}, fname
+
 class ImageToImage2D(Dataset):
 
     def __init__(self, dataset_path, image_size=256):
@@ -354,7 +392,7 @@ class ImageToImage2D(Dataset):
 
         self.images_list = sorted([
             f for f in os.listdir(self.input_path)
-            if f.endswith(".png")
+            if f.endswith((".png", ".npy"))
         ])
 
     def __len__(self):
@@ -363,22 +401,59 @@ class ImageToImage2D(Dataset):
     def __getitem__(self, idx):
 
         fname = self.images_list[idx]
+        img_path = os.path.join(self.input_path, fname)
 
-        # ===== IMAGE =====
-        img = cv2.imread(os.path.join(self.input_path, fname))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, (self.image_size, self.image_size))
+        # ================= IMAGE =================
+        if fname.endswith(".npy"):
+            img = np.load(img_path)  # (H, W, 4)
 
-        # ===== MASK =====
-        mask = cv2.imread(os.path.join(self.output_path, fname), 0)
+            # resize (important)
+            if img.shape[0] != self.image_size:
+                img = cv2.resize(img, (self.image_size, self.image_size))
+
+        else:
+            # ⚠️ fallback (not recommended for your case)
+            img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
+
+            if img is None:
+                raise ValueError(f"Image not found: {img_path}")
+
+            # Debug
+            print("WARNING: Using PNG, shape:", img.shape)
+
+            # If PNG has 4 channels (RGBA)
+            if img.shape[-1] == 4:
+                img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
+            else:
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+            img = cv2.resize(img, (self.image_size, self.image_size))
+
+        # ================= MASK =================
+        mask = cv2.imread(os.path.join(self.output_path, fname.replace(".npy", ".png")), 0)
         mask = cv2.resize(mask, (self.image_size, self.image_size), interpolation=cv2.INTER_NEAREST)
-
         mask = (mask > 0).astype(np.uint8)
 
-        # ===== TO TENSOR =====
-        # img = torch.from_numpy(img).permute(2,0,1).float() / 255.0
-        img = torch.from_numpy(img).permute(2,0,1).float()
-        img = (img - img.mean()) / (img.std() + 1e-8)
+        # ================= TO TENSOR =================
+        img = torch.from_numpy(img).permute(2, 0, 1).float()
+
+        # ✅ SCALE
+        img = img / (img.max() + 1e-8)
+
+        # ✅ CHANNEL-WISE NORMALIZATION
+        for c in range(img.shape[0]):
+            mean = img[c].mean()
+            std = img[c].std()
+            img[c] = (img[c] - mean) / (std + 1e-8)
+
         mask = torch.from_numpy(mask).long()
+
+        # ================= DEBUG (ONCE) =================
+        if idx == 0:
+            print("\n===== DATA DEBUG =====")
+            print("Image shape:", img.shape)   # EXPECT (4, 256, 256)
+            print("Image min/max:", img.min().item(), img.max().item())
+            print("Mask unique:", torch.unique(mask))
+            print("======================\n")
 
         return {'image': img, 'label': mask}, fname
