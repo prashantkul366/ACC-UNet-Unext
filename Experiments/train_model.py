@@ -300,21 +300,29 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
     print(f"USE_TEXT: {use_text}")
     # train_dataset = ImageToImage2D(config.train_dataset, train_tf,image_size=config.img_size,)
+    # train_dataset = ImageToImage2D(
+    #                 dataset_path=config.train_dataset,
+    #                 joint_transform=train_tf,
+    #                 row_text=train_text,
+    #                 image_size=config.img_size
+    #             )
     train_dataset = ImageToImage2D(
-                    dataset_path=config.train_dataset,
-                    joint_transform=train_tf,
-                    row_text=train_text,
-                    image_size=config.img_size
-                )
+            dataset_path=config.train_dataset,
+            image_size=config.img_size
+        )
 
     
     # val_dataset = ImageToImage2D(config.val_dataset, val_tf,image_size=config.img_size)
+    # val_dataset = ImageToImage2D(
+    #                 dataset_path=config.val_dataset,
+    #                 joint_transform=val_tf,
+    #                 row_text=val_text,
+    #                 image_size=config.img_size
+    #             )
     val_dataset = ImageToImage2D(
-                    dataset_path=config.val_dataset,
-                    joint_transform=val_tf,
-                    row_text=val_text,
-                    image_size=config.img_size
-                )
+        dataset_path=config.val_dataset,
+        image_size=config.img_size
+    )
     train_loader = DataLoader(train_dataset,
                               batch_size=config.batch_size,
                               shuffle=True,

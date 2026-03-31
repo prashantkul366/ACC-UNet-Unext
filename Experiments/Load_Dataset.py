@@ -376,7 +376,9 @@ class ImageToImage2D(Dataset):
         mask = (mask > 0).astype(np.uint8)
 
         # ===== TO TENSOR =====
-        img = torch.from_numpy(img).permute(2,0,1).float() / 255.0
+        # img = torch.from_numpy(img).permute(2,0,1).float() / 255.0
+        img = torch.from_numpy(img).permute(2,0,1).float()
+        img = (img - img.mean()) / (img.std() + 1e-8)
         mask = torch.from_numpy(mask).long()
 
         return {'image': img, 'label': mask}, fname
