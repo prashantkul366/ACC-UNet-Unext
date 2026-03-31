@@ -4,137 +4,137 @@
 # We thankfully acknowledge the contributions of the authors
 # """
 
-# import numpy as np
-# import torch
-# import random
-# from scipy.ndimage.interpolation import zoom
-# from torch.utils.data import Dataset
-# from torchvision import transforms as T
-# from torchvision.transforms import functional as F
-# from typing import Callable
-# import os
-# import cv2
-# from scipy import ndimage
+import numpy as np
+import torch
+import random
+from scipy.ndimage.interpolation import zoom
+from torch.utils.data import Dataset
+from torchvision import transforms as T
+from torchvision.transforms import functional as F
+from typing import Callable
+import os
+import cv2
+from scipy import ndimage
 
-# def random_rot_flip(image, label):
-#     k = np.random.randint(0, 4)
-#     image = np.rot90(image, k)
-#     label = np.rot90(label, k)
-#     axis = np.random.randint(0, 2)
-#     image = np.flip(image, axis=axis).copy()
-#     label = np.flip(label, axis=axis).copy()
-#     return image, label
+def random_rot_flip(image, label):
+    k = np.random.randint(0, 4)
+    image = np.rot90(image, k)
+    label = np.rot90(label, k)
+    axis = np.random.randint(0, 2)
+    image = np.flip(image, axis=axis).copy()
+    label = np.flip(label, axis=axis).copy()
+    return image, label
 
-# def random_rotate(image, label):
-#     angle = np.random.randint(-20, 20)
-#     image = ndimage.rotate(image, angle, order=0, reshape=False)
-#     label = ndimage.rotate(label, angle, order=0, reshape=False)
-#     return image, label
+def random_rotate(image, label):
+    angle = np.random.randint(-20, 20)
+    image = ndimage.rotate(image, angle, order=0, reshape=False)
+    label = ndimage.rotate(label, angle, order=0, reshape=False)
+    return image, label
 
-# class RandomGenerator(object):
-#     def __init__(self, output_size):
-#         self.output_size = output_size
+class RandomGenerator(object):
+    def __init__(self, output_size):
+        self.output_size = output_size
 
-#     def __call__(self, sample):
-#         image, label = sample['image'], sample['label']
-#         text = sample.get("text", None)
-#         image, label = F.to_pil_image(image), F.to_pil_image(label)
-#         # x, y = image.shape[:2]
-#         x, y = image.size
-#         if random.random() > 0.5:
-#             image, label = random_rot_flip(image, label)
-#         elif random.random() < 0.5:
-#             image, label = random_rotate(image, label)
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        text = sample.get("text", None)
+        image, label = F.to_pil_image(image), F.to_pil_image(label)
+        # x, y = image.shape[:2]
+        x, y = image.size
+        if random.random() > 0.5:
+            image, label = random_rot_flip(image, label)
+        elif random.random() < 0.5:
+            image, label = random_rotate(image, label)
 
-#         if x != self.output_size[0] or y != self.output_size[1]:
-#             image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
-#             # image = zoom(image, (
-#             #             self.output_size[0] / x,
-#             #             self.output_size[1] / y,
-#             #             1
-#             #         ), order=1)
-#             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
-#         image = F.to_tensor(image)
-#         # image = torch.from_numpy(image).permute(2, 0, 1)  # (4, H, W)
-#         # image = torch.from_numpy(image).permute(2, 0, 1).float()
+        if x != self.output_size[0] or y != self.output_size[1]:
+            image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
+            # image = zoom(image, (
+            #             self.output_size[0] / x,
+            #             self.output_size[1] / y,
+            #             1
+            #         ), order=1)
+            label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
+        image = F.to_tensor(image)
+        # image = torch.from_numpy(image).permute(2, 0, 1)  # (4, H, W)
+        # image = torch.from_numpy(image).permute(2, 0, 1).float()
 
-#         label = to_long_tensor(label)
-#         # label = torch.from_numpy(label).unsqueeze(0).float()
-#         ###########################################################
-#         # label = torch.from_numpy(np.array(label, dtype=np.float32))
-#         # label = (label > 0).float()  # Binarize & ensure float
-#         ###########################################################     
-#         sample = {'image': image, 'label': label}
+        label = to_long_tensor(label)
+        # label = torch.from_numpy(label).unsqueeze(0).float()
+        ###########################################################
+        # label = torch.from_numpy(np.array(label, dtype=np.float32))
+        # label = (label > 0).float()  # Binarize & ensure float
+        ###########################################################     
+        sample = {'image': image, 'label': label}
 
-#         # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
-#         # if text is not None:
-#         #     sample["text"] = text
-#         # sample = {
-#         #                 "image": image,
-#         #                 "label": label,
-#         #                 "text": text 
-#         #             }
+        # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
+        # if text is not None:
+        #     sample["text"] = text
+        # sample = {
+        #                 "image": image,
+        #                 "label": label,
+        #                 "text": text 
+        #             }
         
-#         return sample
+        return sample
 
-# class ValGenerator(object):
-#     def __init__(self, output_size):
-#         self.output_size = output_size
+class ValGenerator(object):
+    def __init__(self, output_size):
+        self.output_size = output_size
 
-#     def __call__(self, sample):
-#         image, label = sample['image'], sample['label']
-#         text = sample.get("text", None)
-#         image, label = F.to_pil_image(image), F.to_pil_image(label)
-#         # x, y = image.shape[:2]
-#         x, y = image.size
-#         if x != self.output_size[0] or y != self.output_size[1]:
-#             image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
-#             # image = zoom(image, (
-#             #     self.output_size[0] / x,
-#             #     self.output_size[1] / y,
-#             #     1
-#             # ), order=1)
-#             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
-#         image = F.to_tensor(image)
-#         # image = torch.from_numpy(image).permute(2, 0, 1)  # (4, H, W)
-#         label = to_long_tensor(label)
-#         # label = torch.from_numpy(label).unsqueeze(0).float()
-#         ###########################################################
-#         # label = torch.from_numpy(np.array(label, dtype=np.float32))
-#         # label = (label > 0).float()  # Binarize & ensure float
-#         ###########################################################
-#         sample = {'image': image, 'label': label}
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        text = sample.get("text", None)
+        image, label = F.to_pil_image(image), F.to_pil_image(label)
+        # x, y = image.shape[:2]
+        x, y = image.size
+        if x != self.output_size[0] or y != self.output_size[1]:
+            image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
+            # image = zoom(image, (
+            #     self.output_size[0] / x,
+            #     self.output_size[1] / y,
+            #     1
+            # ), order=1)
+            label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
+        image = F.to_tensor(image)
+        # image = torch.from_numpy(image).permute(2, 0, 1)  # (4, H, W)
+        label = to_long_tensor(label)
+        # label = torch.from_numpy(label).unsqueeze(0).float()
+        ###########################################################
+        # label = torch.from_numpy(np.array(label, dtype=np.float32))
+        # label = (label > 0).float()  # Binarize & ensure float
+        ###########################################################
+        sample = {'image': image, 'label': label}
 
-#         # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
-#         # sample = {
-#         #         "image": image,
-#         #         "label": label,
-#         #         "text": text   
-#         #     }
-#         # if text is not None:
-#         #     sample["text"] = text
+        # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
+        # sample = {
+        #         "image": image,
+        #         "label": label,
+        #         "text": text   
+        #     }
+        # if text is not None:
+        #     sample["text"] = text
 
-#         return sample
+        return sample
 
-# def to_long_tensor(pic):
-#     # handle numpy array
-#     img = torch.from_numpy(np.array(pic, np.uint8))
-#     # backward compatibility
-#     return img.long()
+def to_long_tensor(pic):
+    # handle numpy array
+    img = torch.from_numpy(np.array(pic, np.uint8))
+    # backward compatibility
+    return img.long()
 
-# def correct_dims(*images):
-#     corr_images = []
-#     # print(images)
-#     for img in images:
-#         if len(img.shape) == 2:
-#             corr_images.append(np.expand_dims(img, axis=2))
-#         else:
-#             corr_images.append(img)
+def correct_dims(*images):
+    corr_images = []
+    # print(images)
+    for img in images:
+        if len(img.shape) == 2:
+            corr_images.append(np.expand_dims(img, axis=2))
+        else:
+            corr_images.append(img)
 
-#     if len(corr_images) == 1:
-#         return corr_images[0]
-#     else:
-#         return corr_images
+    if len(corr_images) == 1:
+        return corr_images[0]
+    else:
+        return corr_images
 
 # class ImageToImage2D(Dataset):
 #     """
