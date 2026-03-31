@@ -581,7 +581,7 @@ class ACC_UNet(torch.nn.Module):
 
         self.up7 = torch.nn.ConvTranspose2d(n_filts * 8, n_filts * 4, kernel_size=(2, 2), stride=2)
         self.cnv71 = HANCBlock(n_filts * 4 + n_filts * 4, n_filts * 4, k=3, inv_fctr=3)
-        self.cnv72 = HANCBlock(n_filts * 4, n_filts * 4, k=3, inv_fctr=34)
+        self.cnv72 = HANCBlock(n_filts * 4, n_filts * 4, k=3, inv_fctr=3)
 
         self.up8 = torch.nn.ConvTranspose2d(n_filts * 4, n_filts * 2, kernel_size=(2, 2), stride=2)
         self.cnv81 = HANCBlock(n_filts * 2 + n_filts * 2, n_filts * 2, k=3, inv_fctr=3)
@@ -593,7 +593,8 @@ class ACC_UNet(torch.nn.Module):
 
         if n_classes == 1:
             self.out = torch.nn.Conv2d(n_filts, n_classes, kernel_size=(1, 1))
-            self.last_activation = torch.nn.Sigmoid()
+            # self.last_activation = torch.nn.Sigmoid()
+            self.last_activation = None
         else:
             self.out = torch.nn.Conv2d(n_filts, n_classes + 1, kernel_size=(1, 1))
             self.last_activation = None
@@ -650,10 +651,12 @@ class ACC_UNet(torch.nn.Module):
         x10 = self.cnv91(torch.cat([x10, x2], dim=1))
         x10 = self.cnv92(x10)
 
-        if self.last_activation is not None:
-            logits = self.last_activation(self.out(x10))
-
-        else:
-            logits = self.out(x10)
-
+        logits = self.out(x10)
         return logits
+        # if self.last_activation is not None:
+        #     logits = self.last_activation(self.out(x10))
+
+        # else:
+        #     logits = self.out(x10)
+
+        # return logits

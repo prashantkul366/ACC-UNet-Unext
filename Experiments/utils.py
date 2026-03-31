@@ -120,6 +120,8 @@ class WeightedDiceLoss(nn.Module):
             truth = truth.view(batch_size,-1)
             assert(logit.shape==truth.shape)
             p = logit.view(batch_size,-1)
+            
+            p = torch.sigmoid(logit)
             t = truth.view(batch_size,-1)
             w = truth.detach()
             w = w*(self.weights[1]-self.weights[0])+self.weights[0]
@@ -145,8 +147,10 @@ class WeightedDiceBCE(nn.Module):
         self.dice_weight = dice_weight
 
     def _show_dice(self, inputs, targets):
-        inputs[inputs>=0.5] = 1
-        inputs[inputs<0.5] = 0
+        inputs = torch.sigmoid(inputs)
+        inputs = (inputs >= 0.5).float()
+        # inputs[inputs>=0.5] = 1
+        # inputs[inputs<0.5] = 0
         # print("2",np.sum(tmp))
         targets[targets>0] = 1
         targets[targets<=0] = 0
@@ -476,7 +480,8 @@ def iou_on_batch(masks, pred):
     ious = []
 
     for i in range(pred.shape[0]):
-        pred_tmp = pred[i][0].cpu().detach().numpy()
+        # pred_tmp = pred[i][0].cpu().detach().numpy()
+        pred_tmp = torch.sigmoid(pred[i][0]).cpu().detach().numpy()
         # print("www",np.max(prediction), np.min(prediction))
         mask_tmp = masks[i].cpu().detach().numpy()
         pred_tmp[pred_tmp>=0.5] = 1
@@ -500,7 +505,8 @@ def dice_on_batch(masks, pred):
     dices = []
 
     for i in range(pred.shape[0]):
-        pred_tmp = pred[i][0].cpu().detach().numpy()
+        # pred_tmp = pred[i][0].cpu().detach().numpy()
+        pred_tmp = torch.sigmoid(pred[i][0]).cpu().detach().numpy()
         # print("www",np.max(prediction), np.min(prediction))
         mask_tmp = masks[i].cpu().detach().numpy()
         pred_tmp[pred_tmp>=0.5] = 1
@@ -515,7 +521,8 @@ def dice_on_batch(masks, pred):
 def save_on_batch(images1, masks, pred, names, vis_path):
     '''Computes the mean Area Under ROC Curve over a batch during training'''
     for i in range(pred.shape[0]):
-        pred_tmp = pred[i][0].cpu().detach().numpy()
+        # pred_tmp = pred[i][0].cpu().detach().numpy()
+        pred_tmp = torch.sigmoid(pred[i][0]).cpu().detach().numpy()
         mask_tmp = masks[i].cpu().detach().numpy()
         pred_tmp[pred_tmp>=0.5] = 255
         pred_tmp[pred_tmp<0.5] = 0
