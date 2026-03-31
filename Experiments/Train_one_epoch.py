@@ -121,9 +121,8 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
 
         # print("preds:", preds.shape, preds.min().item(), preds.max().item())
         # print("masks:", masks.shape, masks.min().item(), masks.max().item())
-        print("Pred:", final_preds.min().item(), final_preds.max().item())
-        print("Mask:", masks.min().item(), masks.max().item())
-        
+        # print("Pred:", final_preds.min().item(), final_preds.max().item())
+
         if model.training:
             optimizer.zero_grad()
             out_loss.backward()
