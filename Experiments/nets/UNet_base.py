@@ -119,8 +119,8 @@ class UNet_base(nn.Module):
     def forward(self, x):
         # Question here
         x = x.float()
-        if self.use_adapter:
-            x = self.adapter(x)
+        # if self.use_adapter:
+        #     x = self.adapter(x)
         x1 = self.inc(x)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
