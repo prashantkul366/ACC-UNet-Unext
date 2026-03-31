@@ -62,25 +62,25 @@ class UpBlock(nn.Module):
         x = torch.cat([out, skip_x], dim=1)  # dim 1 is the channel dimension
         return self.nConvs(x)
 
-class InputAdapter(nn.Module):
-    def __init__(self, in_channels=4, out_channels=3):
-        super().__init__()
+# class InputAdapter(nn.Module):
+#     def __init__(self, in_channels=4, out_channels=3):
+#         super().__init__()
 
-        self.adapter = nn.Sequential(
-            nn.Conv2d(in_channels, 16, kernel_size=3, padding=1),
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
+#         self.adapter = nn.Sequential(
+#             nn.Conv2d(in_channels, 16, kernel_size=3, padding=1),
+#             nn.BatchNorm2d(16),
+#             nn.ReLU(inplace=True),
 
-            nn.Conv2d(16, out_channels, kernel_size=1)
-        )
+#             nn.Conv2d(16, out_channels, kernel_size=1)
+#         )
 
-    def forward(self, x):
-        return self.adapter(x)
+#     def forward(self, x):
+#         return self.adapter(x)
 
-# class UNet_base(nn.Module):
-#     def __init__(self, n_channels=3, n_classes=9):
 class UNet_base(nn.Module):
-    def __init__(self, n_channels=4, n_classes=1, use_adapter=True):
+    def __init__(self, n_channels=3, n_classes=9):
+# class UNet_base(nn.Module):
+#     def __init__(self, n_channels=4, n_classes=1, use_adapter=True):
         '''
         n_channels : number of channels of the input.
                         By default 3, because we have RGB images
@@ -88,12 +88,12 @@ class UNet_base(nn.Module):
                       By default 3 (2 labels + 1 for the background)
         '''
         super().__init__()
-        self.use_adapter = use_adapter
+        # self.use_adapter = use_adapter
 
-        if use_adapter:
-            self.adapter = InputAdapter(in_channels=n_channels, out_channels=3)
-            print("Using input adapter to convert {} channels to 3 channels.".format(n_channels))
-            n_channels = 3  # IMPORTANT: UNet now sees 3 channels
+        # if use_adapter:
+        #     self.adapter = InputAdapter(in_channels=n_channels, out_channels=3)
+        #     print("Using input adapter to convert {} channels to 3 channels.".format(n_channels))
+        #     n_channels = 3  # IMPORTANT: UNet now sees 3 channels
 
         # self.n_channels = n_channels
         self.n_classes = n_classes

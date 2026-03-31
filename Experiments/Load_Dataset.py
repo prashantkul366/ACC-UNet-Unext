@@ -399,6 +399,61 @@ class ImageToImage2D(Dataset):
     def __len__(self):
         return len(self.images_list)
 
+    # def __getitem__(self, idx):
+
+    #     fname = self.images_list[idx]
+
+    #     # ===== IMAGE =====
+    #     # img = np.load(os.path.join(self.input_path, fname))  # (4, H, W)
+
+    #     # if img.shape[0] == 4:
+    #     #     img = np.transpose(img, (1, 2, 0))  # → (H, W, 4)
+
+    #     # if img.shape[0] != self.image_size:
+    #     #     img = cv2.resize(img, (self.image_size, self.image_size))
+
+    #     # ===== IMAGE =====
+    #     img = np.load(os.path.join(self.input_path, fname))  # (4, H, W)
+
+    #     # 🔥 SELECT ONLY ONE CHANNEL
+    #     channel_idx = 0   # change this to 0,1,2,3 for experiments
+    #     img = img[channel_idx]   # (H, W)
+
+    #     # resize
+    #     if img.shape[0] != self.image_size:
+    #         img = cv2.resize(img, (self.image_size, self.image_size))
+
+    #     # add channel dimension → (1, H, W)
+    #     img = np.expand_dims(img, axis=0)
+
+    #     # to tensor
+    #     img = torch.from_numpy(img).float()
+
+    #     # normalize
+    #     mean = img.mean()
+    #     std = img.std()
+    #     img = (img - mean) / (std + 1e-8)
+    #     # ===== MASK =====
+    #     mask = np.load(os.path.join(self.output_path, fname))  # (H, W)
+
+    #     if mask.shape[0] != self.image_size:
+    #         mask = cv2.resize(mask, (self.image_size, self.image_size), interpolation=cv2.INTER_NEAREST)
+
+    #     mask = (mask > 0).astype(np.uint8)
+
+    #     # ===== TO TENSOR =====
+    #     img = torch.from_numpy(img).permute(2, 0, 1).float()
+
+    #     # normalize
+    #     for c in range(img.shape[0]):
+    #         mean = img[c].mean()
+    #         std = img[c].std()
+    #         img[c] = (img[c] - mean) / (std + 1e-8)
+
+    #     mask = torch.from_numpy(mask).long()
+
+    #     return {'image': img, 'label': mask}, fname
+
     def __getitem__(self, idx):
 
         fname = self.images_list[idx]
@@ -406,29 +461,27 @@ class ImageToImage2D(Dataset):
         # ===== IMAGE =====
         img = np.load(os.path.join(self.input_path, fname))  # (4, H, W)
 
-        if img.shape[0] == 4:
-            img = np.transpose(img, (1, 2, 0))  # → (H, W, 4)
+        channel_idx = 0
+        img = img[channel_idx]   # (H, W)
 
         if img.shape[0] != self.image_size:
             img = cv2.resize(img, (self.image_size, self.image_size))
 
+        img = np.expand_dims(img, axis=0)  # (1, H, W)
+
+        img = torch.from_numpy(img).float()
+
+        mean = img.mean()
+        std = img.std()
+        img = (img - mean) / (std + 1e-8)
+
         # ===== MASK =====
-        mask = np.load(os.path.join(self.output_path, fname))  # (H, W)
+        mask = np.load(os.path.join(self.output_path, fname))
 
         if mask.shape[0] != self.image_size:
             mask = cv2.resize(mask, (self.image_size, self.image_size), interpolation=cv2.INTER_NEAREST)
 
         mask = (mask > 0).astype(np.uint8)
-
-        # ===== TO TENSOR =====
-        img = torch.from_numpy(img).permute(2, 0, 1).float()
-
-        # normalize
-        for c in range(img.shape[0]):
-            mean = img[c].mean()
-            std = img[c].std()
-            img[c] = (img[c] - mean) / (std + 1e-8)
-
         mask = torch.from_numpy(mask).long()
 
         return {'image': img, 'label': mask}, fname

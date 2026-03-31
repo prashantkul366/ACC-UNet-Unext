@@ -361,12 +361,12 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
 
     elif model_type == 'UNet_base':
         config_vit = config.get_CTranS_config()        
-        # model = UNet_base(n_channels=config.n_channels,n_classes=config.n_labels)
-        model = UNet_base(
-            n_channels=config.n_channels,
-            n_classes=config.n_labels,
-            use_adapter=True
-        )
+        model = UNet_base(n_channels=config.n_channels,n_classes=config.n_labels)
+        # model = UNet_base(
+        #     n_channels=config.n_channels,
+        #     n_classes=config.n_labels,
+        #     use_adapter=True
+        # )
 
     elif model_type == 'SMESwinUnet':
         config_vit = config.get_CTranS_config()        
