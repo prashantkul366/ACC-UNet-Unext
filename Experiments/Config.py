@@ -20,8 +20,8 @@ os.environ['PYTHONHASHSEED'] = str(seed)
 
 n_filts = 32            # change this to train larger ACC-UNet model
 cosineLR = True         # whether use cosineLR or not
-# n_channels = 3
-n_channels = 4
+n_channels = 3
+# n_channels = 4
 n_labels = 1
 epochs = 10000
 # epochs = 400
@@ -83,8 +83,8 @@ learning_rate = 1e-3
 batch_size = 8
 # batch_size = 2
 
-# model_name = 'ACC_UNet'
-model_name = 'SwinUnet'
+model_name = 'ACC_UNet'
+# model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
 # model_name = 'UNet_base'
@@ -176,7 +176,8 @@ img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
 # test_session = "session1"   
-test_session = "session_adapter"   
+# test_session = "session_adapter"
+test_session = "session_3ch"   
 # test_session = "session2" 
 
 
@@ -310,10 +311,18 @@ test_session = "session_adapter"
 # 
 # COLAB 1
 # Forestry Hillshade (4-channel npy)
-dataset_path = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy'
-train_dataset = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy/train'
-val_dataset   = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy/val'
-test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy/val'
+# dataset_path = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy'
+# train_dataset = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy/train'
+# val_dataset   = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy/val'
+# test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_npy/val'
+
+# COLAB 1
+# Forestry Hillshade (4-channel npy)
+dataset_path = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_visual_NORM_IMG'
+train_dataset = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_visual_NORM_IMG/train'
+val_dataset   = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_visual_NORM_IMG/val'
+test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_visual_NORM_IMG/val'
+
 
 
 
@@ -467,7 +476,8 @@ test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_
 
 
 # session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
-session_name       = 'session_adapter'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session_adapter'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session_3ch'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 
 
