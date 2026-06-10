@@ -60,7 +60,7 @@ resume_checkpoint = False  # or False
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-# task_name = 'BUSI_80-20'
+task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_text'
 
 # task_name = 'BUSI_80-20_text_p4'
@@ -70,7 +70,7 @@ resume_checkpoint = False  # or False
 
 # task_name = 'CVC_ClinicDB_80-20'
 # task_name = 'QaTa_text'
-task_name = 'Forestry'
+# task_name = 'Forestry'
 
 # task_name = 'Glas_80-20'
 # task_name = 'TNBC_80-20'
@@ -81,14 +81,14 @@ task_name = 'Forestry'
 learning_rate = 1e-3
 # learning_rate = 0.0001
 # batch_size = 32
-batch_size = 8
-# batch_size = 2
+# batch_size = 8
+batch_size = 2
 
 # model_name = 'ACC_UNet'
 # model_name = 'SwinUnet'
 # model_name = 'SMESwinUnet'
 # model_name = 'UCTransNet'
-model_name = 'UNet_base'
+# model_name = 'UNet_base'
 # model_name = 'UNet_base_proto'
 # model_name = 'MultiResUnet1_32_1.67'
 # model_name = 'U-KAN'
@@ -111,6 +111,7 @@ model_name = 'UNet_base'
 
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds_lite'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA'
@@ -170,16 +171,17 @@ models_224 = {
     'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual', 'segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba' , 
     'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN' , 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba',
     'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba', 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text',
+    'Segmamba_hybrid_gsc_MLP_PE_ds_lite',
 
 }
 
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-# test_session = "session1"   
+test_session = "session1"   
 # test_session = "session_adapter"
 # test_session = "session_3ch"   
-test_session = "session_small_"
+# test_session = "session_small_"
 # test_session = "session2" 
 
 
@@ -327,10 +329,10 @@ test_session = "session_small_"
 
 # COLAB 1
 # Forestry Hillshade (4-channel npy)
-dataset_path = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_small'
-train_dataset = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_small/train'
-val_dataset   = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_small/val'
-test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_small/val'
+# dataset_path = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_small'
+# train_dataset = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_small/train'
+# val_dataset   = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_small/val'
+# test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_small/val'
 
 
 
@@ -348,10 +350,10 @@ test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_
 
 
 # BUSI_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 # BUSI_80-20_ Seed 43
@@ -484,10 +486,10 @@ test_dataset  = '/content/drive/MyDrive/Prashant/Forestry_data/data_new/dataset_
 
 
 
-# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_adapter'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_3ch'  #time.strftime('%m.%d_%Hh%M')
-session_name       = 'session_small_'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session_small_'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session2'  #time.strftime('%m.%d_%Hh%M')
 
 

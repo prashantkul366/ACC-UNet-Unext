@@ -7,6 +7,7 @@ import torch
 import torch.nn.functional as F
 from .CTrans import ChannelTransformer
 
+
 def get_activation(activation_type):
     activation_type = activation_type.lower()
     if hasattr(nn, activation_type):
