@@ -688,8 +688,15 @@ class ImageToImage2D(Dataset):
         if joint_transform:
             self.joint_transform = joint_transform
         else:
+            # to_tensor = T.ToTensor()
+            # self.joint_transform = lambda x, y: (to_tensor(x), to_tensor(y))
             to_tensor = T.ToTensor()
-            self.joint_transform = lambda x, y: (to_tensor(x), to_tensor(y))
+            self.joint_transform = lambda s: {
+                'image': to_tensor(s['image']),
+                'label': torch.from_numpy(np.array(s['label'], np.uint8)).long()
+            }
+
+        
 
     def __len__(self):
         # return len(os.listdir(self.input_path))
