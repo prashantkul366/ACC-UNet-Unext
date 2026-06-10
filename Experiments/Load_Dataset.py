@@ -489,9 +489,6 @@
 
 
 
-
-
-
 """
 Our experimental codes are based on 
 https://github.com/McGregorWwww/UCTransNet
@@ -531,6 +528,7 @@ class RandomGenerator(object):
 
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
+        text = sample.get("text", None)
         image, label = F.to_pil_image(image), F.to_pil_image(label)
         x, y = image.size
         if random.random() > 0.5:
@@ -546,8 +544,18 @@ class RandomGenerator(object):
         ###########################################################
         # label = torch.from_numpy(np.array(label, dtype=np.float32))
         # label = (label > 0).float()  # Binarize & ensure float
-        ###########################################################
+        ###########################################################     
         sample = {'image': image, 'label': label}
+
+        # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
+        # if text is not None:
+        #     sample["text"] = text
+        # sample = {
+        #                 "image": image,
+        #                 "label": label,
+        #                 "text": text 
+        #             }
+        
         return sample
 
 class ValGenerator(object):
@@ -556,6 +564,7 @@ class ValGenerator(object):
 
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
+        text = sample.get("text", None)
         image, label = F.to_pil_image(image), F.to_pil_image(label)
         x, y = image.size
         if x != self.output_size[0] or y != self.output_size[1]:
@@ -568,6 +577,16 @@ class ValGenerator(object):
         # label = (label > 0).float()  # Binarize & ensure float
         ###########################################################
         sample = {'image': image, 'label': label}
+
+        # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
+        # sample = {
+        #         "image": image,
+        #         "label": label,
+        #         "text": text   
+        #     }
+        # if text is not None:
+        #     sample["text"] = text
+
         return sample
 
 def to_long_tensor(pic):
@@ -617,14 +636,46 @@ class ImageToImage2D(Dataset):
         one_hot_mask: bool, if True, returns the mask in one-hot encoded form.
     """
 
-    def __init__(self, dataset_path: str, joint_transform: Callable = None, one_hot_mask: int = False, image_size: int =224, n_labels: int=1) -> None:
+    def __init__(self, dataset_path: str, joint_transform: Callable = None, row_text: dict = None, one_hot_mask: int = False, image_size: int =224, n_labels: int=1) -> None:
         self.dataset_path = dataset_path
         print(f"Dataset path: {dataset_path}")
         self.image_size = image_size        
         # self.input_path = os.path.join(dataset_path, 'img')
         # self.output_path = os.path.join(dataset_path, 'labelcol')
-        self.input_path = os.path.join(dataset_path, 'images')
-        self.output_path = os.path.join(dataset_path, 'masks')
+        # self.input_path = os.path.join(dataset_path, 'images')
+        # self.output_path = os.path.join(dataset_path, 'masks')
+        
+        # Option 1: Text style folders
+        option1_img = os.path.join(dataset_path, "img")
+        option1_mask = os.path.join(dataset_path, "labelcol")
+
+        # Option 2: Generic style folders
+        option2_img = os.path.join(dataset_path, "images")
+        option2_mask = os.path.join(dataset_path, "masks")
+
+
+        if os.path.isdir(option1_img) and os.path.isdir(option1_mask):
+            # Case 1: img + labelcol
+            self.input_path = option1_img
+            self.output_path = option1_mask
+            print(" Using folders: img/ and labelcol/")
+
+        elif os.path.isdir(option2_img) and os.path.isdir(option2_mask):
+            # Case 2: images + masks
+            self.input_path = option2_img
+            self.output_path = option2_mask
+            print(" Using folders: images/ and masks/")
+
+        else:
+            # Case 3: Not found
+            raise FileNotFoundError(
+                f" Dataset folder structure not recognized!\n\n"
+                f"Expected either:\n"
+                f"  1) img/ and labelcol/\n"
+                f"  2) images/ and masks/\n\n"
+                f"But found only:\n"
+                f"  {os.listdir(dataset_path)}"
+            )
         # self.images_list = os.listdir(self.input_path)
         self.images_list = [
                             f for f in os.listdir(self.input_path)
@@ -632,6 +683,7 @@ class ImageToImage2D(Dataset):
                         ]
         self.one_hot_mask = one_hot_mask
         self.n_labels = n_labels
+        self.row_text = row_text
 
         if joint_transform:
             self.joint_transform = joint_transform
@@ -682,6 +734,13 @@ class ImageToImage2D(Dataset):
         if mask is None:
             raise ValueError(f"⚠️ Mask file exists but could not be read: {mask_path}")
 
+        stem, _ = os.path.splitext(image_filename)
+        mask_filename = stem + ".png"
+
+        if self.row_text is not None:
+            text = self.row_text.get(mask_filename, "")
+        else:
+            text = None
         ##########################################################
         # print("mask",image_filename[: -3] + "png")
         # print(np.max(mask), np.min(mask))
@@ -689,13 +748,7 @@ class ImageToImage2D(Dataset):
         # print(np.max(mask), np.min(mask))
         if self.n_labels == 1:
             mask[mask<=0] = 0
-            # (mask == 35).astype(int)
             mask[mask>0] = 1
-        #     mask = mask.astype(np.float32)  # 🔧 Ensure float type
-        # if self.n_labels == 1:
-        #     mask = (mask > 0).astype(np.float32)  # binarize + cast to float
-
-            # print("11111",np.max(mask), np.min(mask))
 
         # correct dimensions if needed
         image, mask = correct_dims(image, mask)
@@ -703,15 +756,20 @@ class ImageToImage2D(Dataset):
         # print("11",image.shape)
         # print("22",mask.shape)
         assert mask.max() <= 1.0 and mask.min() >= 0.0, f"Mask out of range: {mask.min()} - {mask.max()}"
+
+        
         sample = {'image': image, 'label': mask}
+        # UNCOMMENT WHEN MODEL SUPPORTS TEXT 
+        
+        # sample = {
+        #             "image": image,
+        #             "label": mask,
+        #             "text": text  
+        #         }
 
         if self.joint_transform:
             sample = self.joint_transform(sample)
 
-        # sample['label'] = torch.clamp(sample['label'].unsqueeze(0).float(), 0.0, 1.0)
-        # sample['image'] = sample['image'].float()
-        # sample = {'image': image, 'label': mask}
-        # print("2222",np.max(mask), np.min(mask))
 
         if self.one_hot_mask:
             assert self.one_hot_mask > 0, 'one_hot_mask must be nonnegative'
