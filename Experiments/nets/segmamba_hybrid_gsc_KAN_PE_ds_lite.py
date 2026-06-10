@@ -762,6 +762,21 @@ class ConvLayer(nn.Module):
 
     def forward(self, input):
         return self.conv(input)
+
+class ConvLayer3D(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super(ConvLayer3D, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv3d(in_ch, out_ch, kernel_size=(1, 3, 3), padding=(0, 1, 1)),
+            nn.InstanceNorm3d(out_ch),
+            nn.ReLU(inplace=True),
+            nn.Conv3d(out_ch, out_ch, kernel_size=(1, 3, 3), padding=(0, 1, 1)),
+            nn.InstanceNorm3d(out_ch),
+            nn.ReLU(inplace=True),
+        )
+
+    def forward(self, x):
+        return self.conv(x)
     
 class SegMamba(nn.Module):
     def __init__(
@@ -818,8 +833,10 @@ class SegMamba(nn.Module):
         #     res_block=res_block,
         # )
 
-        self.encoder1 = ConvLayer(3, kan_input_dim//8)  
-        self.encoder2 = ConvLayer(kan_input_dim//8, kan_input_dim//4) 
+        # self.encoder1 = ConvLayer(3, kan_input_dim//8)  
+        # self.encoder2 = ConvLayer(kan_input_dim//8, kan_input_dim//4) 
+        self.encoder1 = ConvLayer3D(in_chans, feat_size[0])
+        self.encoder2 = ConvLayer3D(feat_size[0], feat_size[1])
 
         self.encoder3 = UnetrBasicBlock(
             spatial_dims=spatial_dims,
@@ -977,16 +994,24 @@ class SegMamba(nn.Module):
                 raise RuntimeError(f"[SegMamba] vit outs[{i}] is None")
             self._check_numerics(f"vit outs[{i}]", o)
 
-        B = x.shape[0]
+        enc1 = self.encoder1(x_in)
+        # print(f"[SegMamba] enc1:           {enc1.shape}")
+        self._check_numerics("enc1", enc1)
+
+        x2 = outs[0]
+        enc2 = self.encoder2(x2)
+        # print(f"[SegMamba] enc2:           {enc2.shape}")
+        self._check_numerics("enc2", enc2)
+        # B = x.shape[0]
         ### Encoder
         ### Conv Stage
 
         ### Stage 1
-        out = F.relu(F.max_pool2d(self.encoder1(x), 2, 2))
-        t1 = out
-        ### Stage 2
-        out = F.relu(F.max_pool2d(self.encoder2(out), 2, 2))
-        t2 = out
+        # out = F.relu(F.max_pool2d(self.encoder1(x), 2, 2))
+        # t1 = out
+        # ### Stage 2
+        # out = F.relu(F.max_pool2d(self.encoder2(out), 2, 2))
+        # t2 = out
 
         # enc1 = self.encoder1(x_in)
         # print(f"[SegMamba] enc1:           {enc1.shape}")
