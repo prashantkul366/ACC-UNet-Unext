@@ -42,9 +42,10 @@ def print_summary(epoch, i, nb_batch, loss, loss_name, batch_time,
 
 ##################################################################################
 #=================================================================================
-#          Train One Epoch
+#                               Train One Epoch
 #=================================================================================
 ##################################################################################
+
 def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_scheduler, model_type, logger):
     logging_mode = 'Train' if model.training else 'Val'
 
