@@ -506,7 +506,10 @@ from typing import Callable
 import os
 import cv2
 from scipy import ndimage
-
+try:
+    cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+except AttributeError:
+    cv2.setLogLevel(2)  # 2 = errors only
 def random_rot_flip(image, label):
     k = np.random.randint(0, 4)
     image = np.rot90(image, k)
