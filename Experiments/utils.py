@@ -146,16 +146,24 @@ class WeightedDiceBCE(nn.Module):
         self.BCE_weight = BCE_weight
         self.dice_weight = dice_weight
 
+    # def _show_dice(self, inputs, targets):
+    #     inputs = torch.sigmoid(inputs)
+    #     inputs = (inputs >= 0.5).float()
+    #     # inputs[inputs>=0.5] = 1
+    #     # inputs[inputs<0.5] = 0
+    #     # print("2",np.sum(tmp))
+    #     targets[targets>0] = 1
+    #     targets[targets<=0] = 0
+    #     hard_dice_coeff = 1.0 - self.dice_loss(inputs, targets)
+    #     return hard_dice_coeff
+    @torch.no_grad()
     def _show_dice(self, inputs, targets):
-        inputs = torch.sigmoid(inputs)
-        inputs = (inputs >= 0.5).float()
-        # inputs[inputs>=0.5] = 1
-        # inputs[inputs<0.5] = 0
-        # print("2",np.sum(tmp))
-        targets[targets>0] = 1
-        targets[targets<=0] = 0
-        hard_dice_coeff = 1.0 - self.dice_loss(inputs, targets)
-        return hard_dice_coeff
+        B = inputs.shape[0]
+        p = (torch.sigmoid(inputs) >= 0.5).float().view(B, -1)
+        t = (targets > 0).float().view(B, -1)
+        inter = (p * t).sum(-1)
+        dice = (2 * inter + 1e-5) / (p.sum(-1) + t.sum(-1) + 1e-5)
+        return dice.mean().item()
 
     def forward(self, inputs, targets):
         # inputs = inputs.contiguous().view(-1)

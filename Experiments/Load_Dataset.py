@@ -754,17 +754,23 @@ class ImageToImage2D(Dataset):
         ##########################################################
         # print("mask",image_filename[: -3] + "png")
         # print(np.max(mask), np.min(mask))
-        mask = cv2.resize(mask,(self.image_size,self.image_size))
-        # print(np.max(mask), np.min(mask))
-        if self.n_labels == 1:
-            mask[mask<=0] = 0
-            mask[mask>0] = 1
+        # mask = cv2.resize(mask,(self.image_size,self.image_size))
+        # # print(np.max(mask), np.min(mask))
+        # if self.n_labels == 1:
+        #     mask[mask<=0] = 0
+        #     mask[mask>0] = 1
 
-        # correct dimensions if needed
-        image, mask = correct_dims(image, mask)
+        # # correct dimensions if needed
+        # image, mask = correct_dims(image, mask)
         # image, mask = F.to_pil_image(image), F.to_pil_image(mask)
         # print("11",image.shape)
         # print("22",mask.shape)
+        mask = cv2.resize(mask, (self.image_size, self.image_size), interpolation=cv2.INTER_NEAREST)
+        if self.n_labels == 1:
+            mask = (mask > 127).astype(np.uint8)
+
+        # only the image needs a channel axis; the mask stays [H, W]
+        image = correct_dims(image)
         assert mask.max() <= 1.0 and mask.min() >= 0.0, f"Mask out of range: {mask.min()} - {mask.max()}"
 
         
