@@ -178,6 +178,7 @@ img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
 test_session = "session1"   
+test_session = "session_with_ds"
 # test_session = "session_adapter"
 # test_session = "session_3ch"   
 # test_session = "session_small_"
