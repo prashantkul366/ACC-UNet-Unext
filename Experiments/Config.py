@@ -49,7 +49,7 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-task_name = 'ISIC18_UNET'
+# task_name = 'ISIC18_UNET'
 # task_name = 'ISIC18_mod'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
@@ -60,7 +60,7 @@ task_name = 'ISIC18_UNET'
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-# task_name = 'BUSI_80-20'
+task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_text'
 
 # task_name = 'BUSI_80-20_text_p4'
@@ -108,7 +108,11 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_SWAttn'
 # model_name = 'Segmamba_hybrid_gsc_VSS'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
-model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
+# model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
+
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_MDTA_MDTA'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba'
+
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_lite'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
@@ -177,8 +181,8 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-# test_session = "session1"   
-test_session = "session_with_ds"
+test_session = "session1"   
+# test_session = "session_with_ds"
 # test_session = "session_adapter"
 # test_session = "session_3ch"   
 # test_session = "session_small_"
@@ -244,10 +248,10 @@ test_session = "session_with_ds"
 
 
 
-dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 
 
@@ -350,10 +354,10 @@ test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/te
 
 
 # BUSI_80-20
-# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
-# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
-# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
-# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20'
+train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/train'
+val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
+test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_80_20/test'
 
 
 # BUSI_80-20_ Seed 43
@@ -486,8 +490,8 @@ test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/te
 
 
 
-# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
-session_name       = "session_with_ds"
+session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = "session_with_ds"
 # session_name       = 'session_adapter'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_3ch'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_small_'  #time.strftime('%m.%d_%Hh%M')
