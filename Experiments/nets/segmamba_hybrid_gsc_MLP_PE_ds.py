@@ -807,7 +807,7 @@ class SegMamba(nn.Module):
         self.deep_supervision = deep_supervision
 
         # print("Initializing SegMamba")
-        print("Initializing SegMamba with Hybrid Encoder - GSC + MDTA + MambaVisionMixer + MLP-Refine with Deep Supervision")
+        print("Initializing SegMamba with Hybrid Encoder - GSC + MDTA + MambaVisionMixer + MLP-Refine with Deep Supervision + OCT 2026")
         self.spatial_dims = spatial_dims
         self.vit = MambaEncoder(in_chans, 
                                 depths=depths,
