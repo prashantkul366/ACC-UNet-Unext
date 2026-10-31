@@ -30,7 +30,7 @@ epochs = 10000
 print_frequency = 200
 save_frequency = 100
 vis_frequency = 100
-early_stopping_patience = 99
+early_stopping_patience = 100
 # early_stopping_patience = 30
 # early_stopping_patience = 400
 # fafaefae
@@ -49,7 +49,7 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-# task_name = 'ISIC18_UNET'
+task_name = 'ISIC18_UNET'
 # task_name = 'ISIC18_mod'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
@@ -68,7 +68,7 @@ resume_checkpoint = False  # or False
 # task_name = 'BUSI_80-20_mod'
 # task_name = 'Kvasir_80_20_Text'
 
-task_name = 'CVC_ClinicDB_80-20'
+# task_name = 'CVC_ClinicDB_80-20'
 # task_name = 'QaTa_text'
 # task_name = 'Forestry'
 
@@ -244,10 +244,10 @@ test_session = "session_with_ds"
 
 
 
-# dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
-# train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
-# val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
-# test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
+dataset_path = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2'
+train_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/train'
+val_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/val'
+test_dataset = '/content/drive/MyDrive/Amit-Paper3/UNeXt-pytorch/inputs/isic2/test'
 
 
 
@@ -462,10 +462,10 @@ test_session = "session_with_ds"
 
 
 # CVC_ClinicDB_80-20
-dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
-train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
-val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
-test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+# dataset_path = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20'
+# train_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/train'
+# val_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
+# test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-ClinicDB_80_20/test'
 
 
 
