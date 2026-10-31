@@ -486,7 +486,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-Clinic
 
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = "session_with_ds"
 # session_name       = 'session_adapter'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_3ch'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_small_'  #time.strftime('%m.%d_%Hh%M')
