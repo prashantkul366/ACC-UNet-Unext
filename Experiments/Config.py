@@ -53,7 +53,7 @@ resume_checkpoint = False  # or False
 # task_name = 'ISIC18_mod'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
-task_name = 'CVC-ClinicDB'
+# task_name = 'CVC-ClinicDB'
 # task_name = 'Kvasir-Seg'
 # task_name = 'BUSI'
 # task_name = 'Glas'
@@ -68,7 +68,7 @@ task_name = 'CVC-ClinicDB'
 # task_name = 'BUSI_80-20_mod'
 # task_name = 'Kvasir_80_20_Text'
 
-# task_name = 'CVC_ClinicDB_80-20'
+task_name = 'CVC_ClinicDB_80-20'
 # task_name = 'QaTa_text'
 # task_name = 'Forestry'
 
@@ -182,8 +182,8 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-test_session = "session1"   
-# test_session = "session_with_ds"
+# test_session = "session1"   
+test_session = "session_with_ds"
 # test_session = "session_adapter"
 # test_session = "session_3ch"   
 # test_session = "session_small_"
@@ -491,8 +491,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/CVC/CVC-Clinic
 
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
-# session_name       = "session_with_ds"
+# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = "session_with_ds"
 # session_name       = 'session_adapter'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_3ch'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_small_'  #time.strftime('%m.%d_%Hh%M')
