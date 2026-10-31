@@ -110,8 +110,8 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_MDTA_MDTA'
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_MDTA_MDTA'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba'
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_lite'
