@@ -30,7 +30,7 @@ epochs = 10000
 print_frequency = 200
 save_frequency = 100
 vis_frequency = 100
-early_stopping_patience = 100
+early_stopping_patience = 99
 # early_stopping_patience = 30
 # early_stopping_patience = 400
 # fafaefae
