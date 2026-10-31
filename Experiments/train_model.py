@@ -737,6 +737,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True, res
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba',
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba',
         'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text',
+        'Segmamba_hybrid_gsc_KAN_PE_ds_MDTA_MDTA',      # ablation
+        'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba', 
     }
 
     criterion = WeightedDiceBCE(dice_weight=0.5,BCE_weight=0.5, n_labels=config.n_labels)

@@ -174,7 +174,8 @@ models_224 = {
     'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual', 'segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba' , 
     'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_KAN' , 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_SpatialMamba',
     'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba', 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text',
-    'Segmamba_hybrid_gsc_KAN_PE_ds_lite',
+    'Segmamba_hybrid_gsc_KAN_PE_ds_lite', 'Segmamba_hybrid_gsc_KAN_PE_ds_MDTA_MDTA',
+    'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba',
 
 }
 
