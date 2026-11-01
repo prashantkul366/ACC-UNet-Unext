@@ -108,12 +108,12 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_SWAttn'
 # model_name = 'Segmamba_hybrid_gsc_VSS'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE'
-# model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
+model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_MDTA_MDTA'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba'
 
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_lite'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
