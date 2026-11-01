@@ -49,7 +49,7 @@ resume_checkpoint = False  # or False
 #task_name = 'BUSI_exp1'
 
 
-# task_name = 'ISIC18_UNET'
+task_name = 'ISIC18_UNET'
 # task_name = 'ISIC18_mod'
 # task_name = 'ISIC17'
 # task_name = 'MoNuSeg'
@@ -60,7 +60,7 @@ resume_checkpoint = False  # or False
 # task_name = 'ClinicDB'
 # task_name = 'ColonDB'
 
-task_name = 'BUSI_80-20'
+# task_name = 'BUSI_80-20'
 # task_name = 'BUSI_80-20_text'
 
 # task_name = 'BUSI_80-20_text_p4'
@@ -111,9 +111,9 @@ batch_size = 2
 # model_name = 'Segmamba_hybrid_gsc_MLP_PE_ds'
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_MDTA_MDTA'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba'
 
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_lite'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
@@ -176,7 +176,6 @@ models_224 = {
     'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_Dual_SpatialMamba', 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn_HSLCA_SpatialMamba_no_text',
     'Segmamba_hybrid_gsc_KAN_PE_ds_lite', 'Segmamba_hybrid_gsc_KAN_PE_ds_MDTA_MDTA',
     'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba',
-
 }
 
 img_size = 224 if model_name in models_224 else 256
