@@ -112,9 +112,10 @@ batch_size = 2
 
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_MDTA_MDTA'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_mamba'
-model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_MDTA'
+# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_mamba_MDTA'
 
-# model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds'
+
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_lite'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_text'
 # model_name = 'Segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn'
@@ -183,7 +184,8 @@ models_224 = {
 img_size = 224 if model_name in models_224 else 256
 
 # img_size = 224
-test_session = "session1"   
+# test_session = "session1"   
+test_session = "session_new"   
 # test_session = "session_with_ds"
 # test_session = "session_adapter"
 # test_session = "session_3ch"   
@@ -492,7 +494,8 @@ test_dataset = '/content/drive/MyDrive/Prashant/research_datasets/Dataset_BUSI_8
 
 
 
-session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+# session_name       = 'session1'  #time.strftime('%m.%d_%Hh%M')
+session_name       = 'session_new'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = "session_with_ds"
 # session_name       = 'session_adapter'  #time.strftime('%m.%d_%Hh%M')
 # session_name       = 'session_3ch'  #time.strftime('%m.%d_%Hh%M')
