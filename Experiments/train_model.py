@@ -73,7 +73,8 @@ from nets.UCTransNet import UCTransNet
 # from nets.segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_rm_fkan_ds
 
 
-# from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
+from nets.segmamba_hybrid_gsc_KAN_PE_ds import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds
+
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_lite import SegMamba as Segmamba_hybrid_gsc_KAN_PE_ds_lite
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_text import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_text
 # from nets.segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn import SegMamba as segmamba_hybrid_gsc_KAN_PE_ds_CrossAttn
